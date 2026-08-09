@@ -59,22 +59,33 @@ export const loginSchema = z.object({
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres.'),
 });
 
-export const registerSchema = z
-  .object({
-    displayName: requiredText('El nombre', 120),
-    organizationName: requiredText('El nombre del negocio', 120),
-    email: z.email('Ingresa un correo válido.'),
-    password: z
-      .string()
-      .min(8, 'La contraseña debe tener al menos 8 caracteres.')
-      .regex(/[A-Za-z]/, 'La contraseña debe incluir al menos una letra.')
-      .regex(/[0-9]/, 'La contraseña debe incluir al menos un número.'),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
+const registerObjectSchema = z.object({
+  displayName: requiredText('El nombre', 120),
+  organizationName: requiredText('El nombre del negocio', 120),
+  email: z.email('Ingresa un correo válido.'),
+  password: z
+    .string()
+    .min(8, 'La contraseña debe tener al menos 8 caracteres.')
+    .regex(/[A-Za-z]/, 'La contraseña debe incluir al menos una letra.')
+    .regex(/[0-9]/, 'La contraseña debe incluir al menos un número.'),
+  confirmPassword: z.string(),
+});
+
+export const registerSchema = registerObjectSchema.refine(
+  (data) => data.password === data.confirmPassword,
+  {
     message: 'Las contraseñas no coinciden.',
     path: ['confirmPassword'],
-  });
+  },
+);
+
+// Solo los campos que el servidor necesita del registro. Se deriva del objeto
+// base (sin refinamientos) porque en Zod 4 `.pick()` no puede aplicarse sobre
+// un schema que ya tiene `.refine()`.
+export const registerProfileSchema = registerObjectSchema.pick({
+  displayName: true,
+  organizationName: true,
+});
 
 export const forgotPasswordSchema = z.object({
   email: z.email('Ingresa un correo válido.'),

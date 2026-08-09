@@ -22,7 +22,7 @@ import { userRepository } from '@/lib/repositories/organization';
 import { auditAuthEvent } from '@/lib/services/audit';
 import { organizationService } from '@/lib/services/organization';
 import { parseOrThrow } from '@/lib/validation/parse';
-import { registerSchema } from '@/lib/validation/schemas';
+import { registerProfileSchema } from '@/lib/validation/schemas';
 
 /** Intercambia el `idToken` por una cookie de sesión httpOnly. */
 export async function establishSession(idToken: string): Promise<ActionResult<{ organizationId: string }>> {
@@ -81,10 +81,10 @@ export async function completeRegistration(input: {
     const decoded = await auth.verifyIdToken(input.idToken, true);
 
     // Se valida solo lo que el servidor necesita del formulario.
-    const data = parseOrThrow(
-      registerSchema.pick({ displayName: true, organizationName: true }),
-      { displayName: input.displayName, organizationName: input.organizationName },
-    );
+    const data = parseOrThrow(registerProfileSchema, {
+      displayName: input.displayName,
+      organizationName: input.organizationName,
+    });
 
     const { organizationId } = await organizationService.provision({
       uid: decoded.uid,
