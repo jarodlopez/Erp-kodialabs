@@ -1,0 +1,127 @@
+rules_version = '2';
+
+// ============================================================================
+// ERP HomeMart — Reglas de seguridad de Firestore
+// ----------------------------------------------------------------------------
+// PRINCIPIO: toda la lógica de negocio se ejecuta en el servidor con el
+// Firebase Admin SDK, que NO pasa por estas reglas. Por lo tanto, para los
+// clientes (navegador) el modelo es:
+//
+//   - ESCRITURA: prohibida en todas las colecciones, sin excepción.
+//   - LECTURA:   permitida únicamente sobre documentos de la propia
+//                organización, y solo en las colecciones donde tiene sentido.
+//   - AUDITORÍA: inmutable; ni siquiera un administrador puede alterarla.
+//
+// Esto hace imposible que un usuario manipule inventario, saldos o precios
+// desde la consola del navegador, aunque conozca los IDs de los documentos.
+// ============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------------------------- Utilidades -------------------------------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function orgId() {
+      return request.auth.token.organizationId;
+    }
+
+    function userRole() {
+      return request.auth.token.role;
+    }
+
+    function hasOrganization() {
+      return isSignedIn()
+        && orgId() != null
+        && orgId() is string
+        && orgId() != '';
+    }
+
+    // El documento leído pertenece a la organización del usuario.
+    function sameOrganization() {
+      return hasOrganization()
+        && resource.data.organizationId == orgId();
+    }
+
+    function isAdmin() {
+      return hasOrganization() && userRole() == 'ADMIN';
+    }
+
+    function canSeeAudit() {
+      return hasOrganization() && (userRole() == 'ADMIN' || userRole() == 'ACCOUNTANT');
+    }
+
+    // ------------------------- Organización y perfil ------------------------
+
+    match /organizations/{organizationId} {
+      allow read: if hasOrganization() && organizationId == orgId();
+      allow write: if false;
+    }
+
+    match /settings/{organizationId} {
+      allow read: if hasOrganization() && organizationId == orgId();
+      allow write: if false;
+    }
+
+    // Cada usuario puede leer su propio perfil; los administradores pueden
+    // leer los perfiles de su organización.
+    match /users/{userId} {
+      allow read: if isSignedIn()
+        && (request.auth.uid == userId
+            || (isAdmin() && resource.data.organizationId == orgId()));
+      allow write: if false;
+    }
+
+    match /memberships/{membershipId} {
+      allow read: if sameOrganization();
+      allow write: if false;
+    }
+
+    // --------------------- Datos de negocio (solo lectura) ------------------
+
+    match /categories/{docId}            { allow read: if sameOrganization(); allow write: if false; }
+    match /products/{docId}              { allow read: if sameOrganization(); allow write: if false; }
+    match /productStock/{docId}          { allow read: if sameOrganization(); allow write: if false; }
+    match /customers/{docId}             { allow read: if sameOrganization(); allow write: if false; }
+    match /suppliers/{docId}             { allow read: if sameOrganization(); allow write: if false; }
+    match /sales/{docId}                 { allow read: if sameOrganization(); allow write: if false; }
+    match /purchases/{docId}             { allow read: if sameOrganization(); allow write: if false; }
+    match /expenses/{docId}              { allow read: if sameOrganization(); allow write: if false; }
+    match /expenseCategories/{docId}     { allow read: if sameOrganization(); allow write: if false; }
+    match /recurringExpenses/{docId}     { allow read: if sameOrganization(); allow write: if false; }
+    match /inventoryMovements/{docId}    { allow read: if sameOrganization(); allow write: if false; }
+    match /inventoryTransfers/{docId}    { allow read: if sameOrganization(); allow write: if false; }
+    match /financialAccounts/{docId}     { allow read: if sameOrganization(); allow write: if false; }
+    match /financialTransactions/{docId} { allow read: if sameOrganization(); allow write: if false; }
+    match /transfers/{docId}             { allow read: if sameOrganization(); allow write: if false; }
+    match /accountsReceivable/{docId}    { allow read: if sameOrganization(); allow write: if false; }
+    match /accountsPayable/{docId}       { allow read: if sameOrganization(); allow write: if false; }
+    match /payments/{docId}              { allow read: if sameOrganization(); allow write: if false; }
+    match /returns/{docId}               { allow read: if sameOrganization(); allow write: if false; }
+    match /taxes/{docId}                 { allow read: if sameOrganization(); allow write: if false; }
+    match /warehouses/{docId}            { allow read: if sameOrganization(); allow write: if false; }
+
+    // ------------------------------ Auditoría -------------------------------
+    // Inmutable: sin escritura desde ningún cliente y lectura restringida.
+
+    match /auditLogs/{docId} {
+      allow read: if canSeeAudit() && resource.data.organizationId == orgId();
+      allow create, update, delete: if false;
+    }
+
+    // ------------------ Infraestructura interna (sin acceso) ----------------
+
+    match /counters/{docId}        { allow read, write: if false; }
+    match /idempotencyKeys/{docId} { allow read, write: if false; }
+
+    // ------------------------- Regla de cierre ------------------------------
+    // Cualquier colección no declarada arriba queda completamente bloqueada.
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,46 @@
+rules_version = '2';
+
+// ============================================================================
+// ERP HomeMart — Reglas de seguridad de Firebase Storage
+// ----------------------------------------------------------------------------
+// Toda subida pasa por `/api/storage/upload`, que valida tipo MIME, tamaño,
+// sesión y organización antes de escribir con el Admin SDK. Por eso desde el
+// navegador la escritura está prohibida.
+//
+// La lectura se restringe a los archivos de la propia organización. Las
+// imágenes de catálogo se publican explícitamente por el servidor cuando el
+// negocio lo requiere; los comprobantes permanecen privados y se acceden con
+// URL firmada temporal.
+// ============================================================================
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function orgId() {
+      return request.auth.token.organizationId;
+    }
+
+    function belongsToOrganization(organizationId) {
+      return isSignedIn()
+        && orgId() != null
+        && orgId() is string
+        && orgId() == organizationId;
+    }
+
+    // Archivos de la organización: lectura para sus miembros, escritura solo
+    // desde el servidor (Admin SDK, que no evalúa estas reglas).
+    match /organizations/{organizationId}/{allPaths=**} {
+      allow read: if belongsToOrganization(organizationId);
+      allow write: if false;
+    }
+
+    // Cualquier otra ruta queda bloqueada.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

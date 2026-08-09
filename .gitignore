@@ -1,0 +1,36 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+coverage/
+
+# Entorno — NUNCA subir credenciales
+.env
+.env.local
+.env.*.local
+*.serviceaccount.json
+service-account*.json
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+database-debug.log
+pubsub-debug.log
+storage-debug.log
+emulator-data/
+
+# Testing
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Sistema
+.DS_Store
+*.pem
+.vercel
+tsconfig.tsbuildinfo
+next-env.d.ts
