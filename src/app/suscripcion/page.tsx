@@ -6,11 +6,12 @@ import { signOutAction } from '@/app/actions/auth';
 import { Badge, Button, Card, CardHeader } from '@/components/ui/primitives';
 import { getSession } from '@/lib/auth/session';
 import { organizationRepository } from '@/lib/repositories/organization';
+import { platformConfigRepository } from '@/lib/repositories/platform-config';
 import {
   subscriptionPaymentRepository,
   subscriptionRepository,
 } from '@/lib/repositories/subscription';
-import { effectiveSubscription, planName, PLAN_LIST } from '@/lib/subscription';
+import { effectiveSubscription, paidPlans, planName } from '@/lib/subscription';
 import { formatDate } from '@/lib/utils';
 import {
   PAYMENT_REPORT_STATUS_LABELS,
@@ -34,12 +35,14 @@ export default async function SubscriptionPage() {
   if (!session) redirect('/login');
   if (!session.organizationId) redirect('/sin-organizacion');
 
-  const [org, subscription, reports] = await Promise.all([
+  const [org, subscription, reports, allPlans] = await Promise.all([
     organizationRepository.get(session.organizationId),
     subscriptionRepository.get(session.organizationId),
     subscriptionPaymentRepository.listByOrg(session.organizationId),
+    platformConfigRepository.getPlans(),
   ]);
 
+  const plans = paidPlans(allPlans);
   const state = effectiveSubscription(subscription, org?.createdAt ?? new Date().toISOString());
   const paymentInfo = process.env.SUBSCRIPTION_PAYMENT_INFO?.trim();
 
@@ -63,7 +66,7 @@ export default async function SubscriptionPage() {
                 {SUBSCRIPTION_STATUS_LABELS[state.status]}
               </Badge>
               <span className="text-sm text-[var(--color-ink-muted)]">
-                Plan: {planName(state.plan)}
+                Plan: {planName(allPlans, state.plan)}
               </span>
             </div>
             <p className="mt-2 text-sm text-[var(--color-ink-muted)]">
@@ -95,17 +98,16 @@ export default async function SubscriptionPage() {
           description="El pago se valida manualmente. Realiza el pago y luego repórtalo abajo."
         />
         <div className="space-y-4 p-4">
-          <div className="grid gap-3 sm:grid-cols-2">
-            {PLAN_LIST.map((p) => (
+          <div className="grid gap-3 sm:grid-cols-3">
+            {plans.map((p) => (
               <div key={p.key} className="rounded-lg border border-[var(--color-border)] p-3">
                 <p className="font-semibold text-[var(--color-ink)]">{p.name}</p>
                 <p className="text-sm text-[var(--color-ink-muted)]">
-                  Referencia: {p.price} / {p.months} mes(es)
+                  {p.price > 0 ? `${p.price} ${p.currency}` : 'Consultar'} · {p.months} mes(es)
                 </p>
                 <ul className="mt-2 space-y-0.5 text-xs text-[var(--color-ink-subtle)]">
-                  {p.features.map((f) => (
-                    <li key={f}>· {f}</li>
-                  ))}
+                  <li>· {p.limits.users > 0 ? `Hasta ${p.limits.users} usuario(s)` : 'Usuarios ilimitados'}</li>
+                  <li>· {p.limits.products > 0 ? `Hasta ${p.limits.products} productos` : 'Productos ilimitados'}</li>
                 </ul>
               </div>
             ))}
@@ -125,7 +127,7 @@ export default async function SubscriptionPage() {
       </Card>
 
       {/* Reportar pago */}
-      <ReportPaymentForm />
+      <ReportPaymentForm plans={plans} />
 
       {/* Historial de reportes */}
       {reports.length > 0 && (
@@ -136,7 +138,7 @@ export default async function SubscriptionPage() {
               <li key={r.id} className="flex items-center justify-between gap-3 p-4 text-sm">
                 <div>
                   <p className="font-medium text-[var(--color-ink)]">
-                    {planName(r.plan)} · {r.amount}
+                    {planName(allPlans, r.plan)} · {r.amount}
                   </p>
                   <p className="text-xs text-[var(--color-ink-subtle)]">
                     {formatDate(r.paidAt)} · {r.method}

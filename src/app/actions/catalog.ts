@@ -7,6 +7,7 @@ import { PERMISSIONS } from '@/lib/rbac';
 import { categoryRepository, productRepository } from '@/lib/repositories/catalog';
 import { getActorContext, getOperationContext } from '@/lib/server-context';
 import { catalogService } from '@/lib/services/catalog';
+import { assertCanAddProduct, productsRemaining } from '@/lib/services/limits';
 import { parseOrThrow } from '@/lib/validation/parse';
 import { categorySchema, productSchema } from '@/lib/validation/schemas';
 import type { Product, ProductUnit } from '@/types/catalog';
@@ -44,6 +45,7 @@ export async function updateCategoryAction(
 export async function createProductAction(input: unknown): Promise<ActionResult<{ id: string }>> {
   try {
     const ctx = await getOperationContext(PERMISSIONS.PRODUCTS_CREATE);
+    await assertCanAddProduct(ctx.actor.organizationId);
     const data = parseOrThrow(productSchema, input);
     const id = await catalogService.createProduct(ctx.actor, data, ctx.defaultWarehouseId);
     revalidatePath('/inventario');
@@ -176,6 +178,9 @@ export async function importProductsAction(
     const categories = await categoryRepository.list(ctx.actor.organizationId);
     const categoryByName = new Map(categories.map((c) => [normalizeKey(c.name), c.id]));
 
+    // Cupo de productos disponible según el plan (Infinity si es ilimitado).
+    const remaining = await productsRemaining(ctx.actor.organizationId);
+
     const results: ImportRowResult[] = [];
     let created = 0;
 
@@ -223,6 +228,16 @@ export async function importProductsAction(
             sku,
             ok: false,
             error: parsed.error.issues[0]?.message ?? 'Datos inválidos.',
+          });
+          continue;
+        }
+
+        if (created >= remaining) {
+          results.push({
+            line,
+            sku,
+            ok: false,
+            error: 'Se alcanzó el límite de productos de tu plan. Mejora tu plan para agregar más.',
           });
           continue;
         }

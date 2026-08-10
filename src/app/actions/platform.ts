@@ -5,10 +5,11 @@ import { revalidatePath } from 'next/cache';
 import { errors, fail, logError, ok, type ActionResult } from '@/lib/errors';
 import { requireSuperAdmin } from '@/lib/auth/platform';
 import { organizationRepository } from '@/lib/repositories/organization';
+import { platformConfigRepository } from '@/lib/repositories/platform-config';
 import { subscriptionPaymentRepository, subscriptionRepository } from '@/lib/repositories/subscription';
-import { addMonthsIso, PLANS } from '@/lib/subscription';
+import { addMonthsIso, findPlan } from '@/lib/subscription';
 import { nowIso } from '@/lib/repositories/base';
-import type { SubscriptionStatus } from '@/types/subscription';
+import type { PlanConfig, SubscriptionStatus } from '@/types/subscription';
 
 /** Base de cálculo: si aún es válida, se extiende desde el vencimiento; si no, desde hoy. */
 function extensionBase(currentValidUntil: string | null): string {
@@ -85,7 +86,8 @@ export async function approvePaymentAction(
       throw errors.validation('Este reporte ya fue revisado.');
     }
 
-    const months = PLANS[payment.plan]?.months ?? 1;
+    const plans = await platformConfigRepository.getPlans();
+    const months = findPlan(plans, payment.plan)?.months ?? 1;
     const current = await subscriptionRepository.get(payment.organizationId);
     const validUntil = addMonthsIso(extensionBase(current?.validUntil ?? null), months);
 
@@ -132,6 +134,51 @@ export async function rejectPaymentAction(
     return ok();
   } catch (error) {
     logError('platform.reject', error);
+    return fail(error);
+  }
+}
+
+/** Guarda la configuración de planes (precios, duración y límites). */
+export async function savePlansAction(
+  input: unknown,
+): Promise<ActionResult<undefined>> {
+  try {
+    const session = await requireSuperAdmin();
+    const raw = Array.isArray(input) ? input : [];
+    if (raw.length === 0) throw errors.validation('Debe haber al menos un plan.');
+
+    const toInt = (v: unknown) => {
+      const n = Math.trunc(Number(v));
+      return Number.isFinite(n) && n >= 0 ? n : 0;
+    };
+
+    const plans: PlanConfig[] = raw.map((p) => {
+      const item = p as Record<string, unknown>;
+      const limits = (item.limits ?? {}) as Record<string, unknown>;
+      return {
+        key: String(item.key ?? '').trim().toUpperCase() || 'PLAN',
+        name: String(item.name ?? '').trim() || 'Plan',
+        price: Number(item.price) >= 0 ? Number(item.price) : 0,
+        currency: String(item.currency ?? 'NIO').trim() || 'NIO',
+        months: toInt(item.months),
+        isTrial: Boolean(item.isTrial),
+        limits: { users: toInt(limits.users), products: toInt(limits.products) },
+      };
+    });
+
+    // Claves únicas para evitar ambigüedad al resolver el plan de un comercio.
+    const keys = new Set<string>();
+    for (const p of plans) {
+      if (keys.has(p.key)) throw errors.validation(`Clave de plan duplicada: ${p.key}.`);
+      keys.add(p.key);
+    }
+
+    await platformConfigRepository.savePlans(plans, session.uid);
+    revalidatePath('/admin');
+    revalidatePath('/suscripcion');
+    return ok();
+  } catch (error) {
+    logError('platform.savePlans', error);
     return fail(error);
   }
 }

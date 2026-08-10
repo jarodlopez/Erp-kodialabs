@@ -6,14 +6,14 @@ import { useRouter } from 'next/navigation';
 import { reportSubscriptionPaymentAction } from '@/app/actions/subscription';
 import { Button, Card, CardHeader, Field, Input, Select, Textarea } from '@/components/ui/primitives';
 import { useToast } from '@/components/ui/toast';
-import { PLAN_LIST } from '@/lib/subscription';
 import { toDateInput } from '@/lib/utils';
+import type { PlanConfig } from '@/types/subscription';
 
-export function ReportPaymentForm() {
+export function ReportPaymentForm({ plans }: { plans: PlanConfig[] }) {
   const router = useRouter();
   const toast = useToast();
   const [loading, setLoading] = useState(false);
-  const [plan, setPlan] = useState(PLAN_LIST[0]?.key ?? 'BASIC');
+  const [plan, setPlan] = useState(plans[0]?.key ?? 'BASIC');
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -48,9 +48,9 @@ export function ReportPaymentForm() {
       <form onSubmit={onSubmit} className="space-y-4 p-4">
         <Field label="Plan que pagaste" required>
           <Select name="plan" value={plan} onChange={(e) => setPlan(e.target.value)}>
-            {PLAN_LIST.map((p) => (
+            {plans.map((p) => (
               <option key={p.key} value={p.key}>
-                {p.name} — {p.months} mes(es)
+                {p.name} — {p.months} mes(es){p.price > 0 ? ` · ${p.price} ${p.currency}` : ''}
               </option>
             ))}
           </Select>

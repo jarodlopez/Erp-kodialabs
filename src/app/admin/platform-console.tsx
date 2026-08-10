@@ -22,8 +22,11 @@ import {
   Tr,
 } from '@/components/ui/primitives';
 import { useToast } from '@/components/ui/toast';
-import { PLAN_LIST } from '@/lib/subscription';
-import { SUBSCRIPTION_STATUS_LABELS, type SubscriptionStatus } from '@/types/subscription';
+import {
+  SUBSCRIPTION_STATUS_LABELS,
+  type PlanConfig,
+  type SubscriptionStatus,
+} from '@/types/subscription';
 
 export interface TenantRow {
   id: string;
@@ -63,9 +66,11 @@ function fmt(iso: string) {
 export function PlatformConsole({
   tenants,
   pending,
+  plans,
 }: {
   tenants: TenantRow[];
   pending: ReportRow[];
+  plans: PlanConfig[];
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -171,11 +176,11 @@ export function PlatformConsole({
                 <Td>
                   <div className="flex flex-wrap items-center gap-1.5">
                     <Select
-                      value={planByOrg[t.id] ?? PLAN_LIST[0]?.key ?? 'BASIC'}
+                      value={planByOrg[t.id] ?? plans[0]?.key ?? 'BASIC'}
                       onChange={(e) => setPlanByOrg((s) => ({ ...s, [t.id]: e.target.value }))}
                       className="h-8 py-0 text-xs"
                     >
-                      {PLAN_LIST.map((p) => (
+                      {plans.map((p) => (
                         <option key={p.key} value={p.key}>
                           {p.name} ({p.months}m)
                         </option>
@@ -185,8 +190,8 @@ export function PlatformConsole({
                       size="sm"
                       loading={busy === `ex-${t.id}`}
                       onClick={() => {
-                        const plan = planByOrg[t.id] ?? PLAN_LIST[0]?.key ?? 'BASIC';
-                        const months = PLAN_LIST.find((p) => p.key === plan)?.months ?? 1;
+                        const plan = planByOrg[t.id] ?? plans[0]?.key ?? 'BASIC';
+                        const months = plans.find((p) => p.key === plan)?.months ?? 1;
                         run(
                           `ex-${t.id}`,
                           () => extendSubscriptionAction(t.id, plan, months),

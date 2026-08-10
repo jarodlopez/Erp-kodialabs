@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { fail, logError, ok, type ActionResult } from '@/lib/errors';
 import { PERMISSIONS, type Role } from '@/lib/rbac';
 import { getActorContext } from '@/lib/server-context';
+import { assertCanAddUser } from '@/lib/services/limits';
 import { organizationService, userService } from '@/lib/services/organization';
 import { parseOrThrow } from '@/lib/validation/parse';
 import {
@@ -18,6 +19,7 @@ import {
 export async function inviteUserAction(input: unknown): Promise<ActionResult<{ uid: string }>> {
   try {
     const { actor } = await getActorContext(PERMISSIONS.USERS_MANAGE);
+    await assertCanAddUser(actor.organizationId);
     const data = parseOrThrow(inviteUserSchema, input);
     const result = await userService.inviteUser(actor, { ...data, role: data.role as Role });
     revalidatePath('/usuarios');

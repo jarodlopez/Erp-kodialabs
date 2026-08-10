@@ -1,47 +1,65 @@
-import type { Subscription, SubscriptionStatus } from '@/types/subscription';
+import type { PlanConfig, Subscription, SubscriptionStatus } from '@/types/subscription';
 
 /** Días de prueba gratis para un comercio nuevo. */
 export const TRIAL_DAYS = 14;
 
-export interface Plan {
-  key: string;
-  name: string;
-  /** Precio sugerido de referencia (el cobro es manual). */
-  price: number;
-  /** Meses que otorga una compra de este plan. */
-  months: number;
-  features: string[];
-}
-
-/** Planes disponibles. El precio es referencial; el pago se valida manualmente. */
-export const PLANS: Record<string, Plan> = {
-  TRIAL: {
+/**
+ * Planes por defecto (semilla). Son solo el punto de partida: el súper-admin
+ * puede editar nombres, precios, monedas, duración y límites desde `/admin`, y
+ * quedan guardados en la base de datos. `0` en un límite significa ilimitado.
+ */
+export const DEFAULT_PLANS: PlanConfig[] = [
+  {
     key: 'TRIAL',
     name: 'Prueba gratis',
     price: 0,
+    currency: 'NIO',
     months: 0,
-    features: [`${TRIAL_DAYS} días de acceso completo`],
+    isTrial: true,
+    limits: { users: 0, products: 0 }, // acceso total durante la prueba
   },
-  BASIC: {
-    key: 'BASIC',
-    name: 'Básico',
-    price: 15,
+  {
+    key: 'EMPRENDEDOR',
+    name: 'Emprendedor',
+    price: 0,
+    currency: 'NIO',
     months: 1,
-    features: ['1 mes de acceso', 'Todos los módulos', 'Usuarios ilimitados'],
+    limits: { users: 2, products: 100 },
   },
-  ANNUAL: {
-    key: 'ANNUAL',
-    name: 'Anual',
-    price: 150,
-    months: 12,
-    features: ['12 meses de acceso', 'Ahorro vs. mensual', 'Todos los módulos'],
+  {
+    key: 'NEGOCIO',
+    name: 'Negocio',
+    price: 0,
+    currency: 'NIO',
+    months: 1,
+    limits: { users: 5, products: 1000 },
   },
-};
+  {
+    key: 'EMPRESA',
+    name: 'Empresa',
+    price: 0,
+    currency: 'NIO',
+    months: 1,
+    limits: { users: 0, products: 0 }, // ilimitado
+  },
+];
 
-export const PLAN_LIST = Object.values(PLANS).filter((p) => p.key !== 'TRIAL');
+export function findPlan(plans: PlanConfig[], key: string): PlanConfig | null {
+  return plans.find((p) => p.key === key) ?? null;
+}
 
-export function planName(key: string): string {
-  return PLANS[key]?.name ?? key;
+/** Planes de pago (excluye la prueba). */
+export function paidPlans(plans: PlanConfig[]): PlanConfig[] {
+  return plans.filter((p) => !p.isTrial);
+}
+
+export function planName(plans: PlanConfig[], key: string): string {
+  return findPlan(plans, key)?.name ?? key;
+}
+
+/** `true` si el valor de un límite es ilimitado (0, nulo o inválido). */
+export function isUnlimited(value: number | null | undefined): boolean {
+  return !value || value <= 0;
 }
 
 function addDaysIso(base: string, days: number): string {

@@ -48,6 +48,7 @@ export const COLLECTIONS = {
 
   SUBSCRIPTIONS: 'subscriptions',
   SUBSCRIPTION_PAYMENTS: 'subscriptionPayments',
+  PLATFORM_CONFIG: 'platformConfig',
 } as const;
 
 export type CollectionName = (typeof COLLECTIONS)[keyof typeof COLLECTIONS];

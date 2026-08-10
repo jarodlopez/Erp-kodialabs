@@ -25,8 +25,15 @@ Además de las obligatorias de Firebase (`FIREBASE_CLIENT_EMAIL`,
   **extender**, **suspender** o **reactivar** cualquier comercio manualmente.
 - El súper-admin nunca se bloquea por suscripción.
 
-Los planes se definen en `src/lib/subscription.ts` (`PLANS`): nombre, meses que
-otorga y precio de referencia. Ajusta ahí montos y duraciones.
+### Planes (editables desde `/admin`)
+Los planes (precio, moneda, duración en meses y **límites** de usuarios y
+productos) se editan desde `/admin` → sección **Planes y precios**, y se guardan
+en la base de datos. No hay que tocar el código. Un límite en `0` = ilimitado.
+La **prueba** da acceso total durante `TRIAL_DAYS` (14 días); los planes de pago
+aplican sus límites al crear usuarios o productos.
+
+Los valores iniciales (semilla) están en `src/lib/subscription.ts`
+(`DEFAULT_PLANS`) y solo se usan hasta la primera edición desde el panel.
 
 ## 3. Endurecimiento (checklist)
 

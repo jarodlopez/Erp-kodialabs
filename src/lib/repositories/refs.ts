@@ -112,6 +112,8 @@ export const refs = {
   subscriptionPayment: (id: Id) => docRef(COLLECTIONS.SUBSCRIPTION_PAYMENTS, id),
   subscriptionPayments: () => col(COLLECTIONS.SUBSCRIPTION_PAYMENTS),
 
+  platformConfig: (key: string) => docRef(COLLECTIONS.PLATFORM_CONFIG, key),
+
   counter: (organizationId: Id, key: string) =>
     docRef(COLLECTIONS.COUNTERS, `${organizationId}_${key}`),
 

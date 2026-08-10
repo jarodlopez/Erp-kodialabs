@@ -5,12 +5,14 @@ import type { Metadata } from 'next';
 import { getSession } from '@/lib/auth/session';
 import { isSuperAdminEmail } from '@/lib/auth/platform';
 import { organizationRepository } from '@/lib/repositories/organization';
+import { platformConfigRepository } from '@/lib/repositories/platform-config';
 import {
   subscriptionPaymentRepository,
   subscriptionRepository,
 } from '@/lib/repositories/subscription';
-import { effectiveSubscription } from '@/lib/subscription';
+import { effectiveSubscription, paidPlans } from '@/lib/subscription';
 import type { Subscription } from '@/types/subscription';
+import { PlansEditor } from './plans-editor';
 import { PlatformConsole, type ReportRow, type TenantRow } from './platform-console';
 
 export const metadata: Metadata = { title: 'Administración de plataforma' };
@@ -21,10 +23,11 @@ export default async function PlatformAdminPage() {
   if (!session) redirect('/login');
   if (!isSuperAdminEmail(session.email)) redirect('/');
 
-  const [orgs, subscriptions, reports] = await Promise.all([
+  const [orgs, subscriptions, reports, allPlans] = await Promise.all([
     organizationRepository.listAll(),
     subscriptionRepository.listAll(),
     subscriptionPaymentRepository.listAll(),
+    platformConfigRepository.getPlans(),
   ]);
 
   const subByOrg = new Map<string, Subscription>();
@@ -77,7 +80,8 @@ export default async function PlatformAdminPage() {
         </Link>
       </div>
 
-      <PlatformConsole tenants={tenants} pending={pending} />
+      <PlatformConsole tenants={tenants} pending={pending} plans={paidPlans(allPlans)} />
+      <PlansEditor initialPlans={allPlans} />
     </div>
   );
 }

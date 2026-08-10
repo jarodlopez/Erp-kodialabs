@@ -189,6 +189,16 @@ export const userRepository = {
     return mapDoc<Membership>(snap);
   },
 
+  async countMemberships(organizationId: Id): Promise<number> {
+    const snap = await refs
+      .memberships()
+      .where('organizationId', '==', organizationId)
+      .where('status', '==', 'ACTIVE')
+      .count()
+      .get();
+    return snap.data().count;
+  },
+
   async touchLogin(uid: Id): Promise<void> {
     await refs.user(uid).set({ lastLoginAt: nowIso() }, { merge: true });
   },

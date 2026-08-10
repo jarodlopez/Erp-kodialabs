@@ -1,5 +1,36 @@
 import type { Id, IsoDate } from './common';
 
+/** Límites por plan. `0` significa ilimitado. */
+export interface PlanLimits {
+  /** Máximo de usuarios (miembros activos) de la organización. */
+  users: number;
+  /** Máximo de productos activos en el inventario. */
+  products: number;
+}
+
+/**
+ * Configuración de un plan. Se guarda en la base de datos (editable desde el
+ * súper-admin), por lo que precios y límites se cambian sin tocar el código.
+ */
+export interface PlanConfig {
+  key: string;
+  name: string;
+  /** Precio de referencia (el cobro es manual). */
+  price: number;
+  currency: string;
+  /** Meses de acceso que otorga. La prueba usa 0. */
+  months: number;
+  limits: PlanLimits;
+  /** Marca el plan de prueba (no seleccionable para pago). */
+  isTrial?: boolean;
+}
+
+export interface PlatformPlans {
+  plans: PlanConfig[];
+  updatedAt: IsoDate;
+  updatedBy: Id;
+}
+
 export type SubscriptionStatus = 'TRIAL' | 'ACTIVE' | 'EXPIRED' | 'SUSPENDED';
 
 export const SUBSCRIPTION_STATUS_LABELS: Record<SubscriptionStatus, string> = {
