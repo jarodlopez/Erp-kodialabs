@@ -115,17 +115,17 @@ export default async function CustomersPage({
                           {customer.status === 'INACTIVE' && ' · Inactivo'}
                         </p>
                       </Td>
-                      <Td className="text-[var(--color-ink-muted)]">
+                      <Td label="Contacto" className="text-[var(--color-ink-muted)]">
                         {customer.phone ?? customer.email ?? '—'}
                       </Td>
-                      <Td align="right">{customer.stats.documentCount}</Td>
-                      <Td align="right">
+                      <Td align="right" label="Compras">{customer.stats.documentCount}</Td>
+                      <Td align="right" label="Total comprado">
                         <Money value={customer.stats.totalAmount} currency={currency} />
                       </Td>
-                      <Td align="right">
+                      <Td align="right" label="Ticket prom.">
                         <Money value={ticket} currency={currency} />
                       </Td>
-                      <Td align="right">
+                      <Td align="right" label="Saldo">
                         {customer.stats.outstandingBalance > 0 ? (
                           <Badge tone="warning">
                             <Money value={customer.stats.outstandingBalance} currency={currency} />
@@ -134,7 +134,7 @@ export default async function CustomersPage({
                           <span className="text-[var(--color-ink-subtle)]">—</span>
                         )}
                       </Td>
-                      <Td className="text-[var(--color-ink-subtle)]">
+                      <Td label="Última compra" className="text-[var(--color-ink-subtle)]">
                         {formatDate(customer.stats.lastDocumentAt)}
                       </Td>
                     </Tr>

@@ -355,7 +355,8 @@ export function PageHeader({
 export function TableWrapper({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div className={cn('overflow-x-auto', className)}>
-      <table className="w-full min-w-[640px] border-collapse text-sm">{children}</table>
+      {/* `erp-table`: en móvil cada fila se apila como tarjeta (ver globals.css). */}
+      <table className="erp-table w-full min-w-[640px] border-collapse text-sm">{children}</table>
     </div>
   );
 }
@@ -389,15 +390,19 @@ export function Td({
   align = 'left',
   className,
   colSpan,
+  label,
 }: {
   children?: ReactNode;
   align?: 'left' | 'right' | 'center';
   className?: string;
   colSpan?: number;
+  /** Etiqueta que se muestra antes del valor cuando la fila se ve como tarjeta (móvil). */
+  label?: string;
 }) {
   return (
     <td
       colSpan={colSpan}
+      data-label={label}
       className={cn(
         'border-b border-[var(--color-border)] px-4 py-3 text-[var(--color-ink)]',
         align === 'right' && 'text-right tabular',

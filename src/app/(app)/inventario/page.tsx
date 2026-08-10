@@ -165,33 +165,33 @@ export default async function InventoryPage({
                         {product.barcode ? ` · ${product.barcode}` : ''}
                       </p>
                     </Td>
-                    <Td>
+                    <Td label="Categoría">
                       {product.categoryName ? (
                         <Badge>{product.categoryName}</Badge>
                       ) : (
                         <span className="text-[var(--color-ink-subtle)]">—</span>
                       )}
                     </Td>
-                    <Td align="right">
+                    <Td align="right" label="Existencias">
                       {product.tracksInventory ? (
                         <Qty value={product.stock} />
                       ) : (
                         <span className="text-xs text-[var(--color-ink-subtle)]">Servicio</span>
                       )}
                     </Td>
-                    <Td align="right">
+                    <Td align="right" label="Costo prom.">
                       <Money value={product.averageCost} currency={settings.currency} />
                     </Td>
-                    <Td align="right">
+                    <Td align="right" label="Precio">
                       <Money value={product.salePrice} currency={settings.currency} />
                     </Td>
-                    <Td align="right">
+                    <Td align="right" label="Valor">
                       <Money
                         value={Math.round((product.averageCost * product.stock) / 1000)}
                         currency={settings.currency}
                       />
                     </Td>
-                    <Td>
+                    <Td label="Estado">
                       {product.status === 'INACTIVE' ? (
                         <Badge tone="neutral">Inactivo</Badge>
                       ) : product.tracksInventory ? (

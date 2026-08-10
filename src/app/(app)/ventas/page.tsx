@@ -145,20 +145,20 @@ export default async function SalesPage({
                         {formatDate(sale.date)} · {sale.items.length} ítem(s)
                       </p>
                     </Td>
-                    <Td className="max-w-[180px] truncate">{sale.customerName}</Td>
-                    <Td className="max-w-[140px] truncate text-[var(--color-ink-muted)]">
+                    <Td label="Cliente" className="max-w-[180px] truncate">{sale.customerName}</Td>
+                    <Td label="Vendedor" className="max-w-[140px] truncate text-[var(--color-ink-muted)]">
                       {sale.sellerName}
                     </Td>
-                    <Td>
+                    <Td label="Estado">
                       <SaleStatusBadge status={sale.status} />
                     </Td>
-                    <Td>
+                    <Td label="Pago">
                       <PaymentStatusBadge status={sale.paymentStatus} />
                     </Td>
-                    <Td align="right">
+                    <Td align="right" label="Total">
                       <Money value={sale.total} currency={currency} />
                     </Td>
-                    <Td align="right">
+                    <Td align="right" label="Pendiente">
                       {sale.dueAmount > 0 ? (
                         <span className="font-medium text-[var(--color-warning-700)]">
                           <Money value={sale.dueAmount} currency={currency} />

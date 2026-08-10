@@ -125,3 +125,58 @@
     background: #fff;
   }
 }
+
+/* ==========================================================================
+   Tablas responsivas: en pantallas pequeñas cada fila se muestra como una
+   tarjeta con "etiqueta: valor", en vez de una tabla ancha con scroll.
+   Las celdas sin `data-label` (nombre/título, acciones) se ven a la izquierda
+   y sin prefijo, funcionando como encabezado de la tarjeta.
+   ========================================================================== */
+@media (max-width: 639px) {
+  .erp-table {
+    min-width: 0;
+    display: block;
+  }
+  .erp-table thead {
+    display: none;
+  }
+  .erp-table tbody {
+    display: block;
+  }
+  .erp-table tr {
+    display: block;
+    border: 1px solid var(--color-border);
+    border-radius: 0.625rem;
+    padding: 0.35rem 0.75rem;
+    margin-bottom: 0.625rem;
+    background: #fff;
+  }
+  .erp-table tr:hover {
+    background: #fff;
+  }
+  .erp-table td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 0;
+    padding: 0.3rem 0;
+    text-align: right;
+  }
+  .erp-table td::before {
+    content: attr(data-label);
+    font-weight: 500;
+    color: var(--color-ink-subtle);
+    text-align: left;
+    white-space: nowrap;
+  }
+  .erp-table td:not([data-label]),
+  .erp-table td[data-label=''] {
+    justify-content: flex-start;
+    text-align: left;
+  }
+  .erp-table td:not([data-label])::before,
+  .erp-table td[data-label='']::before {
+    content: none;
+  }
+}

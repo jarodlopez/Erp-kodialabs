@@ -121,20 +121,20 @@ export default async function PurchasesPage({
                         {formatDate(purchase.date)} · {purchase.items.length} ítem(s)
                       </p>
                     </Td>
-                    <Td className="max-w-[180px] truncate">{purchase.supplierName}</Td>
-                    <Td className="text-[var(--color-ink-muted)]">
+                    <Td label="Proveedor" className="max-w-[180px] truncate">{purchase.supplierName}</Td>
+                    <Td label="Factura" className="text-[var(--color-ink-muted)]">
                       {purchase.invoiceNumber ?? '—'}
                     </Td>
-                    <Td>
+                    <Td label="Estado">
                       <PurchaseStatusBadge status={purchase.status} />
                     </Td>
-                    <Td>
+                    <Td label="Pago">
                       <PaymentStatusBadge status={purchase.paymentStatus} />
                     </Td>
-                    <Td align="right">
+                    <Td align="right" label="Total">
                       <Money value={purchase.total} currency={currency} />
                     </Td>
-                    <Td align="right">
+                    <Td align="right" label="Pendiente">
                       {purchase.dueAmount > 0 ? (
                         <span className="font-medium text-[var(--color-warning-700)]">
                           <Money value={purchase.dueAmount} currency={currency} />

@@ -109,14 +109,14 @@ export default async function SuppliersPage({
                         {supplier.status === 'INACTIVE' && ' · Inactivo'}
                       </p>
                     </Td>
-                    <Td className="text-[var(--color-ink-muted)]">
+                    <Td label="Contacto" className="text-[var(--color-ink-muted)]">
                       {supplier.contactName ?? supplier.phone ?? supplier.email ?? '—'}
                     </Td>
-                    <Td align="right">{supplier.stats.documentCount}</Td>
-                    <Td align="right">
+                    <Td align="right" label="Compras">{supplier.stats.documentCount}</Td>
+                    <Td align="right" label="Total comprado">
                       <Money value={supplier.stats.totalAmount} currency={currency} />
                     </Td>
-                    <Td align="right">
+                    <Td align="right" label="Saldo por pagar">
                       {supplier.stats.outstandingBalance > 0 ? (
                         <Badge tone="warning">
                           <Money value={supplier.stats.outstandingBalance} currency={currency} />
@@ -125,7 +125,7 @@ export default async function SuppliersPage({
                         <span className="text-[var(--color-ink-subtle)]">—</span>
                       )}
                     </Td>
-                    <Td className="text-[var(--color-ink-subtle)]">
+                    <Td label="Última compra" className="text-[var(--color-ink-subtle)]">
                       {formatDate(supplier.stats.lastDocumentAt)}
                     </Td>
                   </Tr>
