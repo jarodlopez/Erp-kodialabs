@@ -224,7 +224,7 @@ export function PosTerminal({
         </Card>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 pb-28 lg:grid-cols-3 lg:pb-0">
       {/* Productos */}
       <div className="space-y-4 lg:col-span-2">
         <Card>
@@ -477,6 +477,16 @@ export function PosTerminal({
           title="Escanear producto"
         />
       </div>
+
+      {/* Barra de cobro fija en móvil (sobre la navegación inferior) */}
+      {lines.length > 0 && (
+        <div className="fixed inset-x-0 bottom-16 z-30 border-t border-[var(--color-border)] bg-white p-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] lg:hidden">
+          <Button className="w-full py-3 text-base" onClick={charge} loading={loading}>
+            Cobrar · {lines.reduce((a, l) => a + l.quantity, 0)} art. ·{' '}
+            {formatMoney(totalMinor, currency)}
+          </Button>
+        </div>
+      )}
     </>
   );
 }

@@ -77,7 +77,7 @@ export default async function DashboardPage({
         actions={<DashboardRangePicker from={from} to={to} />}
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <KpiCard
           label="Ventas del periodo"
           value={<Money value={kpis.sales} currency={currency} />}
@@ -105,7 +105,7 @@ export default async function DashboardPage({
         />
       </section>
 
-      <section className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="mt-3 grid grid-cols-2 gap-3 xl:grid-cols-4">
         <KpiCard
           label="Caja"
           value={<Money value={kpis.cash} currency={currency} />}

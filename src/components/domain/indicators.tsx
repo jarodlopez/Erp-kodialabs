@@ -65,10 +65,12 @@ export function KpiCard({
   return (
     <Card className="p-4">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-sm text-[var(--color-ink-subtle)]">{label}</p>
-        {icon && <span className="text-[var(--color-ink-subtle)]">{icon}</span>}
+        <p className="text-xs text-[var(--color-ink-subtle)] sm:text-sm">{label}</p>
+        {icon && <span className="shrink-0 text-[var(--color-ink-subtle)]">{icon}</span>}
       </div>
-      <p className={cn('mt-2 text-2xl font-semibold tracking-tight tabular', toneClass)}>{value}</p>
+      <p className={cn('mt-2 text-xl font-semibold leading-tight tracking-tight tabular sm:text-2xl', toneClass)}>
+        {value}
+      </p>
       <div className="mt-1 flex items-center gap-2">
         {typeof trend === 'number' && trend !== 0 && (
           <span
