@@ -26,7 +26,17 @@ export interface DashboardAlert {
   href: string;
 }
 
+export interface OnboardingStatus {
+  hasProducts: boolean;
+  hasParties: boolean;
+  hasPurchases: boolean;
+  hasSales: boolean;
+  /** Verdadero cuando la organización ya tiene lo mínimo para operar. */
+  complete: boolean;
+}
+
 export interface DashboardData {
+  onboarding: OnboardingStatus;
   kpis: {
     sales: Money;
     salesCount: number;
@@ -69,6 +79,8 @@ export async function buildDashboard(
     series,
     topProducts,
     topCategories,
+    suppliers,
+    anyPurchase,
   ] = await Promise.all([
     saleRepository.inRange(organizationId, range.from, range.to, ACTIVE_SALE_STATUSES),
     purchaseRepository.inRange(organizationId, range.from, range.to, ACTIVE_PURCHASE_STATUSES),
@@ -83,7 +95,20 @@ export async function buildDashboard(
     buildDailySeries(organizationId, range),
     buildSalesReport(organizationId, range, 'product'),
     buildSalesReport(organizationId, range, 'category'),
+    supplierRepository.count(organizationId),
+    purchaseRepository.list(organizationId, {}, { limit: 1 }),
   ]);
+
+  // Estado de primeros pasos: se calcula sobre existencia real de datos
+  // (no acotado al rango del dashboard) para guiar a organizaciones nuevas.
+  const onboarding: OnboardingStatus = {
+    hasProducts: products.length > 0,
+    hasParties: customers > 0 || suppliers > 0,
+    hasPurchases: anyPurchase.items.length > 0,
+    hasSales: recentSales.length > 0,
+    complete: false,
+  };
+  onboarding.complete = onboarding.hasProducts && onboarding.hasParties && onboarding.hasSales;
 
   const salesTotal = sales.reduce((acc, s) => acc + s.subtotal, 0);
   const cogs = sales.reduce((acc, s) => acc + s.costOfGoodsSold, 0);
@@ -155,6 +180,7 @@ export async function buildDashboard(
   }
 
   return {
+    onboarding,
     kpis: {
       sales: salesTotal,
       salesCount: sales.length,

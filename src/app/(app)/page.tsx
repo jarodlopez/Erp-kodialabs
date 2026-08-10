@@ -31,6 +31,7 @@ import { organizationRepository } from '@/lib/repositories/organization';
 import { buildDashboard } from '@/lib/services/dashboard';
 import { formatDate, startOfMonthInput, toDateInput } from '@/lib/utils';
 import { DashboardRangePicker } from './dashboard-range';
+import { OnboardingChecklist } from './onboarding-checklist';
 
 export const metadata: Metadata = { title: 'Dashboard' };
 export const dynamic = 'force-dynamic';
@@ -53,6 +54,20 @@ export default async function DashboardPage({
 
   const currency = settings.currency;
   const { kpis } = data;
+
+  // Organización recién creada: en lugar del dashboard en cero, se muestra una
+  // guía de primeros pasos hasta que el negocio empiece a operar.
+  if (!data.onboarding.complete) {
+    return (
+      <>
+        <PageHeader
+          title={`¡Te damos la bienvenida, ${session.name || session.email}!`}
+          description="Sigue estos pasos para dejar tu ERP listo para operar."
+        />
+        <OnboardingChecklist status={data.onboarding} />
+      </>
+    );
+  }
 
   return (
     <>
