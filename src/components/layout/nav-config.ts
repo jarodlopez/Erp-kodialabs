@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import {
   ArrowLeftRight,
+  BookOpen,
   Boxes,
   ClipboardList,
   Coins,
@@ -12,6 +13,7 @@ import {
   Settings,
   ShieldCheck,
   ShoppingCart,
+  Store,
   Tags,
   Truck,
   Users,
@@ -50,6 +52,12 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     title: 'Operaciones',
     items: [
+      {
+        label: 'Punto de venta',
+        href: '/pos',
+        icon: Store,
+        permission: PERMISSIONS.SALES_CREATE,
+      },
       {
         label: 'Ventas',
         href: '/ventas',
@@ -161,6 +169,17 @@ export const NAV_SECTIONS: NavSection[] = [
         href: '/configuracion',
         icon: Settings,
         permission: PERMISSIONS.SETTINGS_VIEW,
+      },
+    ],
+  },
+  {
+    title: 'Ayuda',
+    items: [
+      {
+        label: 'Guía de uso',
+        href: '/guia',
+        icon: BookOpen,
+        permission: PERMISSIONS.DASHBOARD_VIEW,
       },
     ],
   },

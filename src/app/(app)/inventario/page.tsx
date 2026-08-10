@@ -20,6 +20,7 @@ import { requirePermission } from '@/lib/auth/session';
 import { PERMISSIONS } from '@/lib/rbac';
 import { categoryRepository, productRepository } from '@/lib/repositories/catalog';
 import { organizationRepository } from '@/lib/repositories/organization';
+import { ScanProductButton } from './scan-button';
 
 export const metadata: Metadata = { title: 'Inventario' };
 export const dynamic = 'force-dynamic';
@@ -61,6 +62,7 @@ export default async function InventoryPage({
         description="Catálogo de productos con existencias y costo promedio ponderado."
         actions={
           <div className="flex gap-2">
+            <ScanProductButton canCreate={canCreate} />
             <Link href="/categorias">
               <Button variant="secondary">Categorías</Button>
             </Link>
