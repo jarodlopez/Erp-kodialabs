@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Ban, CheckCircle2, RotateCcw, Trash2, Wallet } from 'lucide-react';
 
 import {
@@ -39,6 +39,13 @@ export function SaleActions({
   >('none');
   const [loading, setLoading] = useState(false);
 
+  // Llaves de idempotencia estables por operación (se rotan tras cada éxito),
+  // para que un reintento por red no genere una confirmación o cobro duplicado.
+  const confirmKeyRef = useRef<string>('');
+  if (!confirmKeyRef.current) confirmKeyRef.current = newIdempotencyKey();
+  const paymentKeyRef = useRef<string>('');
+  if (!paymentKeyRef.current) paymentKeyRef.current = newIdempotencyKey();
+
   const canCollect = permissions.includes('receivables.collect');
   const canCancel = permissions.includes('sales.cancel');
   const canReturn = permissions.includes('sales.return');
@@ -59,7 +66,7 @@ export function SaleActions({
             reference: null,
           }
         : null,
-      newIdempotencyKey(),
+      confirmKeyRef.current,
     );
     setLoading(false);
 
@@ -67,6 +74,7 @@ export function SaleActions({
       toast.error('No se pudo confirmar la venta', result.error.message);
       return;
     }
+    confirmKeyRef.current = newIdempotencyKey();
     toast.success('Venta confirmada', 'Inventario y finanzas actualizados.');
     setDialog('none');
     router.refresh();
@@ -81,7 +89,7 @@ export function SaleActions({
       method: String(formData.get('method') ?? 'CASH'),
       date: String(formData.get('date') ?? toDateInput()),
       reference: String(formData.get('reference') ?? ''),
-      idempotencyKey: newIdempotencyKey(),
+      idempotencyKey: paymentKeyRef.current,
     });
     setLoading(false);
 
@@ -89,6 +97,7 @@ export function SaleActions({
       toast.error('No se pudo registrar el cobro', result.error.message);
       return;
     }
+    paymentKeyRef.current = newIdempotencyKey();
     toast.success('Cobro registrado', `Total cobrado: ${formatMoney(result.data.paidAmount, currency)}`);
     setDialog('none');
     router.refresh();

@@ -10,8 +10,12 @@ import 'server-only';
 import { headers } from 'next/headers';
 
 import { requirePermission, requireSession, toActor, type SessionUser } from '@/lib/auth/session';
+import { isSuperAdminEmail } from '@/lib/auth/platform';
+import { errors } from '@/lib/errors';
 import type { Permission } from '@/lib/rbac';
 import { organizationRepository, warehouseRepository } from '@/lib/repositories/organization';
+import { subscriptionRepository } from '@/lib/repositories/subscription';
+import { effectiveSubscription } from '@/lib/subscription';
 import type { ActorContext } from '@/types/common';
 import type { Settings } from '@/types/organization';
 
@@ -47,13 +51,33 @@ export async function getActorContext(permission?: Permission): Promise<{
   };
 }
 
-/** Contexto completo, necesario para operaciones de negocio. */
+/**
+ * Contexto completo, necesario para operaciones de negocio. Además de permisos,
+ * exige que la suscripción del comercio esté activa: este es el punto único por
+ * donde pasan las mutaciones de negocio, de modo que un comercio vencido o
+ * suspendido no puede seguir operando llamando a las acciones directamente
+ * (el bloqueo del layout es solo de navegación). El súper-admin queda exento.
+ */
 export async function getOperationContext(permission: Permission): Promise<OperationContext> {
   const { session, actor, actorName } = await getActorContext(permission);
-  const [settings, warehouse] = await Promise.all([
+  const [settings, warehouse, organization, subscription] = await Promise.all([
     organizationRepository.getSettings(session.organizationId),
     warehouseRepository.getDefault(session.organizationId),
+    organizationRepository.get(session.organizationId),
+    subscriptionRepository.get(session.organizationId),
   ]);
+
+  if (!isSuperAdminEmail(session.email)) {
+    const state = effectiveSubscription(
+      subscription,
+      organization?.createdAt ?? new Date().toISOString(),
+    );
+    if (!state.allowed) {
+      throw errors.forbidden(
+        'La suscripción de tu comercio no está activa. Reporta tu pago para reactivar el acceso.',
+      );
+    }
+  }
 
   return { session, actor, actorName, settings, defaultWarehouseId: warehouse.id };
 }

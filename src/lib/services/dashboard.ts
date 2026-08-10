@@ -16,7 +16,7 @@ import { ACTIVE_PURCHASE_STATUSES, ACTIVE_SALE_STATUSES } from '@/lib/state-mach
 import type { Id, Money } from '@/types/common';
 import type { Product } from '@/types/catalog';
 import type { Sale } from '@/types/sales';
-import { buildDailySeries, buildSalesReport, type ReportRange } from './reports';
+import { buildDailySeries, buildSalesReport, saleNetTotals, type ReportRange } from './reports';
 
 export interface DashboardAlert {
   kind: 'LOW_STOCK' | 'OUT_OF_STOCK' | 'OVERDUE_RECEIVABLE' | 'OVERDUE_PAYABLE' | 'DUE_SOON';
@@ -110,8 +110,18 @@ export async function buildDashboard(
   };
   onboarding.complete = onboarding.hasProducts && onboarding.hasParties && onboarding.hasSales;
 
-  const salesTotal = sales.reduce((acc, s) => acc + s.subtotal, 0);
-  const cogs = sales.reduce((acc, s) => acc + s.costOfGoodsSold, 0);
+  // Ventas y costo NETOS de devoluciones (consistente con el estado de resultados).
+  const salesNet = sales.reduce(
+    (acc, s) => {
+      const net = saleNetTotals(s);
+      acc.revenue += net.revenue;
+      acc.cost += net.cost;
+      return acc;
+    },
+    { revenue: 0, cost: 0 },
+  );
+  const salesTotal = salesNet.revenue;
+  const cogs = salesNet.cost;
   const expensesTotal = expenses.reduce((acc, e) => acc + e.total, 0);
 
   const cash = accounts

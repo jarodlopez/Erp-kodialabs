@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FileText, Minus, Plus, ScanLine, Trash2, Truck, UserRound, X } from 'lucide-react';
 
@@ -51,6 +51,12 @@ export function PosTerminal({
   const [received, setReceived] = useState('');
   const [loading, setLoading] = useState(false);
   const [scanning, setScanning] = useState(false);
+
+  // Llave de idempotencia ESTABLE para la venta en curso: si el cobro falla por
+  // red y se reintenta, se usa la misma llave y el servidor no duplica la venta.
+  // Se rota solo tras un cobro exitoso, para la siguiente venta.
+  const idemKeyRef = useRef<string>('');
+  if (!idemKeyRef.current) idemKeyRef.current = newIdempotencyKey();
 
   // Delivery (envío a domicilio)
   const [isDelivery, setIsDelivery] = useState(false);
@@ -165,7 +171,7 @@ export function PosTerminal({
             }
           : null,
         payment: { accountId, amount: totalMajor, method, reference: null },
-        idempotencyKey: newIdempotencyKey(),
+        idempotencyKey: idemKeyRef.current,
       },
       { confirm: true },
     );
@@ -180,6 +186,8 @@ export function PosTerminal({
       `Venta ${result.data.number} cobrada`,
       change && change > 0 ? `Cambio: ${formatMoney(toMinorUnits(change), currency)}` : 'Inventario y caja actualizados.',
     );
+    // Venta exitosa: se rota la llave para la próxima venta.
+    idemKeyRef.current = newIdempotencyKey();
     // Se limpia para la siguiente venta; el cajero permanece en la terminal.
     setLastSale({ id: result.data.saleId, number: result.data.number, isDelivery });
     setLines([]);

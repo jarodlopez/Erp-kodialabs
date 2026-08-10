@@ -19,10 +19,34 @@ import type { Id, Money } from '@/types/common';
 import type { CashFlowSummary, IncomeStatement } from '@/types/finance';
 import { NON_OPERATIONAL_TYPES } from '@/types/finance';
 import type { StockValuationRow } from '@/types/inventory';
+import type { Sale } from '@/types/sales';
 
 export interface ReportRange {
   from: string;
   to: string;
+}
+
+/**
+ * Totales NETOS de una venta, descontando las cantidades devueltas. El ingreso
+ * es pre-impuesto (suma de subtotales de línea) y el costo es el costo de
+ * ventas efectivo. Se usa en el estado de resultados, el dashboard y las
+ * agrupaciones para que ingreso y costo queden consistentes tras devoluciones
+ * (antes el ingreso quedaba bruto mientras el costo ya venía neto, inflando la
+ * utilidad).
+ */
+export function saleNetTotals(sale: Sale): { revenue: Money; cost: Money; units: number } {
+  let revenue = 0;
+  let cost = 0;
+  let units = 0;
+  for (const item of sale.items) {
+    const effectiveQty = item.quantity - (item.returnedQuantity ?? 0);
+    if (effectiveQty <= 0) continue;
+    const ratio = effectiveQty / item.quantity;
+    revenue += Math.round(item.subtotal * ratio);
+    cost += Math.round(item.totalCost * ratio);
+    units += effectiveQty;
+  }
+  return { revenue, cost, units };
 }
 
 /** Estado de resultados del periodo. */
@@ -39,8 +63,9 @@ export async function buildIncomeStatement(
   let revenue = 0;
   let costOfGoodsSold = 0;
   for (const sale of sales) {
-    revenue += sale.subtotal;
-    costOfGoodsSold += sale.costOfGoodsSold;
+    const net = saleNetTotals(sale);
+    revenue += net.revenue;
+    costOfGoodsSold += net.cost;
   }
 
   const byCategory = new Map<string, { categoryId: Id; categoryName: string; amount: Money }>();
@@ -168,27 +193,28 @@ export async function buildSalesReport(
   };
 
   for (const sale of sales) {
+    const net = saleNetTotals(sale);
     if (grouping === 'day') {
       const key = sale.date.slice(0, 10);
       push(key, key, {
         documents: 1,
-        revenue: sale.subtotal,
-        cost: sale.costOfGoodsSold,
-        units: sale.items.reduce((acc, i) => acc + i.quantity, 0),
+        revenue: net.revenue,
+        cost: net.cost,
+        units: net.units,
       });
     } else if (grouping === 'customer') {
       push(sale.customerId ?? 'walk-in', sale.customerName, {
         documents: 1,
-        revenue: sale.subtotal,
-        cost: sale.costOfGoodsSold,
-        units: sale.items.reduce((acc, i) => acc + i.quantity, 0),
+        revenue: net.revenue,
+        cost: net.cost,
+        units: net.units,
       });
     } else if (grouping === 'seller') {
       push(sale.sellerId, sale.sellerName, {
         documents: 1,
-        revenue: sale.subtotal,
-        cost: sale.costOfGoodsSold,
-        units: sale.items.reduce((acc, i) => acc + i.quantity, 0),
+        revenue: net.revenue,
+        cost: net.cost,
+        units: net.units,
       });
     } else {
       for (const item of sale.items) {

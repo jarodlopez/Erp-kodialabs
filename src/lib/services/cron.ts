@@ -17,7 +17,7 @@ import { db, newDoc, refs } from '@/lib/repositories/refs';
 import { deriveReceivableStatus } from '@/lib/state-machines';
 import { audit } from './audit';
 import { nextRecurringDate } from './expenses';
-import { postLedgerEntry } from './finance';
+import { postLedgerEntry, writePayment } from './finance';
 import { reserveNumber, runTransaction } from './transaction';
 import type { ActorContext } from '@/types/common';
 import type { Expense, RecurringExpense } from '@/types/expenses';
@@ -155,6 +155,23 @@ async function createExpenseFromRecurring(recurring: RecurringExpense): Promise<
         referenceNumber: expense.number,
         date,
         description: `${current.categoryName}: ${current.description}`,
+      });
+      // Se registra el documento de Pago (igual que un gasto pagado manualmente),
+      // para que al anular el gasto la reversión de caja lo encuentre por
+      // `referenceId` y restaure el saldo. Sin esto, la anulación no revertía.
+      writePayment(tx, {
+        actor,
+        number: paymentNumber.number,
+        type: 'EXPENSE_PAYMENT',
+        referenceType: 'EXPENSE',
+        referenceId: expenseRef.id,
+        referenceNumber: expense.number,
+        partyId: current.supplierId,
+        partyName: current.supplierName ?? current.categoryName,
+        account,
+        amount: total,
+        date,
+        method: current.method ?? 'CASH',
       });
     }
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Ban, PackageCheck, RotateCcw, Wallet } from 'lucide-react';
 
 import {
@@ -35,6 +35,12 @@ export function PurchaseActions({
   const [dialog, setDialog] = useState<'none' | 'receive' | 'payment' | 'cancel' | 'return'>('none');
   const [loading, setLoading] = useState(false);
 
+  // Llaves de idempotencia estables por operación (se rotan tras cada éxito).
+  const receiveKeyRef = useRef<string>('');
+  if (!receiveKeyRef.current) receiveKeyRef.current = newIdempotencyKey();
+  const payKeyRef = useRef<string>('');
+  if (!payKeyRef.current) payKeyRef.current = newIdempotencyKey();
+
   const defaultAccount = accounts.find((a) => a.isDefault)?.id ?? accounts[0]?.id ?? '';
   const isActive = ['RECEIVED', 'PARTIAL', 'PAID', 'RETURNED'].includes(purchase.status);
 
@@ -53,7 +59,7 @@ export function PurchaseActions({
             reference: null,
           }
         : null,
-      newIdempotencyKey(),
+      receiveKeyRef.current,
     );
     setLoading(false);
 
@@ -61,6 +67,7 @@ export function PurchaseActions({
       toast.error('No se pudo recibir la compra', result.error.message);
       return;
     }
+    receiveKeyRef.current = newIdempotencyKey();
     toast.success('Compra recibida', 'Inventario y costo promedio actualizados.');
     setDialog('none');
     router.refresh();
@@ -75,7 +82,7 @@ export function PurchaseActions({
       method: String(formData.get('method') ?? 'CASH'),
       date: String(formData.get('date') ?? toDateInput()),
       reference: String(formData.get('reference') ?? ''),
-      idempotencyKey: newIdempotencyKey(),
+      idempotencyKey: payKeyRef.current,
     });
     setLoading(false);
 
@@ -83,6 +90,7 @@ export function PurchaseActions({
       toast.error('No se pudo registrar el pago', result.error.message);
       return;
     }
+    payKeyRef.current = newIdempotencyKey();
     toast.success('Pago registrado');
     setDialog('none');
     router.refresh();
