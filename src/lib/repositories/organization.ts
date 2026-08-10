@@ -46,6 +46,11 @@ export const organizationRepository = {
     return requireDoc<Organization>(snap, 'Organización');
   },
 
+  /** Todas las organizaciones (uso exclusivo del súper-admin de la plataforma). */
+  async listAll(max = 1000): Promise<Organization[]> {
+    return collectQuery<Organization>(refs.organizations(), max);
+  },
+
   async update(id: Id, data: Partial<Organization>, userId: Id): Promise<void> {
     await refs.organization(id).set(
       { ...data, updatedAt: nowIso(), updatedBy: userId },

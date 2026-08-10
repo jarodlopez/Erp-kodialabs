@@ -117,6 +117,11 @@ service cloud.firestore {
     match /counters/{docId}        { allow read, write: if false; }
     match /idempotencyKeys/{docId} { allow read, write: if false; }
 
+    // Suscripciones y pagos manuales: gestionados solo por el servidor
+    // (Admin SDK) y el súper-admin de la plataforma. Sin acceso de cliente.
+    match /subscriptions/{docId}        { allow read, write: if false; }
+    match /subscriptionPayments/{docId} { allow read, write: if false; }
+
     // ------------------------- Regla de cierre ------------------------------
     // Cualquier colección no declarada arriba queda completamente bloqueada.
 

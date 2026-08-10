@@ -91,6 +91,15 @@ export const forgotPasswordSchema = z.object({
   email: z.email('Ingresa un correo válido.'),
 });
 
+export const subscriptionPaymentReportSchema = z.object({
+  plan: requiredText('El plan', 40),
+  amount: money('El monto').refine((v) => v > 0, 'El monto debe ser mayor que cero.'),
+  method: requiredText('El método de pago', 40),
+  reference: optionalText(120),
+  paidAt: dateString,
+  note: optionalText(500),
+});
+
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(6, 'Ingresa tu contraseña actual.'),

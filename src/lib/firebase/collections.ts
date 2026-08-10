@@ -45,6 +45,9 @@ export const COLLECTIONS = {
   AUDIT_LOGS: 'auditLogs',
   COUNTERS: 'counters',
   IDEMPOTENCY: 'idempotencyKeys',
+
+  SUBSCRIPTIONS: 'subscriptions',
+  SUBSCRIPTION_PAYMENTS: 'subscriptionPayments',
 } as const;
 
 export type CollectionName = (typeof COLLECTIONS)[keyof typeof COLLECTIONS];

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
-import { LogOut, Menu, Store, X } from 'lucide-react';
+import { Building2, LogOut, Menu, Store, X } from 'lucide-react';
 
 import { NAV_SECTIONS } from './nav-config';
 import { Button } from '@/components/ui/primitives';
@@ -21,10 +21,12 @@ export interface ShellUser {
 export function AppShell({
   user,
   onSignOut,
+  isSuperAdmin = false,
   children,
 }: {
   user: ShellUser;
   onSignOut: (formData: FormData) => void | Promise<void>;
+  isSuperAdmin?: boolean;
   children: ReactNode;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -76,6 +78,31 @@ export function AppShell({
           </ul>
         </div>
       ))}
+
+      {isSuperAdmin && (
+        <div>
+          <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-ink-subtle)]">
+            Plataforma
+          </p>
+          <ul className="space-y-0.5">
+            <li>
+              <Link
+                href="/admin"
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
+                  pathname.startsWith('/admin')
+                    ? 'bg-[var(--color-brand-50)] font-medium text-[var(--color-brand-700)]'
+                    : 'text-[var(--color-ink-muted)] hover:bg-[var(--color-canvas)] hover:text-[var(--color-ink)]',
+                )}
+              >
+                <Building2 className="h-4 w-4 shrink-0" />
+                <span className="truncate">Administrar plataforma</span>
+              </Link>
+            </li>
+          </ul>
+        </div>
+      )}
     </nav>
   );
 

@@ -106,6 +106,12 @@ export const refs = {
   auditLogs: () => col(COLLECTIONS.AUDIT_LOGS),
   auditLog: (id: Id) => docRef(COLLECTIONS.AUDIT_LOGS, id),
 
+  subscription: (organizationId: Id) => docRef(COLLECTIONS.SUBSCRIPTIONS, organizationId),
+  subscriptions: () => col(COLLECTIONS.SUBSCRIPTIONS),
+
+  subscriptionPayment: (id: Id) => docRef(COLLECTIONS.SUBSCRIPTION_PAYMENTS, id),
+  subscriptionPayments: () => col(COLLECTIONS.SUBSCRIPTION_PAYMENTS),
+
   counter: (organizationId: Id, key: string) =>
     docRef(COLLECTIONS.COUNTERS, `${organizationId}_${key}`),
 
