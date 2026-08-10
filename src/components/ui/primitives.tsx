@@ -28,7 +28,7 @@ const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
 
 const BUTTON_SIZES: Record<ButtonSize, string> = {
   sm: 'h-8 px-3 text-sm rounded-lg gap-1.5',
-  md: 'h-10 px-4 text-sm rounded-lg gap-2',
+  md: 'h-11 sm:h-10 px-4 text-sm rounded-lg gap-2',
   lg: 'h-11 px-5 text-base rounded-lg gap-2',
   icon: 'h-9 w-9 rounded-lg',
 };
@@ -176,8 +176,10 @@ export function Label({
   );
 }
 
+// `text-base` en móvil (16px) evita el zoom automático de iOS al enfocar; en
+// escritorio baja a `text-sm` (14px).
 const FIELD_BASE =
-  'w-full rounded-lg border bg-white px-3 py-2 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-subtle)] transition-colors disabled:cursor-not-allowed disabled:bg-[var(--color-canvas)] disabled:text-[var(--color-ink-subtle)]';
+  'w-full rounded-lg border bg-white px-3 py-2 text-base sm:text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-subtle)] transition-colors disabled:cursor-not-allowed disabled:bg-[var(--color-canvas)] disabled:text-[var(--color-ink-subtle)]';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   invalid?: boolean;
@@ -188,7 +190,7 @@ export function Input({ className, invalid, ...props }: InputProps) {
     <input
       className={cn(
         FIELD_BASE,
-        'h-10',
+        'h-11 sm:h-10',
         invalid
           ? 'border-[var(--color-danger-500)] focus:border-[var(--color-danger-500)]'
           : 'border-[var(--color-border-strong)] focus:border-[var(--color-brand-500)]',
@@ -208,7 +210,7 @@ export function Select({ className, invalid, children, ...props }: SelectProps) 
     <select
       className={cn(
         FIELD_BASE,
-        'h-10 appearance-none bg-[url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 20 20\' fill=\'%23667085\'%3E%3Cpath d=\'M5.5 7.5 10 12l4.5-4.5\' stroke=\'%23667085\' stroke-width=\'1.5\' fill=\'none\' stroke-linecap=\'round\'/%3E%3C/svg%3E")] bg-[length:20px_20px] bg-[right_0.5rem_center] bg-no-repeat pr-9',
+        'h-11 sm:h-10 appearance-none bg-[url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 20 20\' fill=\'%23667085\'%3E%3Cpath d=\'M5.5 7.5 10 12l4.5-4.5\' stroke=\'%23667085\' stroke-width=\'1.5\' fill=\'none\' stroke-linecap=\'round\'/%3E%3C/svg%3E")] bg-[length:20px_20px] bg-[right_0.5rem_center] bg-no-repeat pr-9',
         invalid ? 'border-[var(--color-danger-500)]' : 'border-[var(--color-border-strong)]',
         className,
       )}
@@ -255,7 +257,7 @@ export function Field({
   className?: string;
 }) {
   return (
-    <div className={cn('space-y-1.5', className)}>
+    <div className={cn('space-y-2', className)}>
       {label && (
         <Label htmlFor={htmlFor} required={required}>
           {label}
