@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Minus, Plus, ScanLine, Trash2, UserRound, X } from 'lucide-react';
+import { FileText, Minus, Plus, ScanLine, Trash2, Truck, UserRound, X } from 'lucide-react';
 
 import { findProductByBarcodeAction } from '@/app/actions/catalog';
 import { createSaleAction } from '@/app/actions/sales';
@@ -51,6 +51,20 @@ export function PosTerminal({
   const [received, setReceived] = useState('');
   const [loading, setLoading] = useState(false);
   const [scanning, setScanning] = useState(false);
+
+  // Delivery (envío a domicilio)
+  const [isDelivery, setIsDelivery] = useState(false);
+  const [delAddress, setDelAddress] = useState('');
+  const [delRecipient, setDelRecipient] = useState('');
+  const [delPhone, setDelPhone] = useState('');
+  const [delNotes, setDelNotes] = useState('');
+
+  // Última venta cobrada, para ofrecer factura / etiqueta.
+  const [lastSale, setLastSale] = useState<{
+    id: string;
+    number: string;
+    isDelivery: boolean;
+  } | null>(null);
 
   const totals = useMemo(() => {
     if (lines.length === 0) return null;
@@ -122,6 +136,10 @@ export function PosTerminal({
       toast.error('Efectivo insuficiente', 'El efectivo recibido es menor que el total.');
       return;
     }
+    if (isDelivery && !delAddress.trim()) {
+      toast.error('Falta la dirección', 'Escribe la dirección de entrega del delivery.');
+      return;
+    }
 
     setLoading(true);
     const result = await createSaleAction(
@@ -138,6 +156,14 @@ export function PosTerminal({
         globalDiscount: 0,
         notes: '',
         dueDate: null,
+        delivery: isDelivery
+          ? {
+              recipient: delRecipient.trim() || null,
+              address: delAddress.trim(),
+              phone: delPhone.trim() || null,
+              notes: delNotes.trim() || null,
+            }
+          : null,
         payment: { accountId, amount: totalMajor, method, reference: null },
         idempotencyKey: newIdempotencyKey(),
       },
@@ -155,16 +181,50 @@ export function PosTerminal({
       change && change > 0 ? `Cambio: ${formatMoney(toMinorUnits(change), currency)}` : 'Inventario y caja actualizados.',
     );
     // Se limpia para la siguiente venta; el cajero permanece en la terminal.
+    setLastSale({ id: result.data.saleId, number: result.data.number, isDelivery });
     setLines([]);
     setCustomer(null);
     setShowCustomer(false);
     setReceived('');
+    setIsDelivery(false);
+    setDelAddress('');
+    setDelRecipient('');
+    setDelPhone('');
+    setDelNotes('');
     setLoading(false);
     router.refresh();
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
+    <>
+      {lastSale && (
+        <Card className="mb-4 border-[var(--color-positive-200)] bg-[var(--color-positive-50)] p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-medium text-[var(--color-positive-700)]">
+              ✓ Venta {lastSale.number} cobrada.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <a href={`/factura/${lastSale.id}`} target="_blank" rel="noopener noreferrer">
+                <Button variant="secondary" size="sm">
+                  <FileText className="h-4 w-4" /> Factura
+                </Button>
+              </a>
+              {lastSale.isDelivery && (
+                <a href={`/etiqueta/${lastSale.id}`} target="_blank" rel="noopener noreferrer">
+                  <Button variant="secondary" size="sm">
+                    <Truck className="h-4 w-4" /> Etiqueta de envío
+                  </Button>
+                </a>
+              )}
+              <Button variant="ghost" size="sm" onClick={() => setLastSale(null)}>
+                Nueva venta
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      <div className="grid gap-4 lg:grid-cols-3">
       {/* Productos */}
       <div className="space-y-4 lg:col-span-2">
         <Card>
@@ -320,6 +380,54 @@ export function PosTerminal({
                 />
               </Field>
             )}
+
+            {/* Delivery */}
+            <div className="rounded-lg border border-[var(--color-border)] p-3">
+              <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-[var(--color-ink)]">
+                <input
+                  type="checkbox"
+                  checked={isDelivery}
+                  onChange={(event) => setIsDelivery(event.target.checked)}
+                  className="h-4 w-4 rounded border-[var(--color-border-strong)] text-[var(--color-brand-500)]"
+                />
+                <Truck className="h-4 w-4 text-[var(--color-ink-subtle)]" /> Es delivery (envío a
+                domicilio)
+              </label>
+
+              {isDelivery && (
+                <div className="mt-3 space-y-3">
+                  <Field label="Dirección de entrega" required>
+                    <Input
+                      value={delAddress}
+                      onChange={(event) => setDelAddress(event.target.value)}
+                      placeholder="Barrio, calle, número, referencias..."
+                    />
+                  </Field>
+                  <Field label="Recibe (opcional)">
+                    <Input
+                      value={delRecipient}
+                      onChange={(event) => setDelRecipient(event.target.value)}
+                      placeholder="Nombre de quien recibe"
+                    />
+                  </Field>
+                  <Field label="Teléfono (opcional)">
+                    <Input
+                      value={delPhone}
+                      inputMode="tel"
+                      onChange={(event) => setDelPhone(event.target.value)}
+                      placeholder="Para coordinar la entrega"
+                    />
+                  </Field>
+                  <Field label="Indicaciones (opcional)">
+                    <Input
+                      value={delNotes}
+                      onChange={(event) => setDelNotes(event.target.value)}
+                      placeholder="Ej. tocar el timbre, dejar con el portero..."
+                    />
+                  </Field>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2 border-t border-[var(--color-border)] p-4">
@@ -362,12 +470,13 @@ export function PosTerminal({
         </Card>
       </div>
 
-      <BarcodeScanner
-        open={scanning}
-        onClose={() => setScanning(false)}
-        onDetect={handleScan}
-        title="Escanear producto"
-      />
-    </div>
+        <BarcodeScanner
+          open={scanning}
+          onClose={() => setScanning(false)}
+          onDetect={handleScan}
+          title="Escanear producto"
+        />
+      </div>
+    </>
   );
 }

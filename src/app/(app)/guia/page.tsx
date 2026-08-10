@@ -155,6 +155,14 @@ const SECTIONS: Section[] = [
             <>Toca <Term>Cobrar</Term>. La venta queda confirmada y el carrito se limpia para la siguiente.</>,
           ]}
         />
+        <P>
+          <Term>Factura y delivery:</Term> tras cobrar aparece un botón para abrir la{' '}
+          <Term>Factura</Term> (imprimir o guardar como PDF). Si activas{' '}
+          <Term>Es delivery</Term> y capturas la dirección, también podrás imprimir una{' '}
+          <Term>Etiqueta de envío</Term> con el destinatario y la lista de empaque, para que el
+          personal de almacén arme el paquete correctamente. Ambos documentos también están
+          disponibles después desde la ficha de la venta.
+        </P>
         <Tip>
           El POS es solo para ventas de contado. Para ventas a crédito, abonos parciales o guardar
           borradores, usa <Term>Ventas → Nueva venta</Term>.

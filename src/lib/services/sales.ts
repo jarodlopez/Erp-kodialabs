@@ -286,6 +286,7 @@ export const saleService = {
         status,
         dueDate: input.type === 'CREDIT' ? dueDate : null,
         notes: input.notes ?? null,
+        delivery: input.delivery ?? null,
         cancelledAt: null,
         cancelledBy: null,
         cancelReason: null,

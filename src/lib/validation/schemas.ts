@@ -215,6 +215,16 @@ export const saleSchema = z.object({
   notes: optionalText(1000),
   dueDate: z.string().optional().nullable().transform((v) => v || null),
   warehouseId: z.string().optional().nullable().transform((v) => v || undefined),
+  delivery: z
+    .object({
+      recipient: optionalText(150),
+      address: requiredText('La dirección de entrega', 400),
+      phone: optionalText(40),
+      notes: optionalText(500),
+    })
+    .optional()
+    .nullable()
+    .transform((v) => v ?? null),
   payment: z
     .object({
       accountId: idString,

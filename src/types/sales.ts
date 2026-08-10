@@ -28,6 +28,14 @@ export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
 
 export type SaleType = 'CASH' | 'CREDIT';
 
+/** Datos de entrega a domicilio (delivery). `null` si es venta en mostrador. */
+export interface DeliveryInfo {
+  recipient: string | null;
+  address: string;
+  phone: string | null;
+  notes: string | null;
+}
+
 export interface SaleItem {
   productId: Id;
   sku: string;
@@ -83,6 +91,8 @@ export interface Sale extends BaseEntity {
   status: SaleStatus;
   dueDate: IsoDate | null;
   notes: string | null;
+  /** Datos de entrega si la venta es delivery; `null` en mostrador. */
+  delivery: DeliveryInfo | null;
   cancelledAt: IsoDate | null;
   cancelledBy: Id | null;
   cancelReason: string | null;
@@ -110,6 +120,7 @@ export interface CreateSaleInput {
   notes?: string | null;
   dueDate?: string | null;
   warehouseId?: Id;
+  delivery?: DeliveryInfo | null;
   /** Pago inmediato registrado junto con la venta. */
   payment?: {
     accountId: Id;

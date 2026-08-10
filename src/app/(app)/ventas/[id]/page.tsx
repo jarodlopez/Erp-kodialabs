@@ -8,8 +8,11 @@ import {
   Qty,
   SaleStatusBadge,
 } from '@/components/domain/indicators';
+import { FileText, Truck } from 'lucide-react';
+
 import {
   Badge,
+  Button,
   Card,
   CardHeader,
   PageHeader,
@@ -58,12 +61,26 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
         }
         description={`${formatDate(sale.date)} · ${sale.customerName}`}
         actions={
-          <SaleActions
-            sale={sale}
-            accounts={accounts}
-            currency={currency}
-            permissions={session.permissions}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <a href={`/factura/${sale.id}`} target="_blank" rel="noopener noreferrer">
+              <Button variant="secondary">
+                <FileText className="h-4 w-4" /> Factura
+              </Button>
+            </a>
+            {sale.delivery && (
+              <a href={`/etiqueta/${sale.id}`} target="_blank" rel="noopener noreferrer">
+                <Button variant="secondary">
+                  <Truck className="h-4 w-4" /> Etiqueta
+                </Button>
+              </a>
+            )}
+            <SaleActions
+              sale={sale}
+              accounts={accounts}
+              currency={currency}
+              permissions={session.permissions}
+            />
+          </div>
         }
       />
 
