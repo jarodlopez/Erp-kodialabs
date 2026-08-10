@@ -223,6 +223,11 @@ const SECTIONS: Section[] = [
               celular y abrir la ficha del producto al instante. Si el código no existe, te lleva a
               crearlo.
             </>,
+            <>
+              <Term>Importar por CSV:</Term> el botón <Term>Importar</Term> te permite cargar muchos
+              productos de una vez desde un archivo. Descarga la plantilla, complétala y súbela; el
+              sistema valida cada fila y te informa de cualquier error.
+            </>,
             <><Term>Movimientos (kardex):</Term> historial de cada entrada y salida de existencias.</>,
             <><Term>Ajustes:</Term> corrige existencias indicando siempre un motivo.</>,
             <><Term>Transferencias:</Term> mueve stock entre bodegas.</>,

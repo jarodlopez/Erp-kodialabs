@@ -70,6 +70,11 @@ export default async function InventoryPage({
               <Button variant="secondary">Movimientos</Button>
             </Link>
             {canCreate && (
+              <Link href="/inventario/importar">
+                <Button variant="secondary">Importar</Button>
+              </Link>
+            )}
+            {canCreate && (
               <Link href="/inventario/nuevo">
                 <Button>
                   <Plus className="h-4 w-4" /> Nuevo producto
