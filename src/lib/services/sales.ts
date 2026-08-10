@@ -896,4 +896,34 @@ export const saleService = {
       });
     });
   },
+
+  /**
+   * Elimina físicamente un borrador. Solo se permite en estado DRAFT porque un
+   * borrador nunca afectó inventario ni finanzas; las ventas confirmadas se
+   * anulan (nunca se borran) para preservar la integridad contable.
+   */
+  async deleteDraft(ctx: SaleServiceContext, saleId: Id): Promise<void> {
+    await runTransaction(async (tx) => {
+      const saleSnap = await tx.get(refs.sale(saleId));
+      if (!saleSnap.exists) throw errors.notFound('Venta');
+      const sale = { ...(saleSnap.data() as Sale), id: saleSnap.id };
+      if (sale.organizationId !== ctx.actor.organizationId) throw errors.orgMismatch();
+      if (sale.status !== 'DRAFT') {
+        throw errors.validation(
+          'Solo se pueden eliminar borradores. Anula las ventas confirmadas.',
+        );
+      }
+
+      tx.delete(refs.sale(saleId));
+
+      auditInTransaction(tx, ctx.actor, {
+        action: 'DELETE',
+        module: 'SALES',
+        entityType: 'sale',
+        entityId: saleId,
+        entityLabel: sale.number,
+        before: { status: sale.status, total: sale.total },
+      });
+    });
+  },
 };

@@ -2,12 +2,17 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Ban, CheckCircle2, RotateCcw, Wallet } from 'lucide-react';
+import { Ban, CheckCircle2, RotateCcw, Trash2, Wallet } from 'lucide-react';
 
-import { cancelSaleAction, confirmSaleAction, registerSalePaymentAction } from '@/app/actions/sales';
+import {
+  cancelSaleAction,
+  confirmSaleAction,
+  deleteSaleDraftAction,
+  registerSalePaymentAction,
+} from '@/app/actions/sales';
 import { createSaleReturnAction } from '@/app/actions/inventory';
 import { Button, Field, Input, Select, Textarea } from '@/components/ui/primitives';
-import { Modal } from '@/components/ui/modal';
+import { ConfirmDialog, Modal } from '@/components/ui/modal';
 import { useToast } from '@/components/ui/toast';
 import { formatMoney, toMajorUnits } from '@/lib/money';
 import { newIdempotencyKey, toDateInput } from '@/lib/utils';
@@ -29,7 +34,9 @@ export function SaleActions({
   const router = useRouter();
   const toast = useToast();
 
-  const [dialog, setDialog] = useState<'none' | 'confirm' | 'payment' | 'cancel' | 'return'>('none');
+  const [dialog, setDialog] = useState<
+    'none' | 'confirm' | 'payment' | 'cancel' | 'return' | 'delete'
+  >('none');
   const [loading, setLoading] = useState(false);
 
   const canCollect = permissions.includes('receivables.collect');
@@ -104,6 +111,21 @@ export function SaleActions({
     router.refresh();
   }
 
+  async function deleteDraft() {
+    setLoading(true);
+    const result = await deleteSaleDraftAction(sale.id);
+    setLoading(false);
+
+    if (!result.ok) {
+      toast.error('No se pudo eliminar', result.error.message);
+      return;
+    }
+    toast.success('Borrador eliminado', `Se eliminó el borrador ${sale.number}.`);
+    setDialog('none');
+    router.push('/ventas');
+    router.refresh();
+  }
+
   async function createReturn(formData: FormData) {
     const items = sale.items
       .map((item) => ({
@@ -148,6 +170,12 @@ export function SaleActions({
       {sale.status === 'DRAFT' && (
         <Button onClick={() => setDialog('confirm')}>
           <CheckCircle2 className="h-4 w-4" /> Confirmar venta
+        </Button>
+      )}
+
+      {sale.status === 'DRAFT' && canCancel && (
+        <Button variant="secondary" onClick={() => setDialog('delete')}>
+          <Trash2 className="h-4 w-4" /> Eliminar borrador
         </Button>
       )}
 
@@ -379,6 +407,23 @@ export function SaleActions({
           </div>
         </form>
       </Modal>
+
+      {/* -------------------------- Eliminar borrador -------------------------- */}
+      <ConfirmDialog
+        open={dialog === 'delete'}
+        onClose={() => !loading && setDialog('none')}
+        onConfirm={deleteDraft}
+        title="Eliminar borrador"
+        confirmLabel="Eliminar"
+        loading={loading}
+        message={
+          <>
+            El borrador <strong>{sale.number}</strong> se eliminará de forma permanente. Un borrador
+            no afectó inventario ni finanzas, por lo que no hay nada que revertir. Esta acción no se
+            puede deshacer.
+          </>
+        }
+      />
     </div>
   );
 }

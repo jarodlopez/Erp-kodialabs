@@ -121,3 +121,16 @@ export async function cancelSaleAction(input: unknown): Promise<ActionResult<und
     return fail(error);
   }
 }
+
+/** Elimina un borrador (solo ventas en estado DRAFT). */
+export async function deleteSaleDraftAction(saleId: string): Promise<ActionResult<undefined>> {
+  try {
+    const ctx = await getOperationContext(PERMISSIONS.SALES_CANCEL);
+    await saleService.deleteDraft(ctx, saleId);
+    refresh();
+    return ok();
+  } catch (error) {
+    logError('sales.deleteDraft', error);
+    return fail(error);
+  }
+}
