@@ -3,12 +3,22 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
-import { Building2, LogOut, Menu, Store, X } from 'lucide-react';
+import {
+  Boxes,
+  Building2,
+  Home,
+  LogOut,
+  Menu,
+  MoreHorizontal,
+  ShoppingCart,
+  Store,
+  X,
+} from 'lucide-react';
 
 import { NAV_SECTIONS } from './nav-config';
 import { Button } from '@/components/ui/primitives';
 import { cn, initials } from '@/lib/utils';
-import { ROLE_LABELS, type Role } from '@/lib/rbac';
+import { PERMISSIONS, ROLE_LABELS, type Role } from '@/lib/rbac';
 
 export interface ShellUser {
   name: string;
@@ -42,6 +52,17 @@ export function AppShell({
     ...section,
     items: section.items.filter((item) => user.permissions.includes(item.permission)),
   })).filter((section) => section.items.length > 0);
+
+  // Accesos rápidos para la barra inferior en móvil (máximo 4 + "Más").
+  const tabCandidates = [
+    { label: 'Inicio', href: '/', icon: Home, permission: PERMISSIONS.DASHBOARD_VIEW },
+    { label: 'POS', href: '/pos', icon: Store, permission: PERMISSIONS.SALES_CREATE },
+    { label: 'Inventario', href: '/inventario', icon: Boxes, permission: PERMISSIONS.INVENTORY_VIEW },
+    { label: 'Ventas', href: '/ventas', icon: ShoppingCart, permission: PERMISSIONS.SALES_VIEW },
+  ];
+  const mobileTabs = tabCandidates
+    .filter((t) => user.permissions.includes(t.permission))
+    .slice(0, 4);
 
   const nav = (
     <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
@@ -168,8 +189,38 @@ export function AppShell({
           <span className="truncate text-sm font-semibold">{user.organizationName}</span>
         </header>
 
-        <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <main className="min-w-0 flex-1 px-4 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-8">{children}</main>
       </div>
+
+      {/* Barra de navegación inferior (solo móvil) */}
+      <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-[var(--color-border)] bg-white pb-[env(safe-area-inset-bottom)] lg:hidden">
+        {mobileTabs.map((tab) => {
+          const active = isActive(tab.href);
+          const Icon = tab.icon;
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className={cn(
+                'flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors',
+                active ? 'text-[var(--color-brand-600)]' : 'text-[var(--color-ink-muted)]',
+              )}
+              aria-current={active ? 'page' : undefined}
+            >
+              <Icon className="h-5 w-5" />
+              {tab.label}
+            </Link>
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => setMobileOpen(true)}
+          className="flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium text-[var(--color-ink-muted)]"
+        >
+          <MoreHorizontal className="h-5 w-5" />
+          Más
+        </button>
+      </nav>
     </div>
   );
 }
