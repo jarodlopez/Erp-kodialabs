@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { Plus, Truck } from 'lucide-react';
+import { Landmark, Plus, Truck, Wallet } from 'lucide-react';
 
-import { Money, PaymentStatusBadge, PurchaseStatusBadge } from '@/components/domain/indicators';
+import { Money, PaymentStatusBadge, PurchaseStatusBadge, SummaryTile } from '@/components/domain/indicators';
 import { CursorPagination, DateRangeFilter, FilterBar } from '@/components/ui/data-table';
 import {
   Button,
@@ -19,7 +19,8 @@ import { requirePermission } from '@/lib/auth/session';
 import { PERMISSIONS } from '@/lib/rbac';
 import { purchaseRepository } from '@/lib/repositories/documents';
 import { organizationRepository } from '@/lib/repositories/organization';
-import { formatDate } from '@/lib/utils';
+import { ACTIVE_PURCHASE_STATUSES } from '@/lib/state-machines';
+import { formatDate, startOfMonthInput, toDateInput } from '@/lib/utils';
 import { PURCHASE_STATUS_LABELS } from '@/types/purchases';
 
 export const metadata: Metadata = { title: 'Compras' };
@@ -33,16 +34,37 @@ export default async function PurchasesPage({
   const session = await requirePermission(PERMISSIONS.PURCHASES_VIEW);
   const params = await searchParams;
 
-  const [settings, page] = await Promise.all([
+  // Rango del resumen: el del filtro de fechas si está, o el mes en curso.
+  const periodFrom = params.from ?? startOfMonthInput();
+  const periodTo = params.to ?? toDateInput();
+
+  const [settings, page, periodPurchases] = await Promise.all([
     organizationRepository.getSettings(session.organizationId),
     purchaseRepository.list(
       session.organizationId,
       { status: params.estado ?? null, from: params.from ?? null, to: params.to ?? null },
       { cursor: params.cursor ?? null, limit: 25 },
     ),
+    purchaseRepository.inRange(
+      session.organizationId,
+      periodFrom,
+      periodTo,
+      ACTIVE_PURCHASE_STATUSES,
+    ),
   ]);
 
   const currency = settings.currency;
+
+  // Totales del período (compras activas del rango), no de la página.
+  const period = periodPurchases.reduce(
+    (acc, purchase) => {
+      acc.total += purchase.total;
+      acc.due += purchase.dueAmount;
+      return acc;
+    },
+    { total: 0, due: 0 },
+  );
+  const paid = period.total - period.due;
 
   return (
     <>
@@ -60,8 +82,32 @@ export default async function PurchasesPage({
         }
       />
 
+      <section className="mb-4 grid gap-3 sm:grid-cols-3">
+        <SummaryTile
+          variant="ember"
+          label="Comprado"
+          value={<Money value={period.total} currency={currency} />}
+          hint={`${periodPurchases.length} compra(s) · ${formatDate(periodFrom)}–${formatDate(periodTo)}`}
+          icon={<Truck className="h-4 w-4" />}
+        />
+        <SummaryTile
+          variant="positive"
+          label="Pagado"
+          value={<Money value={paid} currency={currency} />}
+          icon={<Wallet className="h-4 w-4" />}
+        />
+        <SummaryTile
+          label="Por pagar"
+          value={<Money value={period.due} currency={currency} />}
+          icon={<Landmark className="h-4 w-4" />}
+        />
+      </section>
+
       <Card>
-        <CardHeader title="Documentos" />
+        <CardHeader
+          title="Documentos"
+          description="Historial de compras. Usa el rango de fechas para acotar el período."
+        />
         <FilterBar
           searchPlaceholder="Buscar por proveedor no disponible; usa filtros"
           filters={[

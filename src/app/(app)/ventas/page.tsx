@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { Plus, ShoppingCart } from 'lucide-react';
+import { Coins, Plus, ShoppingCart, Wallet } from 'lucide-react';
 
-import { Money, PaymentStatusBadge, SaleStatusBadge } from '@/components/domain/indicators';
+import { Money, PaymentStatusBadge, SaleStatusBadge, SummaryTile } from '@/components/domain/indicators';
 import { CursorPagination, DateRangeFilter, FilterBar } from '@/components/ui/data-table';
 import {
   Button,
@@ -19,7 +19,8 @@ import { requirePermission } from '@/lib/auth/session';
 import { PERMISSIONS } from '@/lib/rbac';
 import { saleRepository } from '@/lib/repositories/documents';
 import { organizationRepository } from '@/lib/repositories/organization';
-import { formatDate } from '@/lib/utils';
+import { ACTIVE_SALE_STATUSES } from '@/lib/state-machines';
+import { formatDate, startOfMonthInput, toDateInput } from '@/lib/utils';
 import { SALE_STATUS_LABELS } from '@/types/sales';
 
 export const metadata: Metadata = { title: 'Ventas' };
@@ -33,7 +34,11 @@ export default async function SalesPage({
   const session = await requirePermission(PERMISSIONS.SALES_VIEW);
   const params = await searchParams;
 
-  const [settings, page] = await Promise.all([
+  // Rango del resumen: el del filtro de fechas si está, o el mes en curso.
+  const periodFrom = params.from ?? startOfMonthInput();
+  const periodTo = params.to ?? toDateInput();
+
+  const [settings, page, periodSales] = await Promise.all([
     organizationRepository.getSettings(session.organizationId),
     saleRepository.list(
       session.organizationId,
@@ -45,18 +50,21 @@ export default async function SalesPage({
       },
       { cursor: params.cursor ?? null, limit: 25 },
     ),
+    saleRepository.inRange(session.organizationId, periodFrom, periodTo, ACTIVE_SALE_STATUSES),
   ]);
 
   const currency = settings.currency;
-  const totals = page.items.reduce(
+
+  // Totales del período (ventas activas del rango), no de la página.
+  const period = periodSales.reduce(
     (acc, sale) => {
-      if (sale.status === 'CANCELLED') return acc;
       acc.total += sale.total;
       acc.due += sale.dueAmount;
       return acc;
     },
     { total: 0, due: 0 },
   );
+  const collected = period.total - period.due;
 
   return (
     <>
@@ -74,16 +82,31 @@ export default async function SalesPage({
         }
       />
 
+      <section className="mb-4 grid gap-3 sm:grid-cols-3">
+        <SummaryTile
+          variant="sun"
+          label="Facturado"
+          value={<Money value={period.total} currency={currency} />}
+          hint={`${periodSales.length} venta(s) · ${formatDate(periodFrom)}–${formatDate(periodTo)}`}
+          icon={<ShoppingCart className="h-4 w-4" />}
+        />
+        <SummaryTile
+          variant="positive"
+          label="Cobrado"
+          value={<Money value={collected} currency={currency} />}
+          icon={<Wallet className="h-4 w-4" />}
+        />
+        <SummaryTile
+          label="Por cobrar"
+          value={<Money value={period.due} currency={currency} />}
+          icon={<Coins className="h-4 w-4" />}
+        />
+      </section>
+
       <Card>
         <CardHeader
           title="Documentos"
-          description={`Página actual: ${new Intl.NumberFormat('es-NI', {
-            style: 'currency',
-            currency,
-          }).format(totals.total / 100)} facturado · ${new Intl.NumberFormat('es-NI', {
-            style: 'currency',
-            currency,
-          }).format(totals.due / 100)} por cobrar`}
+          description="Historial de ventas. Usa el rango de fechas para acotar el período."
         />
 
         <FilterBar
