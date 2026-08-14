@@ -1,12 +1,31 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import type { LucideIcon } from 'lucide-react';
+import { Boxes, Receipt, ShoppingCart, Store, Truck } from 'lucide-react';
 
 import { NAV_SECTIONS } from '@/components/layout/nav-config';
 import { PageHeader } from '@/components/ui/primitives';
 import { requireSession } from '@/lib/auth/session';
+import { PERMISSIONS, type Permission } from '@/lib/rbac';
 
 export const metadata: Metadata = { title: 'Menú' };
 export const dynamic = 'force-dynamic';
+
+interface QuickAction {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  permission: Permission;
+}
+
+/** Acciones más frecuentes, mostradas como botones destacados al inicio. */
+const QUICK_ACTIONS: QuickAction[] = [
+  { label: 'Punto de venta', href: '/pos', icon: Store, permission: PERMISSIONS.SALES_CREATE },
+  { label: 'Nueva venta', href: '/ventas/nueva', icon: ShoppingCart, permission: PERMISSIONS.SALES_CREATE },
+  { label: 'Nuevo producto', href: '/inventario/nuevo', icon: Boxes, permission: PERMISSIONS.PRODUCTS_CREATE },
+  { label: 'Nueva compra', href: '/compras/nueva', icon: Truck, permission: PERMISSIONS.PURCHASES_CREATE },
+  { label: 'Registrar gasto', href: '/gastos', icon: Receipt, permission: PERMISSIONS.EXPENSES_CREATE },
+];
 
 /**
  * Lanzador tipo app: cuadrícula de accesos con ícono para cada módulo,
@@ -23,9 +42,34 @@ export default async function MenuPage() {
     ),
   })).filter((section) => section.items.length > 0);
 
+  const quickActions = QUICK_ACTIONS.filter((a) => session.permissions.includes(a.permission));
+
   return (
     <>
       <PageHeader title="Menú" description="Todos los módulos a un toque." />
+
+      {quickActions.length > 0 && (
+        <section className="mb-7">
+          <h2 className="mb-2.5 px-1 text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-subtle)]">
+            Accesos rápidos
+          </h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+            {quickActions.map((action) => {
+              const Icon = action.icon;
+              return (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className="flex items-center gap-3 rounded-2xl bg-[var(--color-brand-500)] p-3.5 text-white shadow-sm transition-colors hover:bg-[var(--color-brand-600)] active:bg-[var(--color-brand-700)]"
+                >
+                  <Icon className="h-5 w-5 shrink-0" />
+                  <span className="text-sm font-medium leading-tight">{action.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <div className="space-y-7">
         {sections.map((section) => (
