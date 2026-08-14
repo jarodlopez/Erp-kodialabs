@@ -39,7 +39,7 @@ const TONE_STYLES: Record<ToastTone, { icon: ReactNode; ring: string }> = {
   },
   info: {
     icon: <Info className="h-5 w-5 text-[var(--color-brand-500)]" />,
-    ring: 'ring-indigo-200',
+    ring: 'ring-[var(--color-brand-200)]',
   },
 };
 

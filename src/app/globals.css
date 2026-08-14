@@ -19,18 +19,21 @@
   --color-ink-muted: #475467;
   --color-ink-subtle: #667085;
 
-  --color-brand-50: #eef2ff;
-  --color-brand-100: #e0e7ff;
-  --color-brand-200: #c7d2fe;
-  --color-brand-300: #a5b4fc;
-  --color-brand-400: #818cf8;
-  --color-brand-500: #4f46e5;
-  --color-brand-600: #4338ca;
-  --color-brand-700: #3730a3;
+  /* Marca = carbón cálido (espresso). Es el ancla neutra: los acentos vivos
+     (amarillo/naranja) y los semánticos (verde/rojo) ya ocupan el resto, así
+     que el primario es oscuro y sobrio, como en el concepto de referencia. */
+  --color-brand-50: #f3f0ea;
+  --color-brand-100: #e7e2d9;
+  --color-brand-200: #d5cec1;
+  --color-brand-300: #b3a998;
+  --color-brand-400: #7d7364;
+  --color-brand-500: #3b352c;
+  --color-brand-600: #2c2720;
+  --color-brand-700: #211d17;
 
-  /* Acento secundario para gradientes vivos (violeta). */
-  --color-accent-500: #7c3aed;
-  --color-accent-600: #6d28d9;
+  /* Segundo tono del gradiente de marca (carbón más profundo, cálido). */
+  --color-accent-500: #2a251e;
+  --color-accent-600: #1d1a14;
 
   /* Acentos cálidos: amarillo eléctrico y naranja. Se usan con moderación,
      solo para destacar cifras y estados clave (no en módulos densos). */

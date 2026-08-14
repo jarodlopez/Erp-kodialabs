@@ -17,7 +17,8 @@ export interface SeriesPoint {
   values: number[];
 }
 
-const PALETTE = ['#4f46e5', '#12b76a', '#f79009', '#f04438', '#7a5af8', '#06aed4'];
+// Paleta categórica cálida, sin morados (naranja, verde, ámbar, rojo, azul, teal).
+const PALETTE = ['#e2661f', '#12b76a', '#f59e0b', '#f04438', '#0ea5e9', '#0d9488'];
 
 /** Gráfico de líneas con área, para series temporales. */
 export function LineChart({

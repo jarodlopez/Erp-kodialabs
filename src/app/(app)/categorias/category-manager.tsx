@@ -95,7 +95,7 @@ export function CategoryManager({
                 id="color"
                 name="color"
                 type="color"
-                defaultValue={category?.color ?? '#4f46e5'}
+                defaultValue={category?.color ?? '#e2661f'}
                 className="h-10 p-1"
               />
             </Field>
