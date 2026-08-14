@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { Store } from 'lucide-react';
 
-import { Card, PageHeader } from '@/components/ui/primitives';
+import { Card } from '@/components/ui/primitives';
 import { requirePermission } from '@/lib/auth/session';
 import { PERMISSIONS } from '@/lib/rbac';
 import { accountRepository } from '@/lib/repositories/finance';
@@ -20,11 +21,21 @@ export default async function PosPage() {
   ]);
 
   return (
-    <>
-      <PageHeader
-        title="Punto de venta"
-        description="Vende rápido de contado: busca o escanea productos y cobra. Descuenta inventario y registra el cobro automáticamente."
-      />
+    <div className="space-y-5">
+      <section className="warm-hero flex items-start gap-4 rounded-3xl p-5 shadow-sm sm:p-6">
+        <span className="brand-gradient hidden h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm sm:flex">
+          <Store className="h-6 w-6" />
+        </span>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-ink)] sm:text-3xl">
+            Punto de venta
+          </h1>
+          <p className="mt-1 max-w-2xl text-sm text-[var(--color-ink-muted)]">
+            Vende rápido de contado: busca o escanea productos y cobra. Descuenta inventario y
+            registra el cobro automáticamente.
+          </p>
+        </div>
+      </section>
 
       {accounts.length === 0 ? (
         <Card className="p-6">
@@ -41,6 +52,6 @@ export default async function PosPage() {
       ) : (
         <PosTerminal accounts={accounts} settings={settings} />
       )}
-    </>
+    </div>
   );
 }

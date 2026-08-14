@@ -438,36 +438,39 @@ export function PosTerminal({
             </div>
           </div>
 
-          <div className="space-y-2 border-t border-[var(--color-border)] p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-[var(--color-ink-subtle)]">Artículos</span>
-              <span className="text-sm tabular">
-                {lines.reduce((acc, l) => acc + l.quantity, 0)}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="font-semibold">Total</span>
-              <span className="text-2xl font-semibold tabular">
-                {formatMoney(totalMinor, currency)}
-              </span>
-            </div>
-            {change !== null && (
-              <div
-                className={
-                  change < 0
-                    ? 'flex items-center justify-between text-sm text-[var(--color-danger-700)]'
-                    : 'flex items-center justify-between text-sm text-[var(--color-positive-700)]'
-                }
-              >
-                <span>Cambio</span>
-                <span className="tabular">{formatMoney(toMinorUnits(change), currency)}</span>
+          <div className="border-t border-[var(--color-border)] p-4">
+            {/* Total protagonista sobre banda cálida */}
+            <div className="warm-hero rounded-2xl p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[var(--color-ink-subtle)]">Artículos</span>
+                <span className="text-sm tabular">
+                  {lines.reduce((acc, l) => acc + l.quantity, 0)}
+                </span>
               </div>
-            )}
+              <div className="mt-1 flex items-baseline justify-between">
+                <span className="text-sm font-semibold text-[var(--color-ink-muted)]">Total</span>
+                <span className="text-3xl font-semibold tracking-tight tabular text-[var(--color-ink)]">
+                  {formatMoney(totalMinor, currency)}
+                </span>
+              </div>
+              {change !== null && (
+                <div
+                  className={
+                    change < 0
+                      ? 'mt-1 flex items-center justify-between text-sm font-medium text-[var(--color-danger-700)]'
+                      : 'mt-1 flex items-center justify-between text-sm font-medium text-[var(--color-positive-700)]'
+                  }
+                >
+                  <span>Cambio</span>
+                  <span className="tabular">{formatMoney(toMinorUnits(change), currency)}</span>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="p-4 pt-0">
             <Button
-              className="w-full py-3 text-base"
+              className="brand-gradient w-full border-0 py-3 text-base"
               onClick={charge}
               loading={loading}
               disabled={lines.length === 0}
@@ -488,8 +491,8 @@ export function PosTerminal({
 
       {/* Barra de cobro fija en móvil (sobre la navegación inferior) */}
       {lines.length > 0 && (
-        <div className="fixed inset-x-0 bottom-16 z-30 border-t border-[var(--color-border)] bg-white p-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] lg:hidden">
-          <Button className="w-full py-3 text-base" onClick={charge} loading={loading}>
+        <div className="fixed inset-x-0 bottom-16 z-30 border-t border-[var(--color-border)] bg-white/95 p-3 shadow-[0_-8px_24px_-12px_rgba(16,24,40,0.25)] backdrop-blur lg:hidden">
+          <Button className="brand-gradient w-full border-0 py-3 text-base" onClick={charge} loading={loading}>
             Cobrar · {lines.reduce((a, l) => a + l.quantity, 0)} art. ·{' '}
             {formatMoney(totalMinor, currency)}
           </Button>

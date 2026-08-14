@@ -7,11 +7,13 @@
    ========================================================================== */
 
 @theme {
-  --color-canvas: #f6f7f9;
+  /* Base cálida sutil (crema de baja saturación) para una sensación más
+     acogedora sin cansar en lecturas largas de tablas y cifras. */
+  --color-canvas: #f4f1ea;
   --color-surface: #ffffff;
-  --color-surface-muted: #fbfcfd;
-  --color-border: #e4e7ec;
-  --color-border-strong: #d0d5dd;
+  --color-surface-muted: #faf7f1;
+  --color-border: #e7e2d8;
+  --color-border-strong: #d7d0c3;
 
   --color-ink: #101828;
   --color-ink-muted: #475467;
@@ -30,7 +32,25 @@
   --color-accent-500: #7c3aed;
   --color-accent-600: #6d28d9;
 
+  /* Acentos cálidos: amarillo eléctrico y naranja. Se usan con moderación,
+     solo para destacar cifras y estados clave (no en módulos densos). */
+  --color-sun-50: #fdfce9;
+  --color-sun-100: #fbf7c4;
+  --color-sun-300: #f0f36a;
+  --color-sun-400: #e7f23f;
+  --color-sun-500: #d0dc17;
+  --color-sun-ink: #4a4a10;
+
+  --color-ember-50: #fff4ec;
+  --color-ember-100: #ffe4d2;
+  --color-ember-400: #f3a06a;
+  --color-ember-500: #ef8544;
+  --color-ember-600: #dd6a26;
+  --color-ember-700: #b45309;
+
   --color-positive-50: #ecfdf3;
+  --color-positive-100: #d1fadf;
+  --color-positive-200: #a6f4c5;
   --color-positive-500: #12b76a;
   --color-positive-700: #027a48;
 
@@ -39,6 +59,7 @@
   --color-warning-700: #b54708;
 
   --color-danger-50: #fef3f2;
+  --color-danger-100: #fee4e2;
   --color-danger-500: #f04438;
   --color-danger-700: #b42318;
 
@@ -128,6 +149,27 @@
       var(--color-brand-500) 0%,
       var(--color-accent-500) 100%
     );
+  }
+
+  /* Panel cálido: superficie grande y redondeada con degradado crema, para
+     cabeceras de módulo y tiras de resumen (estilo app moderna). */
+  .warm-hero {
+    background-image:
+      radial-gradient(120% 130% at 100% 0%, rgba(231, 242, 63, 0.16) 0%, transparent 45%),
+      radial-gradient(120% 120% at 0% 100%, rgba(239, 133, 68, 0.12) 0%, transparent 50%),
+      linear-gradient(150deg, #fbf8f1 0%, var(--color-surface-muted) 100%);
+    border: 1px solid var(--color-border);
+  }
+
+  /* Acento amarillo eléctrico para la cifra protagonista de un resumen. */
+  .tile-sun {
+    background-image: linear-gradient(150deg, var(--color-sun-400) 0%, var(--color-sun-500) 130%);
+    color: var(--color-sun-ink);
+  }
+  /* Acento naranja para alertas suaves (stock bajo, pendientes). */
+  .tile-ember {
+    background-image: linear-gradient(150deg, var(--color-ember-500) 0%, var(--color-ember-400) 120%);
+    color: #fff;
   }
 
   /* Realimentación táctil para elementos pulsables en móvil. */
