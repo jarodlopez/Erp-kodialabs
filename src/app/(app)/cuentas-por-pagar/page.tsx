@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { Landmark } from 'lucide-react';
+import { AlertTriangle, Clock, Landmark } from 'lucide-react';
 
-import { DebtStatusBadge, KpiCard, Money } from '@/components/domain/indicators';
+import { DebtStatusBadge, Money, SummaryTile } from '@/components/domain/indicators';
 import { BarList } from '@/components/ui/charts';
 import { CursorPagination, FilterBar } from '@/components/ui/data-table';
 import {
@@ -63,21 +63,26 @@ export default async function PayablesPage({
       />
 
       <section className="grid gap-3 sm:grid-cols-3">
-        <KpiCard
+        <SummaryTile
+          variant="ember"
           label="Total por pagar"
           value={<Money value={aging.total} currency={currency} />}
           hint={`${outstanding.length} documento(s)`}
+          icon={<Landmark className="h-4 w-4" />}
         />
-        <KpiCard
+        <SummaryTile
+          variant="danger"
           label="Vencido"
           value={<Money value={overdueAmount} currency={currency} />}
-          tone="negative"
           hint={`${overdueCount} documento(s)`}
+          icon={<AlertTriangle className="h-4 w-4" />}
         />
-        <KpiCard
+        <SummaryTile
+          variant="positive"
           label="Por vencer"
           value={<Money value={upcoming?.amount ?? 0} currency={currency} />}
           hint={`${upcoming?.count ?? 0} documento(s)`}
+          icon={<Clock className="h-4 w-4" />}
         />
       </section>
 

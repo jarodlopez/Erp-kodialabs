@@ -1,9 +1,8 @@
 import Link from 'next/link';
-import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { AlertTriangle, Boxes, PackageX, Plus, Wallet } from 'lucide-react';
 
-import { Money, Qty, StockBadge } from '@/components/domain/indicators';
+import { Money, Qty, StockBadge, SummaryTile } from '@/components/domain/indicators';
 import { CursorPagination, FilterBar } from '@/components/ui/data-table';
 import {
   Badge,
@@ -18,7 +17,6 @@ import {
 } from '@/components/ui/primitives';
 import { requirePermission } from '@/lib/auth/session';
 import { formatMoney } from '@/lib/money';
-import { cn } from '@/lib/utils';
 import { PERMISSIONS } from '@/lib/rbac';
 import { categoryRepository, productRepository } from '@/lib/repositories/catalog';
 import { organizationRepository } from '@/lib/repositories/organization';
@@ -26,56 +24,6 @@ import { ScanProductButton } from './scan-button';
 
 export const metadata: Metadata = { title: 'Inventario' };
 export const dynamic = 'force-dynamic';
-
-/** Tarjeta de estadística del resumen; el acento cálido se reserva para aquí. */
-function SummaryTile({
-  label,
-  value,
-  hint,
-  icon,
-  variant = 'plain',
-}: {
-  label: string;
-  value: ReactNode;
-  hint?: string;
-  icon: ReactNode;
-  variant?: 'plain' | 'sun' | 'ember' | 'danger';
-}) {
-  const shell = {
-    plain: 'bg-white border border-[var(--color-border)]',
-    sun: 'tile-sun border-0',
-    ember: 'tile-ember border-0',
-    danger: 'bg-white border border-[var(--color-danger-100)]',
-  }[variant];
-
-  const chip = {
-    plain: 'bg-[var(--color-brand-50)] text-[var(--color-brand-600)]',
-    sun: 'bg-black/10 text-[var(--color-sun-ink)]',
-    ember: 'bg-white/25 text-white',
-    danger: 'bg-[var(--color-danger-50)] text-[var(--color-danger-700)]',
-  }[variant];
-
-  const labelClass =
-    variant === 'sun' || variant === 'ember' ? 'opacity-80' : 'text-[var(--color-ink-subtle)]';
-  const hintClass =
-    variant === 'sun' || variant === 'ember' ? 'opacity-75' : 'text-[var(--color-ink-subtle)]';
-  const valueClass = variant === 'danger' ? 'text-[var(--color-danger-700)]' : '';
-
-  return (
-    <div className={cn('rounded-2xl p-4 shadow-sm', shell)}>
-      <div className="flex items-start justify-between gap-2">
-        <p className={cn('text-xs font-medium sm:text-sm', labelClass)}>{label}</p>
-        <span className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-xl', chip)}>
-          {icon}
-        </span>
-      </div>
-      <p className={cn('mt-2 text-xl font-semibold leading-tight tracking-tight tabular sm:text-2xl', valueClass)}>
-        {value}
-      </p>
-      {hint && <p className={cn('mt-0.5 text-xs', hintClass)}>{hint}</p>}
-    </div>
-  );
-}
 
 export default async function InventoryPage({
   searchParams,

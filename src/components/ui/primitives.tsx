@@ -18,7 +18,7 @@ type ButtonSize = 'sm' | 'md' | 'lg' | 'icon';
 
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
   primary:
-    'bg-[var(--color-brand-500)] text-white hover:bg-[var(--color-brand-600)] shadow-sm disabled:bg-[var(--color-brand-200)]',
+    'brand-gradient text-white shadow-sm hover:brightness-[1.06] active:brightness-95',
   secondary:
     'bg-white text-[var(--color-ink)] border border-[var(--color-border-strong)] hover:bg-[var(--color-surface-muted)] shadow-sm',
   ghost: 'text-[var(--color-ink-muted)] hover:bg-[var(--color-canvas)] hover:text-[var(--color-ink)]',
@@ -337,14 +337,14 @@ export function PageHeader({
   breadcrumb?: ReactNode;
 }) {
   return (
-    <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <header className="warm-hero mb-5 flex flex-wrap items-start justify-between gap-4 rounded-3xl p-5 shadow-sm sm:p-6">
       <div className="min-w-0">
         {breadcrumb && <div className="mb-1 text-xs text-[var(--color-ink-subtle)]">{breadcrumb}</div>}
-        <h1 className="truncate text-2xl font-semibold tracking-tight text-[var(--color-ink)]">
+        <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-ink)] sm:text-3xl">
           {title}
         </h1>
         {description && (
-          <p className="mt-1 max-w-2xl text-sm text-[var(--color-ink-subtle)]">{description}</p>
+          <p className="mt-1 max-w-2xl text-sm text-[var(--color-ink-muted)]">{description}</p>
         )}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}

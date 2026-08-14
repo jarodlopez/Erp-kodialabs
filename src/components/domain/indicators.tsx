@@ -110,6 +110,73 @@ export function KpiCard({
   );
 }
 
+/**
+ * Tarjeta de estadística para las tiras de resumen. El acento cálido
+ * (amarillo/naranja) se reserva a estas tarjetas; los módulos densos siguen
+ * en tonos calmados.
+ */
+export function SummaryTile({
+  label,
+  value,
+  hint,
+  icon,
+  variant = 'plain',
+}: {
+  label: string;
+  value: ReactNode;
+  hint?: string;
+  icon?: ReactNode;
+  variant?: 'plain' | 'sun' | 'ember' | 'danger' | 'positive';
+}) {
+  const shell = {
+    plain: 'bg-white border border-[var(--color-border)]',
+    sun: 'tile-sun border-0',
+    ember: 'tile-ember border-0',
+    danger: 'bg-white border border-[var(--color-danger-100)]',
+    positive: 'bg-white border border-[var(--color-positive-100)]',
+  }[variant];
+
+  const chip = {
+    plain: 'bg-[var(--color-brand-50)] text-[var(--color-brand-600)]',
+    sun: 'bg-black/10 text-[var(--color-sun-ink)]',
+    ember: 'bg-white/25 text-white',
+    danger: 'bg-[var(--color-danger-50)] text-[var(--color-danger-700)]',
+    positive: 'bg-[var(--color-positive-50)] text-[var(--color-positive-700)]',
+  }[variant];
+
+  const warm = variant === 'sun' || variant === 'ember';
+  const labelClass = warm ? 'opacity-80' : 'text-[var(--color-ink-subtle)]';
+  const hintClass = warm ? 'opacity-75' : 'text-[var(--color-ink-subtle)]';
+  const valueClass =
+    variant === 'danger'
+      ? 'text-[var(--color-danger-700)]'
+      : variant === 'positive'
+        ? 'text-[var(--color-positive-700)]'
+        : '';
+
+  return (
+    <div className={cn('rounded-2xl p-4 shadow-sm', shell)}>
+      <div className="flex items-start justify-between gap-2">
+        <p className={cn('text-xs font-medium sm:text-sm', labelClass)}>{label}</p>
+        {icon && (
+          <span className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-xl', chip)}>
+            {icon}
+          </span>
+        )}
+      </div>
+      <p
+        className={cn(
+          'mt-2 text-xl font-semibold leading-tight tracking-tight tabular sm:text-2xl',
+          valueClass,
+        )}
+      >
+        {value}
+      </p>
+      {hint && <p className={cn('mt-0.5 text-xs', hintClass)}>{hint}</p>}
+    </div>
+  );
+}
+
 const SALE_STATUS_TONE: Record<SaleStatus, 'neutral' | 'brand' | 'positive' | 'warning' | 'danger'> = {
   DRAFT: 'neutral',
   CONFIRMED: 'brand',
