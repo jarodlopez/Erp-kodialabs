@@ -172,6 +172,14 @@
     color: #fff;
   }
 
+  /* Tarjeta de vidrio esmerilado sobre el fondo cálido (lanzador de módulos). */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 6px 16px -12px rgba(60, 50, 35, 0.5);
+  }
+
   /* Realimentación táctil para elementos pulsables en móvil. */
   .tap {
     transition: transform 0.12s ease;
