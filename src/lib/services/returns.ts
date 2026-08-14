@@ -226,6 +226,8 @@ export const returnService = {
           referenceNumber: document.number,
           reason: input.reason,
           warehouseId: sale.warehouseId,
+          // El reingreso vuelve a mezclar la mercadería a su costo de venta.
+          recalculateAverageCost: true,
         });
       }
 
@@ -492,6 +494,8 @@ export const returnService = {
           referenceNumber: document.number,
           reason: input.reason,
           warehouseId: purchase.warehouseId,
+          // Devolver al proveedor des-mezcla el costo de esa compra del promedio.
+          recalculateAverageCost: true,
         });
       }
 

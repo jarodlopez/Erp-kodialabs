@@ -13,6 +13,7 @@ import {
   toMinorUnits,
   toScaledQty,
   weightedAverageCost,
+  reverseWeightedAverageCost,
   MoneyError,
 } from '@/lib/money';
 
@@ -117,6 +118,37 @@ describe('costo promedio ponderado', () => {
   it('promedia proporcionalmente con lotes desiguales', () => {
     // 30 uds a C$10 + 10 uds a C$20 => C$12.50
     expect(weightedAverageCost(30000, 1000, 10000, 2000)).toBe(1250);
+  });
+});
+
+describe('reversa del costo promedio ponderado', () => {
+  it('deshace exactamente una compra que era el último movimiento', () => {
+    // 10 uds a C$100, entra compra de 10 uds a C$200 => 20 uds a C$150.
+    const blended = weightedAverageCost(10000, 10000, 10000, 20000);
+    expect(blended).toBe(15000);
+    // Al anular esa compra (quitar 10 uds al costo de compra C$200) vuelve a C$100.
+    expect(reverseWeightedAverageCost(20000, blended, 10000, 20000)).toBe(10000);
+  });
+
+  it('des-mezcla usando el costo de compra, no el promedio vigente', () => {
+    // 30 uds a C$10 + 10 uds a C$20 => C$12.50; al quitar las 10 uds a C$20
+    // (su costo de compra) el promedio regresa a C$10, no a otro valor.
+    const blended = weightedAverageCost(30000, 1000, 10000, 2000);
+    expect(blended).toBe(1250);
+    expect(reverseWeightedAverageCost(40000, blended, 10000, 2000)).toBe(1000);
+  });
+
+  it('mantiene el costo cuando no sale mercadería', () => {
+    expect(reverseWeightedAverageCost(10000, 12345, 0, 99999)).toBe(12345);
+  });
+
+  it('reinicia a cero cuando no queda existencia', () => {
+    expect(reverseWeightedAverageCost(10000, 15000, 10000, 20000)).toBe(0);
+  });
+
+  it('reinicia a cero si el valor restante fuese negativo por desfase', () => {
+    // El costo de compra a retirar supera el valor total en libros.
+    expect(reverseWeightedAverageCost(20000, 10000, 5000, 60000)).toBe(0);
   });
 });
 

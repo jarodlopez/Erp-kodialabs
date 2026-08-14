@@ -721,6 +721,8 @@ export const purchaseService = {
             referenceNumber: purchase.number,
             reason: `Anulación de compra: ${reason}`,
             warehouseId: purchase.warehouseId,
+            // Al anular una compra recibida se des-mezcla su costo del promedio.
+            recalculateAverageCost: true,
           });
         }
 

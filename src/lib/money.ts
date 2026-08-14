@@ -218,6 +218,48 @@ export function weightedAverageCost(
   return roundHalfUp((totalValue * QTY_SCALE) / totalQty);
 }
 
+/**
+ * Reversa del costo promedio ponderado: quita del inventario una entrada que
+ * antes se promedió (una compra que se anula o se devuelve al proveedor),
+ * devolviendo el costo promedio aproximado que había antes de esa entrada.
+ *
+ *   nuevoCosto = (stockActual * costoActual - cantidad * costoEntrada)
+ *                / (stockActual - cantidad)
+ *
+ * A diferencia de una salida por venta —que no altera el promedio—, aquí se
+ * retira el VALOR con el que la compra entró (su costo de compra), no al costo
+ * promedio vigente; así el promedio se "des-mezcla" en vez de quedar
+ * contaminado por una compra que ya no existe.
+ *
+ * Si los movimientos intercalados dejan el cálculo sin sentido (no queda
+ * existencia, o el valor restante sería negativo) el promedio se reinicia a 0.
+ * `currentStock` y `outgoingQty` son cantidades escaladas (QTY_SCALE);
+ * los costos son unitarios en centavos.
+ */
+export function reverseWeightedAverageCost(
+  currentStock: number,
+  currentAvgCost: number,
+  outgoingQty: number,
+  outgoingUnitCost: number,
+): number {
+  assertSafeInteger(currentStock, 'Stock actual');
+  assertSafeInteger(currentAvgCost, 'Costo promedio actual');
+  assertSafeInteger(outgoingQty, 'Cantidad saliente');
+  assertSafeInteger(outgoingUnitCost, 'Costo unitario saliente');
+
+  if (outgoingQty <= 0) return currentAvgCost;
+
+  const remainingQty = currentStock - outgoingQty;
+  if (remainingQty <= 0) return 0;
+
+  const currentValue = (currentStock * currentAvgCost) / QTY_SCALE;
+  const outgoingValue = (outgoingQty * outgoingUnitCost) / QTY_SCALE;
+  const remainingValue = currentValue - outgoingValue;
+  if (remainingValue <= 0) return 0;
+
+  return roundHalfUp((remainingValue * QTY_SCALE) / remainingQty);
+}
+
 /** Formatea un importe en centavos como texto legible. */
 export function formatMoney(
   minor: number,

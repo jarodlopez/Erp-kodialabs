@@ -817,6 +817,8 @@ export const saleService = {
             referenceNumber: sale.number,
             reason: `Anulación de venta: ${reason}`,
             warehouseId: sale.warehouseId,
+            // El reingreso vuelve a mezclar la mercadería a su costo de venta.
+            recalculateAverageCost: true,
           });
         }
 

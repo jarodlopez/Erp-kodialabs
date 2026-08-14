@@ -15,7 +15,12 @@ import { FieldValue, type Transaction } from 'firebase-admin/firestore';
 
 import { COLLECTIONS } from '@/lib/firebase/collections';
 import { errors } from '@/lib/errors';
-import { multiplyByQty, toScaledQty, weightedAverageCost } from '@/lib/money';
+import {
+  multiplyByQty,
+  reverseWeightedAverageCost,
+  toScaledQty,
+  weightedAverageCost,
+} from '@/lib/money';
 import { newDoc, refs } from '@/lib/repositories/refs';
 import { nowIso } from '@/lib/repositories/base';
 import type { ActorContext, Id, Quantity } from '@/types/common';
@@ -39,7 +44,13 @@ export interface StockMovementInput {
   warehouseId: Id;
   /** Permite dejar el stock en negativo (según configuración de la organización). */
   allowNegativeStock?: boolean;
-  /** Recalcula el costo promedio ponderado (solo entradas de compra). */
+  /**
+   * Recalcula el costo promedio ponderado con este movimiento.
+   * - En una ENTRADA (compra, devolución de venta) mezcla el costo entrante.
+   * - En una SALIDA (anulación/devolución de compra) des-mezcla el costo con
+   *   el que la compra había entrado, revirtiendo su efecto en el promedio.
+   * Las salidas por venta normales NO deben activarlo: no alteran el promedio.
+   */
   recalculateAverageCost?: boolean;
   /** Actualiza también `product.cost` (último costo de compra). */
   updateLastCost?: boolean;
@@ -78,11 +89,18 @@ export function writeStockMovement(
     );
   }
 
-  // Costo promedio ponderado: solo se recalcula al recibir mercadería.
-  const newAverageCost =
-    input.recalculateAverageCost && inbound
-      ? weightedAverageCost(previousStock, product.averageCost ?? 0, quantity, input.unitCost)
-      : product.averageCost ?? 0;
+  // Costo promedio ponderado. Se recalcula solo cuando el movimiento lo pide:
+  // una entrada mezcla el costo entrante; una salida de reversión (anulación o
+  // devolución de compra) des-mezcla el costo con el que la compra entró. El
+  // resto de salidas (ventas, ajustes de salida, transferencias) lo dejan
+  // intacto.
+  const currentAverageCost = product.averageCost ?? 0;
+  let newAverageCost = currentAverageCost;
+  if (input.recalculateAverageCost) {
+    newAverageCost = inbound
+      ? weightedAverageCost(previousStock, currentAverageCost, quantity, input.unitCost)
+      : reverseWeightedAverageCost(previousStock, currentAverageCost, quantity, input.unitCost);
+  }
 
   const minimum = product.minimumStock ?? 0;
   const productUpdate: Record<string, unknown> = {

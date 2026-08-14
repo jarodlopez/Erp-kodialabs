@@ -191,6 +191,42 @@ describe('anulación de compra', () => {
     expect(payables[0].status).toBe('CANCELLED');
   });
 
+  it('restablece el costo promedio al anular el segundo lote', async () => {
+    // Lote 1: 10 uds a C$100 => promedio C$100.
+    await purchaseService.createPurchase(
+      ctx,
+      {
+        supplierId: ids.supplierId,
+        date: today,
+        type: 'CREDIT',
+        items: [{ productId: ids.productId, quantity: 10, unitCost: 100 }],
+      },
+      { receive: true, idempotencyKey: 'wac-lote-1' },
+    );
+
+    // Lote 2: 10 uds a C$200 => promedio C$150.
+    const lote2 = await purchaseService.createPurchase(
+      ctx,
+      {
+        supplierId: ids.supplierId,
+        date: today,
+        type: 'CREDIT',
+        items: [{ productId: ids.productId, quantity: 10, unitCost: 200 }],
+      },
+      { receive: true, idempotencyKey: 'wac-lote-2' },
+    );
+
+    let product = fakeDb.all<Product>(COLLECTIONS.PRODUCTS)[0];
+    expect(product.averageCost).toBe(15000);
+
+    // Al anular el lote 2 el promedio debe volver a C$100 (antes quedaba en C$150).
+    await purchaseService.cancelPurchase(ctx, lote2.purchaseId, 'Lote equivocado');
+
+    product = fakeDb.all<Product>(COLLECTIONS.PRODUCTS)[0];
+    expect(product.stock).toBe(10000);
+    expect(product.averageCost).toBe(10000);
+  });
+
   it('no permite anular si el inventario ya se vendió', async () => {
     const purchase = await purchaseService.createPurchase(
       ctx,
