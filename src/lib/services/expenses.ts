@@ -448,6 +448,19 @@ export const expenseService = {
   },
 };
 
+/**
+ * Suma meses a una fecha sin desbordar el mes. `setUTCMonth` convierte el 31 de
+ * enero en el 3 de marzo; aquí se fija al último día del mes destino (28 de
+ * febrero) para que un gasto del día 31 no salte de mes.
+ */
+function addUtcMonths(date: Date, months: number): void {
+  const day = date.getUTCDate();
+  date.setUTCDate(1);
+  date.setUTCMonth(date.getUTCMonth() + months);
+  const lastDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
+  date.setUTCDate(Math.min(day, lastDay));
+}
+
 /** Calcula la siguiente fecha de un gasto recurrente. */
 export function nextRecurringDate(current: string, frequency: RecurringExpense['frequency']): string {
   const date = new Date(current);
@@ -456,10 +469,10 @@ export function nextRecurringDate(current: string, frequency: RecurringExpense['
       date.setUTCDate(date.getUTCDate() + 7);
       break;
     case 'MONTHLY':
-      date.setUTCMonth(date.getUTCMonth() + 1);
+      addUtcMonths(date, 1);
       break;
     case 'QUARTERLY':
-      date.setUTCMonth(date.getUTCMonth() + 3);
+      addUtcMonths(date, 3);
       break;
     case 'YEARLY':
       date.setUTCFullYear(date.getUTCFullYear() + 1);

@@ -65,10 +65,16 @@ export async function buildDashboard(
   organizationId: Id,
   range: ReportRange,
 ): Promise<DashboardData> {
+  // Se leen ventas y gastos del rango una sola vez y se reutilizan en las
+  // vistas derivadas (serie diaria, reporte por producto y por categoría) para
+  // no releer las mismas colecciones cuatro veces.
+  const [sales, expenses] = await Promise.all([
+    saleRepository.inRange(organizationId, range.from, range.to, ACTIVE_SALE_STATUSES),
+    expenseRepository.inRange(organizationId, range.from, range.to),
+  ]);
+
   const [
-    sales,
     purchases,
-    expenses,
     accounts,
     receivables,
     payables,
@@ -82,9 +88,7 @@ export async function buildDashboard(
     suppliers,
     anyPurchase,
   ] = await Promise.all([
-    saleRepository.inRange(organizationId, range.from, range.to, ACTIVE_SALE_STATUSES),
     purchaseRepository.inRange(organizationId, range.from, range.to, ACTIVE_PURCHASE_STATUSES),
-    expenseRepository.inRange(organizationId, range.from, range.to),
     accountRepository.list(organizationId),
     receivableRepository.outstanding(organizationId),
     payableRepository.outstanding(organizationId),
@@ -92,9 +96,9 @@ export async function buildDashboard(
     productRepository.allActive(organizationId),
     customerRepository.count(organizationId),
     saleRepository.recent(organizationId, 6),
-    buildDailySeries(organizationId, range),
-    buildSalesReport(organizationId, range, 'product'),
-    buildSalesReport(organizationId, range, 'category'),
+    buildDailySeries(organizationId, range, { sales, expenses }),
+    buildSalesReport(organizationId, range, 'product', sales),
+    buildSalesReport(organizationId, range, 'category', sales),
     supplierRepository.count(organizationId),
     purchaseRepository.list(organizationId, {}, { limit: 1 }),
   ]);

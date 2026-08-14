@@ -159,18 +159,21 @@ export interface SalesReportRow {
 
 export type SalesGrouping = 'day' | 'product' | 'category' | 'customer' | 'seller';
 
-/** Reporte de ventas agrupado según la dimensión solicitada. */
+/**
+ * Reporte de ventas agrupado según la dimensión solicitada.
+ *
+ * `preloadedSales` permite reutilizar ventas ya leídas (p. ej. el dashboard, que
+ * necesita el mismo rango para varias vistas) y evitar releer la colección.
+ */
 export async function buildSalesReport(
   organizationId: Id,
   range: ReportRange,
   grouping: SalesGrouping,
+  preloadedSales?: Sale[],
 ): Promise<SalesReportRow[]> {
-  const sales = await saleRepository.inRange(
-    organizationId,
-    range.from,
-    range.to,
-    ACTIVE_SALE_STATUSES,
-  );
+  const sales =
+    preloadedSales ??
+    (await saleRepository.inRange(organizationId, range.from, range.to, ACTIVE_SALE_STATUSES));
 
   const rows = new Map<string, SalesReportRow>();
 
@@ -435,10 +438,12 @@ export async function buildAgingReport(
 export async function buildDailySeries(
   organizationId: Id,
   range: ReportRange,
+  preloaded?: { sales?: Sale[]; expenses?: Awaited<ReturnType<typeof expenseRepository.inRange>> },
 ): Promise<{ date: string; sales: Money; expenses: Money; profit: Money }[]> {
   const [sales, expenses] = await Promise.all([
-    saleRepository.inRange(organizationId, range.from, range.to, ACTIVE_SALE_STATUSES),
-    expenseRepository.inRange(organizationId, range.from, range.to),
+    preloaded?.sales ??
+      saleRepository.inRange(organizationId, range.from, range.to, ACTIVE_SALE_STATUSES),
+    preloaded?.expenses ?? expenseRepository.inRange(organizationId, range.from, range.to),
   ]);
 
   const series = new Map<string, { date: string; sales: Money; expenses: Money; profit: Money }>();
@@ -454,8 +459,11 @@ export async function buildDailySeries(
     const key = sale.date.slice(0, 10);
     const bucket = series.get(key);
     if (!bucket) continue;
-    bucket.sales += sale.subtotal;
-    bucket.profit += sale.subtotal - sale.costOfGoodsSold;
+    // Netos de devoluciones, para que la serie coincida con los KPIs y el
+    // estado de resultados.
+    const net = saleNetTotals(sale);
+    bucket.sales += net.revenue;
+    bucket.profit += net.revenue - net.cost;
   }
 
   for (const expense of expenses) {

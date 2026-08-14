@@ -169,9 +169,9 @@ export const returnService = {
           );
         }
       }
-      if (input.refundMode === 'CREDIT_NOTE' && (!receivable || receivable.remainingAmount <= 0)) {
+      if (input.refundMode === 'CREDIT_NOTE' && (!receivable || receivable.remainingAmount < total)) {
         throw errors.validation(
-          'Esta venta no tiene saldo pendiente: la devolución debe reembolsarse en efectivo.',
+          'El saldo pendiente de la venta no cubre el total a devolver. Usa reembolso en efectivo para la parte ya cobrada.',
         );
       }
 
@@ -416,6 +416,19 @@ export const returnService = {
       const tax = returnItems.reduce((acc, i) => acc + i.taxAmount, 0);
       const total = subtotal + tax;
       const totalCost = returnItems.reduce((acc, i) => acc + i.totalCost, 0);
+
+      // Coherencia del reembolso: no se puede recibir en efectivo más de lo
+      // que se pagó al proveedor, ni acreditar más de lo que aún se le debe.
+      if (input.refundMode === 'CASH_REFUND' && purchase.paidAmount < total) {
+        throw errors.validation(
+          'No se puede recibir en efectivo un reembolso mayor a lo pagado al proveedor. Usa nota de crédito para la parte no pagada.',
+        );
+      }
+      if (input.refundMode === 'CREDIT_NOTE' && (!payable || payable.remainingAmount < total)) {
+        throw errors.validation(
+          'El saldo por pagar no cubre el total a devolver. Usa reembolso en efectivo para la parte ya pagada al proveedor.',
+        );
+      }
 
       // Validación de inventario disponible para devolver
       for (let i = 0; i < lines.length; i += 1) {

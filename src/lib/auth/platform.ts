@@ -33,5 +33,13 @@ export async function requireSuperAdmin(): Promise<SessionUser> {
   if (!isSuperAdminEmail(session.email)) {
     throw errors.forbidden('Acceso restringido a la administración de la plataforma.');
   }
+  // Endurecimiento: el correo del súper-admin debe estar verificado para evitar
+  // que una cuenta con un correo aún no confirmado alcance los controles de la
+  // plataforma (planes, precios, comercios).
+  if (!session.emailVerified) {
+    throw errors.forbidden(
+      'Verifica tu correo antes de acceder a la administración de la plataforma.',
+    );
+  }
   return session;
 }
