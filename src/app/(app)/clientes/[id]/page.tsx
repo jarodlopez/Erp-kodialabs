@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
-import { DebtStatusBadge, KpiCard, Money, SaleStatusBadge } from '@/components/domain/indicators';
+import { DebtStatusBadge, Money, SaleStatusBadge, SummaryTile } from '@/components/domain/indicators';
 import {
   Badge,
   Card,
@@ -67,16 +67,17 @@ export default async function CustomerDetailPage({
       />
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard
+        <SummaryTile
           label="Total comprado"
           value={<Money value={customer.stats.totalAmount} currency={currency} />}
+          variant="sun"
         />
-        <KpiCard label="Compras" value={customer.stats.documentCount} />
-        <KpiCard label="Ticket promedio" value={<Money value={ticket} currency={currency} />} />
-        <KpiCard
+        <SummaryTile label="Compras" value={customer.stats.documentCount} variant="plain" />
+        <SummaryTile label="Ticket promedio" value={<Money value={ticket} currency={currency} />} variant="plain" />
+        <SummaryTile
           label="Saldo pendiente"
           value={<Money value={customer.stats.outstandingBalance} currency={currency} />}
-          tone={customer.stats.outstandingBalance > 0 ? 'negative' : 'positive'}
+          variant={customer.stats.outstandingBalance > 0 ? 'ember' : 'positive'}
           hint={`Límite: ${new Intl.NumberFormat('es-NI', {
             style: 'currency',
             currency,

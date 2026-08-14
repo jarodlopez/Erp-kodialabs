@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { KpiCard, Money } from '@/components/domain/indicators';
+import { Money, SummaryTile } from '@/components/domain/indicators';
 import { BarList } from '@/components/ui/charts';
 import { DateRangeFilter } from '@/components/ui/data-table';
 import {
@@ -108,18 +108,23 @@ async function SalesReports({ organizationId, range, currency }: SectionProps) {
   return (
     <>
       <section className="grid gap-3 sm:grid-cols-3">
-        <KpiCard label="Ventas netas" value={<Money value={totalRevenue} currency={currency} />} />
-        <KpiCard
+        <SummaryTile
+          label="Ventas netas"
+          value={<Money value={totalRevenue} currency={currency} />}
+          variant="sun"
+        />
+        <SummaryTile
           label="Utilidad bruta"
           value={<Money value={totalProfit} currency={currency} />}
-          tone={totalProfit >= 0 ? 'positive' : 'negative'}
+          variant={totalProfit >= 0 ? 'positive' : 'danger'}
         />
-        <KpiCard
+        <SummaryTile
           label="Ticket promedio"
           value={
             <Money value={documents > 0 ? Math.round(totalRevenue / documents) : 0} currency={currency} />
           }
           hint={`${documents} documento(s)`}
+          variant="plain"
         />
       </section>
 
@@ -325,16 +330,18 @@ async function InventoryReports({ organizationId, range, currency }: SectionProp
   return (
     <>
       <section className="grid gap-3 sm:grid-cols-3">
-        <KpiCard
+        <SummaryTile
           label="Valor del inventario"
           value={<Money value={valuation.totalCost} currency={currency} />}
           hint="Al costo promedio ponderado"
+          variant="sun"
         />
-        <KpiCard
+        <SummaryTile
           label="Valor potencial de venta"
           value={<Money value={valuation.totalPotentialRevenue} currency={currency} />}
+          variant="plain"
         />
-        <KpiCard label="Productos sin movimiento" value={stale.length} tone="negative" />
+        <SummaryTile label="Productos sin movimiento" value={stale.length} variant="danger" />
       </section>
 
       <Card className="mt-4">
@@ -415,19 +422,25 @@ async function FinanceReports({ organizationId, range, currency }: SectionProps)
   return (
     <>
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="Ingresos" value={<Money value={income.revenue} currency={currency} />} />
-        <KpiCard
+        <SummaryTile
+          label="Ingresos"
+          value={<Money value={income.revenue} currency={currency} />}
+          variant="sun"
+        />
+        <SummaryTile
           label="Costo de ventas"
           value={<Money value={income.costOfGoodsSold} currency={currency} />}
+          variant="ember"
         />
-        <KpiCard
+        <SummaryTile
           label="Gastos operativos"
           value={<Money value={income.operatingExpenses} currency={currency} />}
+          variant="plain"
         />
-        <KpiCard
+        <SummaryTile
           label="Utilidad neta"
           value={<Money value={income.netProfit} currency={currency} />}
-          tone={income.netProfit >= 0 ? 'positive' : 'negative'}
+          variant={income.netProfit >= 0 ? 'positive' : 'danger'}
         />
       </section>
 

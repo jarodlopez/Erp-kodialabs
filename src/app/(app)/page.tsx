@@ -11,7 +11,7 @@ import {
   Wallet,
 } from 'lucide-react';
 
-import { KpiCard, Money, SaleStatusBadge } from '@/components/domain/indicators';
+import { Money, SaleStatusBadge, SummaryTile } from '@/components/domain/indicators';
 import { BarList, DonutChart, LineChart } from '@/components/ui/charts';
 import {
   Badge,
@@ -78,50 +78,52 @@ export default async function DashboardPage({
       />
 
       <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <KpiCard
+        <SummaryTile
+          variant="sun"
           label="Ventas del periodo"
           value={<Money value={kpis.sales} currency={currency} />}
           hint={`${kpis.salesCount} venta(s)`}
           icon={<ShoppingCart className="h-4 w-4" />}
         />
-        <KpiCard
+        <SummaryTile
           label="Utilidad bruta"
           value={<Money value={kpis.grossProfit} currency={currency} />}
-          tone={kpis.grossProfit >= 0 ? 'positive' : 'negative'}
+          variant={kpis.grossProfit >= 0 ? 'positive' : 'danger'}
           hint="Ventas netas menos costo de ventas"
           icon={<TrendingUp className="h-4 w-4" />}
         />
-        <KpiCard
+        <SummaryTile
+          variant="ember"
           label="Gastos"
           value={<Money value={kpis.expenses} currency={currency} />}
           icon={<Receipt className="h-4 w-4" />}
         />
-        <KpiCard
+        <SummaryTile
           label="Utilidad neta"
           value={<Money value={kpis.netProfit} currency={currency} />}
-          tone={kpis.netProfit >= 0 ? 'positive' : 'negative'}
+          variant={kpis.netProfit >= 0 ? 'positive' : 'danger'}
           hint="Después de gastos operativos"
           icon={<TrendingUp className="h-4 w-4" />}
         />
       </section>
 
       <section className="mt-3 grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <KpiCard
+        <SummaryTile
           label="Caja"
           value={<Money value={kpis.cash} currency={currency} />}
           icon={<Wallet className="h-4 w-4" />}
         />
-        <KpiCard
+        <SummaryTile
           label="Bancos y otros"
           value={<Money value={kpis.bank} currency={currency} />}
           icon={<Landmark className="h-4 w-4" />}
         />
-        <KpiCard
+        <SummaryTile
           label="Cuentas por cobrar"
           value={<Money value={kpis.receivables} currency={currency} />}
           icon={<Coins className="h-4 w-4" />}
         />
-        <KpiCard
+        <SummaryTile
           label="Cuentas por pagar"
           value={<Money value={kpis.payables} currency={currency} />}
           icon={<Landmark className="h-4 w-4" />}

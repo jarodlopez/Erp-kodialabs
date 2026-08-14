@@ -4,9 +4,9 @@ import type { Metadata } from 'next';
 
 import {
   DebtStatusBadge,
-  KpiCard,
   Money,
   PurchaseStatusBadge,
+  SummaryTile,
 } from '@/components/domain/indicators';
 import {
   Badge,
@@ -84,17 +84,22 @@ export default async function SupplierDetailPage({
       />
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard
+        <SummaryTile
           label="Total comprado"
           value={<Money value={supplier.stats.totalAmount} currency={currency} />}
+          variant="sun"
         />
-        <KpiCard label="Compras" value={supplier.stats.documentCount} />
-        <KpiCard
+        <SummaryTile label="Compras" value={supplier.stats.documentCount} variant="plain" />
+        <SummaryTile
           label="Saldo por pagar"
           value={<Money value={supplier.stats.outstandingBalance} currency={currency} />}
-          tone={supplier.stats.outstandingBalance > 0 ? 'negative' : 'positive'}
+          variant="ember"
         />
-        <KpiCard label="Productos suministrados" value={suppliedProducts.size} />
+        <SummaryTile
+          label="Productos suministrados"
+          value={suppliedProducts.size}
+          variant="plain"
+        />
       </section>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-3">

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Wallet } from 'lucide-react';
 
-import { KpiCard, Money } from '@/components/domain/indicators';
+import { Money, SummaryTile } from '@/components/domain/indicators';
 import { DonutChart } from '@/components/ui/charts';
 import {
   Badge,
@@ -68,12 +68,12 @@ export default async function TreasuryPage({
       />
 
       <section className="grid gap-3 sm:grid-cols-3">
-        <KpiCard label="Efectivo en caja" value={<Money value={cash} currency={currency} />} />
-        <KpiCard label="Bancos y otros" value={<Money value={bank} currency={currency} />} />
-        <KpiCard
+        <SummaryTile label="Efectivo en caja" value={<Money value={cash} currency={currency} />} variant="plain" />
+        <SummaryTile label="Bancos y otros" value={<Money value={bank} currency={currency} />} variant="plain" />
+        <SummaryTile
           label="Disponible total"
           value={<Money value={cash + bank} currency={currency} />}
-          tone="brand"
+          variant="sun"
         />
       </section>
 

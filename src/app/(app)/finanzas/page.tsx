@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { KpiCard, Money } from '@/components/domain/indicators';
+import { Money, SummaryTile } from '@/components/domain/indicators';
 import { BarList, LineChart } from '@/components/ui/charts';
 import { CursorPagination, DateRangeFilter, FilterBar } from '@/components/ui/data-table';
 import {
@@ -72,21 +72,26 @@ export default async function FinancePage({
       </Card>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="Ingresos netos" value={<Money value={income.revenue} currency={currency} />} />
-        <KpiCard
+        <SummaryTile
+          label="Ingresos netos"
+          value={<Money value={income.revenue} currency={currency} />}
+          variant="sun"
+        />
+        <SummaryTile
           label="Costo de ventas"
           value={<Money value={income.costOfGoodsSold} currency={currency} />}
+          variant="ember"
         />
-        <KpiCard
+        <SummaryTile
           label="Utilidad bruta"
           value={<Money value={income.grossProfit} currency={currency} />}
-          tone={income.grossProfit >= 0 ? 'positive' : 'negative'}
+          variant={income.grossProfit >= 0 ? 'positive' : 'danger'}
           hint={`Margen ${formatRate(income.grossMarginRate)}`}
         />
-        <KpiCard
+        <SummaryTile
           label="Utilidad neta"
           value={<Money value={income.netProfit} currency={currency} />}
-          tone={income.netProfit >= 0 ? 'positive' : 'negative'}
+          variant={income.netProfit >= 0 ? 'positive' : 'danger'}
           hint={`Margen ${formatRate(income.netMarginRate)}`}
         />
       </section>
