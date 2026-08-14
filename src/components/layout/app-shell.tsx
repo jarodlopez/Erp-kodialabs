@@ -7,9 +7,9 @@ import {
   Boxes,
   Building2,
   Home,
+  LayoutGrid,
   LogOut,
   Menu,
-  MoreHorizontal,
   ShoppingCart,
   Store,
   X,
@@ -212,14 +212,19 @@ export function AppShell({
             </Link>
           );
         })}
-        <button
-          type="button"
-          onClick={() => setMobileOpen(true)}
-          className="flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium text-[var(--color-ink-muted)]"
+        <Link
+          href="/menu"
+          className={cn(
+            'flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors',
+            pathname.startsWith('/menu')
+              ? 'text-[var(--color-brand-600)]'
+              : 'text-[var(--color-ink-muted)]',
+          )}
+          aria-current={pathname.startsWith('/menu') ? 'page' : undefined}
         >
-          <MoreHorizontal className="h-5 w-5" />
-          Más
-        </button>
+          <LayoutGrid className="h-5 w-5" />
+          Menú
+        </Link>
       </nav>
     </div>
   );
