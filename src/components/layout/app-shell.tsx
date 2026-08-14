@@ -63,6 +63,12 @@ export function AppShell({
   const mobileTabs = tabCandidates
     .filter((t) => user.permissions.includes(t.permission))
     .slice(0, 4);
+  // La barra inferior coloca el botón de Menú (lanzador) elevado en el centro,
+  // con las pestañas repartidas a los lados.
+  const half = Math.ceil(mobileTabs.length / 2);
+  const leftTabs = mobileTabs.slice(0, half);
+  const rightTabs = mobileTabs.slice(half);
+  const menuActive = pathname.startsWith('/menu');
 
   const nav = (
     <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
@@ -129,7 +135,7 @@ export function AppShell({
 
   const brand = (
     <div className="flex h-14 items-center gap-2.5 border-b border-[var(--color-border)] px-5">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-brand-500)] text-white">
+      <div className="brand-gradient flex h-8 w-8 items-center justify-center rounded-lg text-white shadow-sm">
         <Store className="h-4 w-4" />
       </div>
       <div className="min-w-0">
@@ -192,41 +198,75 @@ export function AppShell({
         <main className="min-w-0 flex-1 px-4 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-8">{children}</main>
       </div>
 
-      {/* Barra de navegación inferior (solo móvil) */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-[var(--color-border)] bg-white pb-[env(safe-area-inset-bottom)] lg:hidden">
-        {mobileTabs.map((tab) => {
-          const active = isActive(tab.href);
-          const Icon = tab.icon;
-          return (
-            <Link
-              key={tab.href}
-              href={tab.href}
+      {/* Barra de navegación inferior (solo móvil) con Menú elevado al centro */}
+      <nav className="fixed inset-x-0 bottom-0 z-30 lg:hidden">
+        <div className="flex items-end justify-around border-t border-[var(--color-border)] bg-white/90 px-1 pb-[max(0.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-10px_30px_-18px_rgba(16,24,40,0.35)] backdrop-blur">
+          {leftTabs.map((tab) => (
+            <BottomTab key={tab.href} tab={tab} active={isActive(tab.href)} />
+          ))}
+
+          {/* Botón central elevado: lanzador del menú completo */}
+          <Link
+            href="/menu"
+            aria-label="Menú"
+            aria-current={menuActive ? 'page' : undefined}
+            className="flex flex-1 flex-col items-center gap-1 py-1 text-[10px] font-medium"
+          >
+            <span
               className={cn(
-                'flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors',
-                active ? 'text-[var(--color-brand-600)]' : 'text-[var(--color-ink-muted)]',
+                'tap -mt-8 flex h-14 w-14 items-center justify-center rounded-full text-white ring-4 ring-white',
+                'brand-gradient shadow-[0_8px_20px_-6px_rgba(79,70,229,0.6)]',
+                menuActive && 'ring-[var(--color-brand-100)]',
               )}
-              aria-current={active ? 'page' : undefined}
             >
-              <Icon className="h-5 w-5" />
-              {tab.label}
-            </Link>
-          );
-        })}
-        <Link
-          href="/menu"
-          className={cn(
-            'flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors',
-            pathname.startsWith('/menu')
-              ? 'text-[var(--color-brand-600)]'
-              : 'text-[var(--color-ink-muted)]',
-          )}
-          aria-current={pathname.startsWith('/menu') ? 'page' : undefined}
-        >
-          <LayoutGrid className="h-5 w-5" />
-          Menú
-        </Link>
+              <LayoutGrid className="h-6 w-6" />
+            </span>
+            <span
+              className={cn(
+                menuActive ? 'text-[var(--color-brand-600)]' : 'text-[var(--color-ink-muted)]',
+              )}
+            >
+              Menú
+            </span>
+          </Link>
+
+          {rightTabs.map((tab) => (
+            <BottomTab key={tab.href} tab={tab} active={isActive(tab.href)} />
+          ))}
+        </div>
       </nav>
     </div>
+  );
+}
+
+/** Pestaña de la barra inferior, con indicador superior cuando está activa. */
+function BottomTab({
+  tab,
+  active,
+}: {
+  tab: { label: string; href: string; icon: typeof Home };
+  active: boolean;
+}) {
+  const Icon = tab.icon;
+  return (
+    <Link
+      href={tab.href}
+      aria-current={active ? 'page' : undefined}
+      className={cn(
+        'tap relative flex flex-1 flex-col items-center gap-0.5 py-1.5 text-[10px] font-medium transition-colors',
+        active ? 'text-[var(--color-brand-600)]' : 'text-[var(--color-ink-muted)]',
+      )}
+    >
+      <span
+        className={cn(
+          'absolute -top-0.5 h-1 w-6 rounded-full bg-[var(--color-brand-500)] transition-opacity',
+          active ? 'opacity-100' : 'opacity-0',
+        )}
+        aria-hidden="true"
+      />
+      <Icon className="h-5 w-5" />
+      {tab.label}
+    </Link>
   );
 }
 

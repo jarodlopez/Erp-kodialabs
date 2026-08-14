@@ -62,11 +62,28 @@ export function KpiCard({
     brand: 'text-[var(--color-brand-700)]',
   }[tone];
 
+  // Chip del icono coloreado según el tono, para dar identidad visual a cada KPI.
+  const chipClass = {
+    neutral: 'bg-[var(--color-brand-50)] text-[var(--color-brand-600)]',
+    positive: 'bg-[var(--color-positive-50)] text-[var(--color-positive-700)]',
+    negative: 'bg-[var(--color-danger-50)] text-[var(--color-danger-700)]',
+    brand: 'bg-[var(--color-brand-50)] text-[var(--color-brand-600)]',
+  }[tone];
+
   return (
-    <Card className="p-4">
+    <Card className="card-interactive p-4">
       <div className="flex items-start justify-between gap-2">
         <p className="text-xs text-[var(--color-ink-subtle)] sm:text-sm">{label}</p>
-        {icon && <span className="shrink-0 text-[var(--color-ink-subtle)]">{icon}</span>}
+        {icon && (
+          <span
+            className={cn(
+              'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl',
+              chipClass,
+            )}
+          >
+            {icon}
+          </span>
+        )}
       </div>
       <p className={cn('mt-2 text-xl font-semibold leading-tight tracking-tight tabular sm:text-2xl', toneClass)}>
         {value}

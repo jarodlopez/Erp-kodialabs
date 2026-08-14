@@ -60,9 +60,11 @@ export default async function MenuPage() {
                 <Link
                   key={action.href}
                   href={action.href}
-                  className="flex items-center gap-3 rounded-2xl bg-[var(--color-brand-500)] p-3.5 text-white shadow-sm transition-colors hover:bg-[var(--color-brand-600)] active:bg-[var(--color-brand-700)]"
+                  className="tap brand-gradient flex items-center gap-3 rounded-2xl p-3.5 text-white shadow-[0_8px_20px_-8px_rgba(79,70,229,0.5)]"
                 >
-                  <Icon className="h-5 w-5 shrink-0" />
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/20">
+                    <Icon className="h-5 w-5" />
+                  </span>
                   <span className="text-sm font-medium leading-tight">{action.label}</span>
                 </Link>
               );
@@ -86,7 +88,7 @@ export default async function MenuPage() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="flex flex-col items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-white p-3 text-center shadow-sm transition-colors hover:border-[var(--color-brand-200)] hover:bg-[var(--color-brand-50)] active:bg-[var(--color-brand-100)]"
+                    className="card card-interactive tap flex flex-col items-center gap-2 p-3 text-center"
                   >
                     <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--color-brand-50)] text-[var(--color-brand-600)]">
                       <Icon className="h-6 w-6" />
