@@ -9,7 +9,7 @@ import { getActorContext, getOperationContext } from '@/lib/server-context';
 import { catalogService } from '@/lib/services/catalog';
 import { assertCanAddProduct, productsRemaining } from '@/lib/services/limits';
 import { parseOrThrow } from '@/lib/validation/parse';
-import { categorySchema, productSchema } from '@/lib/validation/schemas';
+import { categorySchema, posQuickProductSchema, productSchema } from '@/lib/validation/schemas';
 import type { Product, ProductUnit } from '@/types/catalog';
 
 export async function createCategoryAction(input: unknown): Promise<ActionResult<{ id: string }>> {
@@ -52,6 +52,48 @@ export async function createProductAction(input: unknown): Promise<ActionResult<
     return ok({ id });
   } catch (error) {
     logError('catalog.createProduct', error);
+    return fail(error);
+  }
+}
+
+/**
+ * Alta rápida de producto desde el POS: crea el producto con lo mínimo y
+ * devuelve el producto COMPLETO para agregarlo al carrito sin recargar. El SKU
+ * se genera aquí (no lo envía el cliente) para garantizar unicidad.
+ */
+export async function createPosProductAction(input: unknown): Promise<ActionResult<Product>> {
+  try {
+    const ctx = await getOperationContext(PERMISSIONS.PRODUCTS_CREATE);
+    await assertCanAddProduct(ctx.actor.organizationId);
+    const data = parseOrThrow(posQuickProductSchema, input);
+
+    const sku = `POS-${Date.now().toString(36).toUpperCase()}${Math.random()
+      .toString(36)
+      .slice(2, 5)
+      .toUpperCase()}`;
+
+    const productInput = parseOrThrow(productSchema, {
+      sku,
+      name: data.name,
+      unit: 'UNIT',
+      cost: data.cost,
+      salePrice: data.salePrice,
+      wholesalePrice: 0,
+      taxRate: 0,
+      minimumStock: 0,
+      initialStock: data.tracksInventory ? data.initialStock : 0,
+      tracksInventory: data.tracksInventory,
+      categoryId: data.categoryId,
+      status: 'ACTIVE',
+    });
+
+    const id = await catalogService.createProduct(ctx.actor, productInput, ctx.defaultWarehouseId);
+    const product = await productRepository.get(ctx.actor.organizationId, id);
+    if (!product) throw errors.notFound('Producto');
+    revalidatePath('/inventario');
+    return ok(product);
+  } catch (error) {
+    logError('catalog.createPosProduct', error);
     return fail(error);
   }
 }

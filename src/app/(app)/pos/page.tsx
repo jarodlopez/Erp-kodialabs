@@ -50,7 +50,11 @@ export default async function PosPage() {
           </p>
         </Card>
       ) : (
-        <PosTerminal accounts={accounts} settings={settings} />
+        <PosTerminal
+          accounts={accounts}
+          settings={settings}
+          canCreateProduct={session.permissions.includes(PERMISSIONS.PRODUCTS_CREATE)}
+        />
       )}
     </div>
   );

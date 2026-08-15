@@ -147,6 +147,21 @@ export const productSchema = z.object({
   status: z.enum(['ACTIVE', 'INACTIVE']).default('ACTIVE'),
 });
 
+/**
+ * Alta rápida de producto desde el punto de venta: solo lo mínimo para vender
+ * al instante (nombre y precio). El SKU se genera en el servidor y, por
+ * defecto, el producto no controla inventario (pensado para artículos únicos).
+ */
+export const posQuickProductSchema = z.object({
+  name: requiredText('El nombre', 150),
+  salePrice: money('El precio de venta'),
+  cost: money('El costo').optional().default(0),
+  categoryId: z.string().optional().nullable().transform((v) => v || null),
+  tracksInventory: z.coerce.boolean().optional().default(false),
+  initialStock: quantity('La existencia inicial').optional().default(0),
+});
+export type PosQuickProductInput = z.infer<typeof posQuickProductSchema>;
+
 // ---------------------------------------------------------------------------
 // Clientes y proveedores
 // ---------------------------------------------------------------------------

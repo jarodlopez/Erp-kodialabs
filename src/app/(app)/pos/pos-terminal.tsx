@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FileText, Minus, Plus, ScanLine, Trash2, Truck, UserRound, X } from 'lucide-react';
+import { FileText, Minus, PackagePlus, Plus, ScanLine, Trash2, Truck, UserRound, X } from 'lucide-react';
 
 import { findProductByBarcodeAction } from '@/app/actions/catalog';
 import { createSaleAction } from '@/app/actions/sales';
@@ -10,6 +10,7 @@ import { BarcodeScanner } from '@/components/domain/barcode-scanner';
 import { PartyPicker, type PartyOption } from '@/components/domain/party-picker';
 import { ProductPicker } from '@/components/domain/product-picker';
 import { Button, Card, CardHeader, EmptyState, Field, Input, Select } from '@/components/ui/primitives';
+import { QuickProductDialog } from './quick-product-dialog';
 import { useToast } from '@/components/ui/toast';
 import { formatMoney, toMinorUnits, toScaledQty } from '@/lib/money';
 import { priceDocument } from '@/lib/pricing';
@@ -33,9 +34,11 @@ interface Line {
 export function PosTerminal({
   accounts,
   settings,
+  canCreateProduct = false,
 }: {
   accounts: FinancialAccount[];
   settings: Settings;
+  canCreateProduct?: boolean;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -51,6 +54,7 @@ export function PosTerminal({
   const [received, setReceived] = useState('');
   const [loading, setLoading] = useState(false);
   const [scanning, setScanning] = useState(false);
+  const [creatingProduct, setCreatingProduct] = useState(false);
 
   // Llave de idempotencia ESTABLE para la venta en curso: si el cobro falla por
   // red y se reintenta, se usa la misma llave y el servidor no duplica la venta.
@@ -247,9 +251,24 @@ export function PosTerminal({
                 />
               </div>
               <Button variant="secondary" onClick={() => setScanning(true)} aria-label="Escanear código">
-                <ScanLine className="h-4 w-4" /> Escanear
+                <ScanLine className="h-4 w-4" /> <span className="hidden sm:inline">Escanear</span>
               </Button>
+              {canCreateProduct && (
+                <Button
+                  variant="secondary"
+                  onClick={() => setCreatingProduct(true)}
+                  aria-label="Nuevo producto"
+                >
+                  <PackagePlus className="h-4 w-4" /> <span className="hidden sm:inline">Nuevo</span>
+                </Button>
+              )}
             </div>
+            {canCreateProduct && (
+              <p className="mt-2 text-xs text-[var(--color-ink-subtle)]">
+                ¿No está en el catálogo? Toca <span className="font-medium">Nuevo</span> para crearlo
+                y venderlo al instante.
+              </p>
+            )}
           </div>
 
           {lines.length === 0 ? (
@@ -487,6 +506,18 @@ export function PosTerminal({
           onDetect={handleScan}
           title="Escanear producto"
         />
+
+        {canCreateProduct && (
+          <QuickProductDialog
+            open={creatingProduct}
+            onClose={() => setCreatingProduct(false)}
+            onCreated={(product) => {
+              addProduct(product);
+              router.refresh();
+            }}
+            currency={currency}
+          />
+        )}
       </div>
 
       {/* Barra de cobro fija en móvil (sobre la navegación inferior) */}
