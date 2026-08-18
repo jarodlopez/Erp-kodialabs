@@ -71,6 +71,12 @@ export const PERMISSIONS = {
   STORE_ORDERS_VIEW: 'store.orders.view',
   STORE_ORDERS_MANAGE: 'store.orders.manage',
 
+  // Reparto
+  DELIVERY_VIEW: 'delivery.view',
+  DELIVERY_MANAGE: 'delivery.manage',
+  /** Permiso del rider: ver y mover SUS repartos, nada más del ERP. */
+  DELIVERY_RIDE: 'delivery.ride',
+
   // Análisis
   REPORTS_VIEW: 'reports.view',
   REPORTS_EXPORT: 'reports.export',
@@ -93,6 +99,7 @@ export const ROLES = {
   SALES: 'SALES',
   WAREHOUSE: 'WAREHOUSE',
   ACCOUNTANT: 'ACCOUNTANT',
+  RIDER: 'RIDER',
 } as const;
 
 export type Role = (typeof ROLES)[keyof typeof ROLES];
@@ -105,6 +112,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   SALES: 'Ventas',
   WAREHOUSE: 'Bodega',
   ACCOUNTANT: 'Contabilidad',
+  RIDER: 'Repartidor',
 };
 
 export const ROLE_DESCRIPTIONS: Record<Role, string> = {
@@ -113,6 +121,8 @@ export const ROLE_DESCRIPTIONS: Record<Role, string> = {
   SALES: 'Registro de ventas, cobros y gestión de clientes.',
   WAREHOUSE: 'Inventario, recepción de compras y ajustes de existencias.',
   ACCOUNTANT: 'Finanzas, gastos, cuentas por cobrar y pagar, y reportes.',
+  RIDER:
+    'Solo reparto: ve los domicilios que se le asignan y marca su avance. No entra al panel del ERP.',
 };
 
 const P = PERMISSIONS;
@@ -132,6 +142,7 @@ const MANAGER_PERMISSIONS: Permission[] = [
   P.RECEIVABLES_VIEW, P.RECEIVABLES_COLLECT,
   P.PAYABLES_VIEW, P.PAYABLES_PAY,
   P.STORE_VIEW, P.STORE_MANAGE, P.STORE_ORDERS_VIEW, P.STORE_ORDERS_MANAGE,
+  P.DELIVERY_VIEW, P.DELIVERY_MANAGE,
   P.REPORTS_VIEW, P.REPORTS_EXPORT,
   P.SETTINGS_VIEW,
 ];
@@ -145,6 +156,7 @@ const SALES_PERMISSIONS: Permission[] = [
   P.INVENTORY_VIEW,
   P.RECEIVABLES_VIEW, P.RECEIVABLES_COLLECT,
   P.STORE_VIEW, P.STORE_ORDERS_VIEW, P.STORE_ORDERS_MANAGE,
+  P.DELIVERY_VIEW, P.DELIVERY_MANAGE,
   P.REPORTS_VIEW,
 ];
 
@@ -157,6 +169,7 @@ const WAREHOUSE_PERMISSIONS: Permission[] = [
   P.PURCHASES_RETURN,
   P.INVENTORY_VIEW, P.INVENTORY_ADJUST, P.INVENTORY_TRANSFER,
   P.STORE_VIEW, P.STORE_ORDERS_VIEW,
+  P.DELIVERY_VIEW,
   P.REPORTS_VIEW,
 ];
 
@@ -174,10 +187,19 @@ const ACCOUNTANT_PERMISSIONS: Permission[] = [
   P.RECEIVABLES_VIEW, P.RECEIVABLES_COLLECT,
   P.PAYABLES_VIEW, P.PAYABLES_PAY,
   P.STORE_VIEW, P.STORE_ORDERS_VIEW,
+  P.DELIVERY_VIEW,
   P.REPORTS_VIEW, P.REPORTS_EXPORT,
   P.AUDIT_VIEW,
   P.SETTINGS_VIEW,
 ];
+
+/**
+ * El repartidor es el único rol que NO entra al panel: su único permiso lo
+ * lleva a la vista móvil de reparto. Mantener la lista en uno solo es la
+ * garantía de que el teléfono de un rider —que se pierde, se presta y se
+ * revende— no sea una puerta al inventario ni a las finanzas.
+ */
+const RIDER_PERMISSIONS: Permission[] = [P.DELIVERY_RIDE];
 
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   ADMIN: ALL_PERMISSIONS,
@@ -185,6 +207,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   SALES: SALES_PERMISSIONS,
   WAREHOUSE: WAREHOUSE_PERMISSIONS,
   ACCOUNTANT: ACCOUNTANT_PERMISSIONS,
+  RIDER: RIDER_PERMISSIONS,
 };
 
 export function isRole(value: unknown): value is Role {
@@ -309,6 +332,14 @@ export const PERMISSION_GROUPS: { module: string; permissions: { key: Permission
       { key: P.STORE_MANAGE, label: 'Configurar tienda y catálogo' },
       { key: P.STORE_ORDERS_VIEW, label: 'Ver pedidos online' },
       { key: P.STORE_ORDERS_MANAGE, label: 'Aprobar y rechazar pedidos' },
+    ],
+  },
+  {
+    module: 'Reparto',
+    permissions: [
+      { key: P.DELIVERY_VIEW, label: 'Ver repartos y seguimiento' },
+      { key: P.DELIVERY_MANAGE, label: 'Despachar, asignar y tarifar' },
+      { key: P.DELIVERY_RIDE, label: 'Repartir (vista de repartidor)' },
     ],
   },
   {

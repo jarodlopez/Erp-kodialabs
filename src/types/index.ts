@@ -9,4 +9,5 @@ export * from './expenses';
 export * from './finance';
 export * from './returns';
 export * from './store';
+export * from './delivery';
 export * from './audit';

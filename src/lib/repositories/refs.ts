@@ -119,6 +119,16 @@ export const refs = {
   storeBanners: () => col(COLLECTIONS.STORE_BANNERS),
   storeBanner: (id: Id) => docRef(COLLECTIONS.STORE_BANNERS, id),
 
+  deliveries: () => col(COLLECTIONS.DELIVERIES),
+  delivery: (id: Id) => docRef(COLLECTIONS.DELIVERIES, id),
+
+  /** El rastro comparte el id del reparto: un documento por viaje. */
+  deliveryTracks: () => col(COLLECTIONS.DELIVERY_TRACKS),
+  deliveryTrack: (deliveryId: Id) => docRef(COLLECTIONS.DELIVERY_TRACKS, deliveryId),
+
+  deliverySettings: (organizationId: Id) =>
+    docRef(COLLECTIONS.DELIVERY_SETTINGS, organizationId),
+
   auditLogs: () => col(COLLECTIONS.AUDIT_LOGS),
   auditLog: (id: Id) => docRef(COLLECTIONS.AUDIT_LOGS, id),
 

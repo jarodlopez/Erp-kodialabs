@@ -86,6 +86,8 @@ export interface Settings {
      * con `DEFAULT_STORE_ORDER_PREFIX`.
      */
     storeOrder?: string;
+    /** Prefijo de los repartos. Opcional por la misma razón que el anterior. */
+    delivery?: string;
   };
   invoiceFooter: string | null;
   updatedAt: IsoDate;

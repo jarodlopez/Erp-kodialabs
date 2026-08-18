@@ -48,6 +48,10 @@ export const COLLECTIONS = {
   STORE_DISCOUNTS: 'storeDiscounts',
   STORE_BANNERS: 'storeBanners',
 
+  DELIVERIES: 'deliveries',
+  DELIVERY_TRACKS: 'deliveryTracks',
+  DELIVERY_SETTINGS: 'deliverySettings',
+
   AUDIT_LOGS: 'auditLogs',
   COUNTERS: 'counters',
   IDEMPOTENCY: 'idempotencyKeys',

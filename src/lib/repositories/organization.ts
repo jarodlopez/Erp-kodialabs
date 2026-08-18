@@ -32,6 +32,7 @@ export const DEFAULT_SETTINGS: Omit<Settings, 'id' | 'organizationId' | 'updated
     transfer: 'TRF',
     adjustment: 'ADJ',
     storeOrder: 'WEB',
+    delivery: 'DEL',
   },
   invoiceFooter: null,
 };
