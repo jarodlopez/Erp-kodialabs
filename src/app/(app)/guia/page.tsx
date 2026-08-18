@@ -348,11 +348,18 @@ const SECTIONS: Section[] = [
     content: (
       <>
         <P>
-          Vende por internet el mismo catálogo del ERP. La tienda tiene su propia dirección
-          pública y se configura entera desde el panel, sin tocar código.
+          Vende por internet el mismo catálogo del ERP. Cada negocio tiene su propia dirección
+          pública y la tienda se configura entera desde el panel, sin tocar código.
         </P>
         <Steps
           items={[
+            <>
+              <Term>Dirección pública:</Term> tu tienda vive en{' '}
+              <Term className="font-mono">/t/tu-negocio</Term> — por ejemplo{' '}
+              <Term className="font-mono">/t/ferreteria-lopez</Term>. Se propone sola con el
+              nombre de tu negocio y la podés cambiar en Diseño. La verás completa, lista para
+              copiar y compartir, en el Resumen de la tienda.
+            </>,
             <>
               <Term>Diseño:</Term> nombre, logo, color, moneda, zonas de envío y datos de pago.
               Elige también la etiqueta de variante: <Term>TALLA</Term> para ropa,{' '}
@@ -377,6 +384,10 @@ const SECTIONS: Section[] = [
         <Tip>
           Un pedido pendiente no toca inventario ni dinero. Nada se mueve hasta que alguien lo
           aprueba, así que un pago falso no te descuadra el stock.
+        </Tip>
+        <Tip>
+          Elegí la dirección pública <Term>antes</Term> de repartir el enlace: si la cambiás
+          después, la anterior deja de funcionar.
         </Tip>
         <Bullets
           items={[
