@@ -352,3 +352,151 @@ export function seedDiscount(
 
   return { id, code };
 }
+
+// ---------------------------------------------------------------------------
+// Reparto
+// ---------------------------------------------------------------------------
+
+export const RIDER_ID = 'user-rider';
+
+/** Dos puntos reales de Managua, a ~1,7 km en línea recta. */
+export const ORIGIN_POINT = { lat: 12.1281, lng: -86.2685 };
+export const DESTINATION_POINT = { lat: 12.1128, lng: -86.2698 };
+
+export interface SeedDeliverySetupOptions {
+  costPerKm?: number;
+  riderPayPerDelivery?: number;
+  riderPayPerKm?: number;
+  customerBaseFee?: number;
+  customerFeePerKm?: number;
+  customerFreeKm?: number;
+  maxAccuracyMeters?: number;
+  autoRegisterExpense?: boolean;
+  expenseCategoryId?: string | null;
+  /** `null` deja la organización SIN punto de partida configurado. */
+  origin?: { lat: number; lng: number } | null;
+}
+
+/** Configura el reparto y da de alta un repartidor activo. */
+export function seedDeliverySetup(db: FakeFirestore, options: SeedDeliverySetupOptions = {}) {
+  const {
+    costPerKm = 15,
+    riderPayPerDelivery = 0,
+    riderPayPerKm = 0,
+    customerBaseFee = 50,
+    customerFeePerKm = 10,
+    customerFreeKm = 2,
+    maxAccuracyMeters = 100,
+    autoRegisterExpense = false,
+    expenseCategoryId = null,
+    origin = ORIGIN_POINT,
+  } = options;
+
+  db.write(
+    COLLECTIONS.DELIVERY_SETTINGS,
+    ORG_ID,
+    {
+      id: ORG_ID,
+      organizationId: ORG_ID,
+      origin,
+      costPerKm: toMinorUnits(costPerKm),
+      riderPayPerDelivery: toMinorUnits(riderPayPerDelivery),
+      riderPayPerKm: toMinorUnits(riderPayPerKm),
+      customerBaseFee: toMinorUnits(customerBaseFee),
+      customerFeePerKm: toMinorUnits(customerFeePerKm),
+      customerFreeKm,
+      roadFactor: 1.4,
+      pingSeconds: 30,
+      maxAccuracyMeters,
+      expenseCategoryId,
+      autoRegisterExpense,
+      updatedAt: now,
+      updatedBy: USER_ID,
+    },
+    false,
+  );
+
+  db.write(
+    COLLECTIONS.MEMBERSHIPS,
+    `${ORG_ID}_${RIDER_ID}`,
+    {
+      id: `${ORG_ID}_${RIDER_ID}`,
+      organizationId: ORG_ID,
+      userId: RIDER_ID,
+      email: 'rider@test.local',
+      displayName: 'Marlon Rider',
+      role: 'RIDER',
+      status: 'ACTIVE',
+      createdAt: now,
+      updatedAt: now,
+      createdBy: USER_ID,
+      updatedBy: USER_ID,
+    },
+    false,
+  );
+
+  return { riderId: RIDER_ID };
+}
+
+/** Contexto del rider: mismo actor que el panel pero con su usuario y permiso. */
+export const riderCtx = {
+  actor: {
+    userId: RIDER_ID,
+    organizationId: ORG_ID,
+    email: 'rider@test.local',
+    role: 'RIDER',
+    permissions: ['delivery.ride'],
+  } as ActorContext,
+  actorName: 'Marlon Rider',
+  settings,
+  defaultWarehouseId: WAREHOUSE_ID,
+};
+
+/** Venta a domicilio ya confirmada, lista para despachar. */
+export function seedDeliverableSale(
+  db: FakeFirestore,
+  options: { id?: string; number?: string; status?: string } = {},
+) {
+  const { id = 'sale-delivery', number = 'FAC-000001', status = 'PAID' } = options;
+
+  db.write(
+    COLLECTIONS.SALES,
+    id,
+    {
+      id,
+      organizationId: ORG_ID,
+      number,
+      type: 'CASH',
+      status,
+      paymentStatus: 'PAID',
+      date: now,
+      customerId: 'cust-1',
+      customerName: 'Cliente de prueba',
+      sellerId: USER_ID,
+      sellerName: 'Administrador',
+      warehouseId: WAREHOUSE_ID,
+      items: [],
+      subtotal: 20000,
+      discount: 0,
+      taxAmount: 3000,
+      total: 23000,
+      paidAmount: 23000,
+      returnedAmount: 0,
+      dueDate: null,
+      notes: null,
+      delivery: {
+        recipient: 'Doña Marta',
+        address: 'De la rotonda Jean Paul 2c al sur, casa 45',
+        phone: '88881234',
+        notes: 'Tocar el timbre dos veces',
+      },
+      createdAt: now,
+      updatedAt: now,
+      createdBy: USER_ID,
+      updatedBy: USER_ID,
+    },
+    false,
+  );
+
+  return { saleId: id, number };
+}

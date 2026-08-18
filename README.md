@@ -79,10 +79,27 @@ operaciones críticas se ejecutan en el servidor dentro de transacciones atómic
   crea la cuenta por cobrar en la misma transacción atómica.
 - Imágenes alojadas en ImgBB y servidas en WebP al ancho de cada vista.
 
+**Reparto**
+
+- Seguimiento en vivo de repartidores sobre **OpenStreetMap** y Leaflet: sin SDK
+  de mapas que cobre por carga, el costo del módulo no crece con el uso.
+- Un reparto nace de una venta con datos de entrega o de un pedido online
+  aprobado; hereda cliente, dirección y teléfono. El destino se fija tocando el
+  mapa, porque las direcciones de barrio no las resuelve ningún geocodificador.
+- El teléfono del rider marca su posición cada 30 segundos y el **servidor**
+  decide qué lecturas cuentan: descarta los saltos del GPS y el temblor de un
+  teléfono detenido, para que un rider esperando en un portón no genere
+  kilómetros que nadie recorrió.
+- Dos importes separados: lo cobrado al cliente (sobre la distancia estimada) y
+  lo que costó (sobre el recorrido real). La diferencia es el **margen del
+  envío**, que se puede registrar como gasto del ERP al entregar.
+- El rol **Repartidor** tiene un único permiso y una vista propia fuera del
+  panel: un teléfono que se presta y se pierde no es una puerta al inventario.
+
 **Administración**
 
 - Multi-organización con aislamiento estricto de datos.
-- RBAC con 5 roles y más de 40 permisos granulares, validados en el servidor.
+- RBAC con 6 roles y más de 50 permisos granulares, validados en el servidor.
 - Auditoría inmutable de cada operación sensible.
 
 ## Puesta en marcha
@@ -185,6 +202,7 @@ partir de `vercel.json`.
 | --- | --- |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Capas, flujo de una operación, decisiones técnicas. |
 | [TIENDA.md](./TIENDA.md) | Módulo de tienda online: puesta en marcha y modelo. |
+| [REPARTO.md](./REPARTO.md) | Módulo de reparto: tarifas, seguimiento y costos. |
 | [DATABASE.md](./DATABASE.md) | Modelo de datos, colecciones, índices y convenciones. |
 | [SECURITY.md](./SECURITY.md) | Autenticación, RBAC, reglas, aislamiento y controles. |
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Despliegue en Vercel y configuración de Firebase. |

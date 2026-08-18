@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import {
   ArrowLeftRight,
+  Bike,
   BookOpen,
   Boxes,
   ClipboardList,
@@ -10,9 +11,11 @@ import {
   Landmark,
   Layers,
   LayoutDashboard,
+  MapPin,
   MessageSquare,
   Palette,
   Receipt,
+  Route,
   RotateCcw,
   Settings,
   ShieldCheck,
@@ -147,6 +150,29 @@ export const NAV_SECTIONS: NavSection[] = [
         href: '/tienda/popups',
         icon: MessageSquare,
         permission: PERMISSIONS.STORE_MANAGE,
+      },
+    ],
+  },
+  {
+    title: 'Reparto',
+    items: [
+      {
+        label: 'Repartos',
+        href: '/repartos',
+        icon: Bike,
+        permission: PERMISSIONS.DELIVERY_VIEW,
+      },
+      {
+        label: 'Mapa en vivo',
+        href: '/repartos/mapa',
+        icon: MapPin,
+        permission: PERMISSIONS.DELIVERY_VIEW,
+      },
+      {
+        label: 'Tarifas de reparto',
+        href: '/repartos/tarifas',
+        icon: Route,
+        permission: PERMISSIONS.DELIVERY_MANAGE,
       },
     ],
   },

@@ -27,8 +27,8 @@ premisa.
 
 ## 2. Autorización (RBAC)
 
-Cinco roles — `ADMIN`, `MANAGER`, `SALES`, `WAREHOUSE`, `ACCOUNTANT` — y más de
-cuarenta permisos granulares definidos en `src/lib/rbac.ts`.
+Seis roles — `ADMIN`, `MANAGER`, `SALES`, `WAREHOUSE`, `ACCOUNTANT`, `RIDER` — y
+más de cincuenta permisos granulares definidos en `src/lib/rbac.ts`.
 
 - El rol viaja en los *custom claims* del token, por lo que también las Security
   Rules pueden evaluarlo.
@@ -43,6 +43,16 @@ cuarenta permisos granulares definidos en `src/lib/rbac.ts`.
 Separación de responsabilidades verificada por pruebas: ventas no puede recibir
 compras ni ajustar inventario; bodega no puede cobrar ni ver finanzas; contabilidad
 no puede crear ventas; solo el administrador gestiona usuarios.
+
+**`RIDER` es el rol más restringido del sistema, y a propósito.** Tiene un único
+permiso (`delivery.ride`), no entra al panel —el layout del área protegida lo
+redirige a su vista de reparto— y no puede leer inventario, ventas ni finanzas.
+La razón es concreta: el teléfono de un repartidor se presta, se pierde y se
+revende, así que la sesión que corre ahí no puede ser una puerta al negocio.
+Tener el permiso tampoco alcanza para tocar cualquier reparto: el servidor
+comprueba en cada operación —salir, marcar posición, cerrar— que el reparto esté
+asignado a quien la pide, de modo que un rider no puede ver el cliente, la
+dirección ni el teléfono del reparto de un compañero cambiando el id de la URL.
 
 ## 3. Aislamiento entre organizaciones
 

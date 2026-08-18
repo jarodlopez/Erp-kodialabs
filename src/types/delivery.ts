@@ -283,6 +283,52 @@ export interface PingResult {
   traveled: number;
 }
 
+/** Tarifas tal como llegan del formulario: importes en unidades mayores. */
+export interface DeliverySettingsInput {
+  origin: GeoPoint | null;
+  costPerKm: number;
+  riderPayPerDelivery: number;
+  riderPayPerKm: number;
+  customerBaseFee: number;
+  customerFeePerKm: number;
+  customerFreeKm: number;
+  roadFactor: number;
+  pingSeconds: number;
+  maxAccuracyMeters: number;
+  expenseCategoryId: Id | null;
+  autoRegisterExpense: boolean;
+}
+
+/**
+ * Totales del módulo. `margin` es lo cobrado por envíos menos lo que costó
+ * hacerlos: puede ser negativo, y que se vea es el punto.
+ */
+export interface DeliverySummary {
+  pending: number;
+  assigned: number;
+  inTransit: number;
+  deliveredCount: number;
+  charged: Money;
+  cost: Money;
+  margin: Money;
+  traveledMeters: number;
+  /** Minutos promedio entre salida y cierre. `null` si nada se pudo medir. */
+  averageMinutes: number | null;
+}
+
+/** Venta o pedido listo para repartir, tal como se ofrece al despachar. */
+export interface DeliveryCandidate {
+  source: DeliverySource;
+  sourceId: Id;
+  number: string;
+  customerName: string;
+  address: string;
+  phone: string | null;
+  createdAt: IsoDate;
+  /** Envío ya cobrado en el documento, en centavos. `0` si no se aisló. */
+  charged: Money;
+}
+
 /** Resumen del rider para la vista de asignación. */
 export interface RiderSummary {
   userId: Id;

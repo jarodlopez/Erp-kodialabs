@@ -13,8 +13,9 @@
 
 export class FakeFieldValue {
   constructor(
-    readonly kind: 'increment' | 'serverTimestamp',
+    readonly kind: 'increment' | 'serverTimestamp' | 'arrayUnion',
     readonly operand: number = 0,
+    readonly elements: unknown[] = [],
   ) {}
 
   static increment(value: number): FakeFieldValue {
@@ -23,6 +24,15 @@ export class FakeFieldValue {
 
   static serverTimestamp(): FakeFieldValue {
     return new FakeFieldValue('serverTimestamp');
+  }
+
+  /**
+   * `arrayUnion` real de Firestore deduplica por igualdad profunda; acá se
+   * compara por JSON, que alcanza para los objetos planos que el sistema mete
+   * en arreglos (marcas de posición) y evita arrastrar una librería.
+   */
+  static arrayUnion(...elements: unknown[]): FakeFieldValue {
+    return new FakeFieldValue('arrayUnion', 0, elements);
   }
 
   isEqual(other: unknown): boolean {
@@ -79,6 +89,11 @@ function applyMerge(base: Doc, patch: Doc): Doc {
     if (value instanceof FakeFieldValue) {
       if (value.kind === 'increment') {
         result[key] = Number(result[key] ?? 0) + value.operand;
+      } else if (value.kind === 'arrayUnion') {
+        const current = Array.isArray(result[key]) ? (result[key] as unknown[]) : [];
+        const seen = new Set(current.map((item) => JSON.stringify(item)));
+        const added = value.elements.filter((item) => !seen.has(JSON.stringify(item)));
+        result[key] = [...current, ...deepClone(added)];
       } else {
         result[key] = new Date().toISOString();
       }
@@ -103,7 +118,9 @@ function resolveSentinels(data: Doc): Doc {
   const out: Doc = {};
   for (const [key, value] of Object.entries(data)) {
     if (value instanceof FakeFieldValue) {
-      out[key] = value.kind === 'increment' ? value.operand : new Date().toISOString();
+      if (value.kind === 'increment') out[key] = value.operand;
+      else if (value.kind === 'arrayUnion') out[key] = deepClone(value.elements);
+      else out[key] = new Date().toISOString();
     } else if (value !== undefined) {
       out[key] = deepClone(value);
     }

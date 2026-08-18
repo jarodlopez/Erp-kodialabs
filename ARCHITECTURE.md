@@ -220,8 +220,9 @@ src/
 │   ├── (auth)/            Login, registro y recuperación
 │   ├── (app)/             Área protegida (sidebar + módulos)
 │   ├── (shop)/            Tienda online pública (`/t/{slug}`), sin sesión
+│   ├── (rider)/           Vista de reparto (`/reparto`), móvil y sin panel
 │   ├── actions/           Server Actions por dominio
-│   ├── api/               Route Handlers (cron, export, storage, tienda)
+│   ├── api/               Route Handlers (cron, export, storage, tienda, repartos)
 │   ├── layout.tsx         Layout raíz
 │   └── globals.css        Sistema de diseño (Tailwind 4)
 ├── components/
@@ -238,6 +239,7 @@ src/
 │   ├── imgbb.ts           Subida de imágenes públicas de la tienda
 │   ├── images.ts          Optimización de imágenes (proxy WebP)
 │   ├── storefront.ts      Utilidades del sitio público (precios, carrito)
+│   ├── geo.ts             Distancias, tiempos y costos del reparto (puro)
 │   ├── money.ts           Aritmética monetaria
 │   ├── pricing.ts         Cálculo de documentos (puro)
 │   ├── rbac.ts            Roles y permisos

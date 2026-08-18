@@ -703,6 +703,113 @@ export const storefrontOrderSchema = z.object({
   notes: optionalText(500),
 });
 
+// ---------------------------------------------------------------------------
+// Reparto
+// ---------------------------------------------------------------------------
+
+/**
+ * Coordenada. Se rechaza el (0,0) porque no es un destino sino lo que informa
+ * un dispositivo sin señal: aceptarlo pondría repartos en el golfo de Guinea.
+ */
+const geoPointSchema = z
+  .object({
+    lat: z.coerce
+      .number({ error: 'La latitud debe ser un número.' })
+      .min(-90, 'Latitud fuera de rango.')
+      .max(90, 'Latitud fuera de rango.'),
+    lng: z.coerce
+      .number({ error: 'La longitud debe ser un número.' })
+      .min(-180, 'Longitud fuera de rango.')
+      .max(180, 'Longitud fuera de rango.'),
+  })
+  .refine((p) => !(p.lat === 0 && p.lng === 0), 'Marca el punto en el mapa.');
+
+export const createDeliverySchema = z.object({
+  source: z.enum(['SALE', 'STORE_ORDER']),
+  sourceId: idString,
+  point: geoPointSchema,
+  landmark: optionalText(160),
+  origin: geoPointSchema.optional().nullable().transform((v) => v ?? null),
+  riderId: z.string().trim().max(128).optional().nullable().transform((v) => v || null),
+  notes: optionalText(500),
+});
+
+export const assignDeliverySchema = z.object({
+  deliveryId: idString,
+  riderId: idString,
+});
+
+export const finishDeliverySchema = z.object({
+  deliveryId: idString,
+  status: z.enum(['DELIVERED', 'FAILED']),
+  note: optionalText(300),
+});
+
+export const cancelDeliverySchema = z.object({
+  deliveryId: idString,
+  note: requiredText('El motivo', 300),
+});
+
+/**
+ * Marca de posición del teléfono del rider.
+ *
+ * `at` se acepta pero el servidor la ignora al guardar: se conserva en el
+ * esquema para no romper clientes que la envíen. La hora la pone el servidor,
+ * porque un reloj mal puesto falsearía las velocidades con las que se
+ * descartan los saltos del GPS.
+ */
+export const trackPingSchema = z.object({
+  lat: z.coerce.number().min(-90).max(90),
+  lng: z.coerce.number().min(-180).max(180),
+  accuracy: z.coerce.number().min(0).max(100_000),
+  speed: z.coerce.number().min(0).max(1000).optional().nullable().transform((v) => v ?? null),
+  at: z.string().trim().max(40).optional().nullable().transform((v) => v || null),
+});
+
+export const deliverySettingsSchema = z
+  .object({
+    origin: geoPointSchema.optional().nullable().transform((v) => v ?? null),
+    costPerKm: money('El costo por kilómetro'),
+    riderPayPerDelivery: money('El pago por entrega'),
+    riderPayPerKm: money('El pago por kilómetro'),
+    customerBaseFee: money('La tarifa base'),
+    customerFeePerKm: money('La tarifa por kilómetro'),
+    customerFreeKm: z.coerce
+      .number({ error: 'Los kilómetros incluidos deben ser un número.' })
+      .min(0, 'No puede ser negativo.')
+      .max(100, 'Como máximo 100 km incluidos.'),
+    // Por debajo de 1 la "ruta" sería más corta que la línea recta, que es
+    // geométricamente imposible.
+    roadFactor: z.coerce
+      .number({ error: 'El factor de carretera debe ser un número.' })
+      .min(1, 'El factor no puede ser menor que 1.')
+      .max(3, 'Un factor mayor que 3 no describe ninguna ciudad.'),
+    // Menos de 10 s vacía la batería sin agregar precisión; más de 5 min deja
+    // huecos en los que el rastro deja de describir la ruta.
+    pingSeconds: z.coerce
+      .number({ error: 'La cadencia debe ser un número.' })
+      .int('Usa segundos enteros.')
+      .min(10, 'Menos de 10 segundos agota la batería sin ganar precisión.')
+      .max(300, 'Más de 5 minutos entre marcas deja huecos en la ruta.'),
+    maxAccuracyMeters: z.coerce
+      .number({ error: 'La precisión mínima debe ser un número.' })
+      .int('Usa metros enteros.')
+      .min(20, 'Exigir menos de 20 m descartaría casi todas las lecturas.')
+      .max(1000, 'Aceptar más de 1 km de error haría inútil el rastro.'),
+    expenseCategoryId: z
+      .string()
+      .trim()
+      .max(128)
+      .optional()
+      .nullable()
+      .transform((v) => v || null),
+    autoRegisterExpense: z.coerce.boolean().default(false),
+  })
+  .refine((v) => !v.autoRegisterExpense || Boolean(v.expenseCategoryId), {
+    error: 'Elige la categoría de gasto o desactiva el registro automático.',
+    path: ['expenseCategoryId'],
+  });
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type ProductFormInput = z.infer<typeof productSchema>;
@@ -720,3 +827,6 @@ export type StoreListingFormInput = z.infer<typeof storeListingSchema>;
 export type StoreDiscountFormInput = z.infer<typeof storeDiscountSchema>;
 export type StoreBannerFormInput = z.infer<typeof storeBannerSchema>;
 export type StorefrontOrderInput = z.infer<typeof storefrontOrderSchema>;
+export type CreateDeliveryFormInput = z.infer<typeof createDeliverySchema>;
+export type DeliverySettingsFormInput = z.infer<typeof deliverySettingsSchema>;
+export type TrackPingFormInput = z.infer<typeof trackPingSchema>;

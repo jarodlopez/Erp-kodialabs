@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { ExternalLink, Receipt } from 'lucide-react';
 
+import { DeliveryLink } from '@/components/domain/delivery-link';
 import { Money, Qty } from '@/components/domain/indicators';
 import {
   Badge,
@@ -77,17 +78,29 @@ export default async function StoreOrderDetailPage({
         }
         description={`Recibido el ${formatDateTime(order.createdAt)}`}
         actions={
-          canResolve ? (
-            <StoreOrderActions
-              orderId={order.id}
-              orderNumber={order.number}
-              total={order.total}
-              currency={currency}
-              accounts={accounts.map((account) => ({ id: account.id, name: account.name }))}
-              defaultAccountId={storeSettings?.defaultAccountId ?? null}
-              hasReceipt={Boolean(order.receiptUrl)}
-            />
-          ) : undefined
+          <>
+            {/* El reparto se ofrece recién con el pedido aprobado: antes de eso
+                no hay venta y podría terminar rechazado. */}
+            {order.status === 'APPROVED' && (
+              <DeliveryLink
+                organizationId={session.organizationId}
+                source="STORE_ORDER"
+                sourceId={order.id}
+                permissions={session.permissions}
+              />
+            )}
+            {canResolve && (
+              <StoreOrderActions
+                orderId={order.id}
+                orderNumber={order.number}
+                total={order.total}
+                currency={currency}
+                accounts={accounts.map((account) => ({ id: account.id, name: account.name }))}
+                defaultAccountId={storeSettings?.defaultAccountId ?? null}
+                hasReceipt={Boolean(order.receiptUrl)}
+              />
+            )}
+          </>
         }
       />
 

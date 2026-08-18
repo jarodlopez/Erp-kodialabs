@@ -120,6 +120,21 @@ service cloud.firestore {
     match /storeDiscounts/{docId} { allow read: if sameOrganization(); allow write: if false; }
     match /storeBanners/{docId}   { allow read: if sameOrganization(); allow write: if false; }
 
+    // ------------------------------- Reparto --------------------------------
+    // Igual que el resto del ERP: la escritura pasa siempre por el servidor.
+    // El teléfono del rider NO escribe en Firestore — manda su posición a una
+    // Server Action y es el Admin SDK el que decide si la lectura cuenta. Esa
+    // decisión no puede vivir en el cliente: de la distancia recorrida sale un
+    // gasto real, y un teléfono es exactamente donde no se defiende un número.
+
+    match /deliveries/{docId}     { allow read: if sameOrganization(); allow write: if false; }
+    match /deliveryTracks/{docId} { allow read: if sameOrganization(); allow write: if false; }
+
+    match /deliverySettings/{organizationId} {
+      allow read: if hasOrganization() && organizationId == orgId();
+      allow write: if false;
+    }
+
     // ------------------------------ Auditoría -------------------------------
     // Inmutable: sin escritura desde ningún cliente y lectura restringida.
 

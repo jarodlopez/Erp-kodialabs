@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
+import { DeliveryLink } from '@/components/domain/delivery-link';
 import {
   Money,
   PaymentStatusBadge,
@@ -73,6 +74,14 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
                   <Truck className="h-4 w-4" /> Etiqueta
                 </Button>
               </a>
+            )}
+            {sale.delivery && sale.status !== 'CANCELLED' && (
+              <DeliveryLink
+                organizationId={session.organizationId}
+                source="SALE"
+                sourceId={sale.id}
+                permissions={session.permissions}
+              />
             )}
             <SaleActions
               sale={sale}

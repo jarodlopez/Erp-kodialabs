@@ -4,6 +4,7 @@ import { signOutAction } from '@/app/actions/auth';
 import { AppShell } from '@/components/layout/app-shell';
 import { getSession } from '@/lib/auth/session';
 import { isSuperAdminEmail } from '@/lib/auth/platform';
+import { PERMISSIONS } from '@/lib/rbac';
 import { organizationRepository } from '@/lib/repositories/organization';
 import { subscriptionRepository } from '@/lib/repositories/subscription';
 import { effectiveSubscription } from '@/lib/subscription';
@@ -19,6 +20,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   if (!session) redirect('/login');
   if (!session.organizationId) redirect('/sin-organizacion');
+
+  /*
+   * El repartidor no tiene panel: su único permiso es repartir, así que
+   * cualquier ruta del ERP le daría un error de permisos en lugar de llevarlo a
+   * donde sí puede trabajar. Se redirige acá y no en cada página porque este
+   * layout es la puerta de todo el panel.
+   */
+  if (
+    !session.permissions.includes(PERMISSIONS.DASHBOARD_VIEW) &&
+    session.permissions.includes(PERMISSIONS.DELIVERY_RIDE)
+  ) {
+    redirect('/reparto');
+  }
 
   const superAdmin = isSuperAdminEmail(session.email);
 

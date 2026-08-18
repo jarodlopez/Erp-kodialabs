@@ -184,6 +184,44 @@ Cupones (`code`, `kind`, `value` en puntos base o centavos, `minimumPurchase`,
 `maxUses`, `usedCount`, `expiresAt`) y pop-ups de la tienda. El uso del cupón se
 consume al crear el pedido y se devuelve si el pedido se rechaza.
 
+### `deliveries`
+
+Reparto a domicilio. `number`, `status` (`PENDING` | `ASSIGNED` | `IN_TRANSIT` |
+`DELIVERED` | `FAILED` | `CANCELLED`), `source` (`SALE` | `STORE_ORDER`) con
+`sourceId`/`sourceNumber`, `customerName`, `destination` (dirección heredada +
+`point` fijado a mano + `landmark`), `origin`, `riderId`/`riderName`, y tres
+grupos numéricos: `amounts` (`charged`, `cost`, `riderPay`, `expenseId`),
+`distances` (`estimated`, `traveled`) y `times`.
+
+`lastPoint` guarda la última posición conocida **dentro del propio reparto**, no
+en una colección aparte: así el mapa en vivo cuesta una lectura por reparto
+activo y cada marca sigue costando una sola escritura.
+
+No existe el reparto huérfano: siempre nace de una venta con datos de entrega o
+de un pedido online, y un mismo documento de origen no puede tener dos.
+
+### `deliveryTracks/{deliveryId}`
+
+Rastro del reparto: `points[]` (cada marca con `lat`, `lng`, `at`, `accuracy`,
+`speed`), `rejectedCount` y `riderId`. **Un documento por reparto, no uno por
+marca**: con un ping cada 30 segundos, un turno de ocho horas serían casi mil
+documentos por rider; así el rastro entero de un viaje de dos horas ocupa unos
+10 KB, muy por debajo del límite de 1 MB por documento. El tope es de 2000
+marcas.
+
+Solo se guardan las marcas que describen movimiento real. Las descartadas —por
+imprecisas o por implicar una velocidad imposible— incrementan `rejectedCount` y
+nada más: guardar el ruido engordaría el documento sin dibujar nada, y sumarlo
+inventaría un gasto que no existió.
+
+### `deliverySettings/{organizationId}`
+
+Tarifas y parámetros del reparto: `origin` (punto de partida), `costPerKm`,
+`riderPayPerDelivery`, `riderPayPerKm`, `customerBaseFee`, `customerFeePerKm`,
+`customerFreeKm`, `roadFactor`, `pingSeconds`, `maxAccuracyMeters`,
+`expenseCategoryId` y `autoRegisterExpense`. Todo configurable porque el
+combustible, la moneda y lo que se le paga a un rider cambian por país y por mes.
+
 ### `auditLogs`
 
 Registro inmutable: `userId`, `action`, `module`, `entityType`, `entityId`,
@@ -237,6 +275,10 @@ organization
  ├── storeSettings ──< storeListings ──> products (vitrina, sin copia)
  │                  └──< storeOrders ──> sales (al aprobar)
  │                  └──< storeDiscounts, storeBanners
+ ├── deliverySettings
+ │    └──< deliveries ──> sales | storeOrders (origen)
+ │              └── deliveryTracks (1:1, un doc por reparto)
+ │              └──> expenses (costo operativo, al entregar)
  ├── returns ── (referencian sales o purchases)
  └── auditLogs (inmutable)
 ```

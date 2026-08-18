@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import type { LucideIcon } from 'lucide-react';
 import {
   ArrowLeftRight,
+  Bike,
   BookOpen,
   Boxes,
   Coins,
@@ -394,6 +395,89 @@ const SECTIONS: Section[] = [
             <>Si apruebas <Term>sin elegir una cuenta</Term>, la venta queda a crédito y aparece en cuentas por cobrar: es lo correcto cuando el cliente paga contra entrega.</>,
             <>El costo de envío se factura como una línea más, para que el total de la venta cuadre con lo que pagó el cliente.</>,
             <>Los <Term>cupones</Term> se crean en su propia pantalla y el descuento se traslada a la venta.</>,
+          ]}
+        />
+      </>
+    ),
+  },
+  {
+    id: 'reparto',
+    title: 'Reparto',
+    icon: Bike,
+    content: (
+      <>
+        <P>
+          Seguí en vivo a tus repartidores en el mapa y sabé cuánto te cuesta cada envío de
+          verdad. Un reparto siempre nace de una venta a domicilio o de un pedido online
+          aprobado: hereda el cliente, la dirección y el teléfono, así que no hay nada que
+          volver a escribir.
+        </P>
+        <Steps
+          items={[
+            <>
+              <Term>Tarifas de reparto:</Term> lo primero es tocar el mapa para marcar tu{' '}
+              <Term>punto de partida</Term> — normalmente tu local o bodega. Desde ahí se miden
+              todas las distancias, y sin él no podés despachar.
+            </>,
+            <>
+              <Term>Cargá las dos tarifas.</Term> Son cosas distintas: lo que le cobrás al
+              cliente por el envío, y lo que a vos te cuesta hacerlo (combustible, moto, pago al
+              repartidor). La misma pantalla te muestra cuánto sale un reparto de 5 km con lo que
+              escribiste, y te avisa si te deja pérdida.
+            </>,
+            <>
+              <Term>Creá tus repartidores</Term> en Usuarios, con el rol{' '}
+              <Term>Repartidor</Term>. Solo van a ver sus repartos: ni inventario, ni ventas, ni
+              caja.
+            </>,
+            <>
+              <Term>Despachá.</Term> Desde la ficha de la venta o del pedido tocá{' '}
+              <Term>Crear reparto</Term>, marcá en el mapa dónde hay que entregar y elegí el
+              repartidor. Agregá una referencia visual —“portón negro”, “frente a la pulpería”—
+              que es lo que de verdad le sirve al que llega.
+            </>,
+            <>
+              <Term>El repartidor abre su vista</Term> en el teléfono, toca{' '}
+              <Term>Salir con este reparto</Term> y su ubicación empieza a marcarse sola. Al
+              llegar confirma la entrega, y ahí queda calculado el costo del recorrido.
+            </>,
+          ]}
+        />
+        <Tip>
+          La dirección se marca a mano en el mapa a propósito: “de donde fue el árbol de mango 2c
+          al sur” no la encuentra ningún buscador de direcciones, pero un dedo sobre el mapa sí.
+        </Tip>
+        <Tip>
+          Decile al repartidor que <Term>deje la pantalla encendida</Term> durante el viaje. Con
+          la pantalla apagada el teléfono corta el seguimiento y la ruta queda incompleta.
+        </Tip>
+        <Bullets
+          items={[
+            <>
+              El <Term>margen</Term> del reparto es lo que cobraste de envío menos lo que costó
+              llevarlo. Puede salir negativo, y eso es justamente lo que hay que ver: es una
+              pérdida que de otro modo queda escondida dentro del total de ventas.
+            </>,
+            <>
+              Lo que se le cobra al cliente se calcula <Term>antes de salir</Term>, sobre la
+              distancia estimada. El costo, en cambio, sale del{' '}
+              <Term>recorrido real</Term> que registró el teléfono.
+            </>,
+            <>
+              Si un repartidor se queda parado media hora esperando, el sistema{' '}
+              <Term>no</Term> le suma kilómetros: descarta el temblor normal del GPS para que no
+              te cobre un gasto que no existió.
+            </>,
+            <>
+              Activá el <Term>registro automático del gasto</Term> en Tarifas y elegí la
+              categoría: cada entrega efectiva asienta su costo en Gastos sin que nadie lo
+              transcriba.
+            </>,
+            <>
+              Si el repartidor no pudo entregar, marca <Term>No pude entregar</Term> y explica
+              qué pasó. El costo se calcula igual —el combustible se gastó— pero el gasto{' '}
+              <Term>no</Term> se asienta solo: queda para que lo revises.
+            </>,
           ]}
         />
       </>
