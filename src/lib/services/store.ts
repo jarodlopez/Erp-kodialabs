@@ -596,6 +596,7 @@ export function buildStorefrontProducts(
     out.push({
       listingId: listing.id,
       productId: product.id,
+      publishedAt: listing.createdAt,
       title: listing.title,
       description: listing.description,
       details: listing.details,

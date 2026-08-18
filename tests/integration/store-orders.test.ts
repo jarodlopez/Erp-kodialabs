@@ -11,7 +11,7 @@ import {
 } from './fixtures';
 import { COLLECTIONS } from '@/lib/firebase/collections';
 import { AppError } from '@/lib/errors';
-import { storeOrderService } from '@/lib/services/store-orders';
+import { previewStorefrontDiscount, storeOrderService } from '@/lib/services/store-orders';
 import type { Customer } from '@/types/parties';
 import type { FinancialAccount, Payment } from '@/types/finance';
 import type { Product } from '@/types/catalog';
@@ -372,6 +372,93 @@ describe('comprobante de pago', () => {
     await expect(
       storeOrderService.requireReceivableOrder('otra-tienda', created.orderId),
     ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+  });
+});
+
+describe('previsualización del cupón', () => {
+  /**
+   * El endpoint público que consume esta función existe para que el comprador
+   * sepa si su código sirve ANTES de confirmar. Por eso lo que se prueba aquí
+   * no es solo que calcule bien: es que no gaste el cupón y que no se pueda
+   * usar para inflar un subtotal y forzar un mínimo de compra.
+   */
+  it('devuelve el descuento sin consumir el uso del cupón', async () => {
+    seedStore(fakeDb, { shippingCost: 0 });
+    const discount = seedDiscount(fakeDb, { value: 10, maxUses: 1 });
+
+    const preview = await previewStorefrontDiscount(STORE_SLUG, discount.code, [
+      { productId: ids.productId, quantity: 2 },
+    ]);
+
+    // 2 x C$200 = C$400, menos 10 %.
+    expect(preview).toMatchObject({ applies: true, code: 'PROMO10', amount: 4000, subtotal: 40000 });
+
+    // Lo esencial: previsualizar no gasta el cupón.
+    expect(fakeDb.all<StoreDiscount>(COLLECTIONS.STORE_DISCOUNTS)[0].usedCount).toBe(0);
+    expect(fakeDb.all(COLLECTIONS.STORE_ORDERS)).toHaveLength(0);
+  });
+
+  it('acepta el código en minúsculas y con espacios', async () => {
+    seedStore(fakeDb, { shippingCost: 0 });
+    seedDiscount(fakeDb, { value: 10 });
+
+    const preview = await previewStorefrontDiscount(STORE_SLUG, '  promo10 ', [
+      { productId: ids.productId, quantity: 1 },
+    ]);
+
+    expect(preview.applies).toBe(true);
+  });
+
+  it('no deja inflar el subtotal repitiendo la misma línea', async () => {
+    seedStore(fakeDb, { shippingCost: 0 });
+    // Mínimo de compra de C$300: una sola unidad de C$200 no alcanza.
+    const discount = seedDiscount(fakeDb, { value: 10, minimumPurchase: 300 });
+
+    const repeated = await previewStorefrontDiscount(STORE_SLUG, discount.code, [
+      { productId: ids.productId, quantity: 1 },
+      { productId: ids.productId, quantity: 1 },
+    ]);
+
+    expect(repeated.applies).toBe(false);
+
+    // Con la cantidad de verdad sí aplica: lo que se rechaza es la repetición.
+    const honest = await previewStorefrontDiscount(STORE_SLUG, discount.code, [
+      { productId: ids.productId, quantity: 2 },
+    ]);
+    expect(honest.applies).toBe(true);
+  });
+
+  it('ignora productos que no están publicados en la vitrina', async () => {
+    seedStore(fakeDb, { shippingCost: 0 });
+    const discount = seedDiscount(fakeDb, { value: 10 });
+
+    const preview = await previewStorefrontDiscount(STORE_SLUG, discount.code, [
+      { productId: 'prod-inexistente', quantity: 50 },
+    ]);
+
+    expect(preview.applies).toBe(false);
+  });
+
+  it('explica por qué no aplica en lugar de fallar', async () => {
+    seedStore(fakeDb, { shippingCost: 0 });
+
+    const preview = await previewStorefrontDiscount(STORE_SLUG, 'NOEXISTE', [
+      { productId: ids.productId, quantity: 1 },
+    ]);
+
+    expect(preview.applies).toBe(false);
+    expect(preview.applies === false && preview.reason).toBeTruthy();
+  });
+
+  it('no previsualiza en una tienda en borrador', async () => {
+    seedStore(fakeDb, { status: 'DRAFT' });
+    const discount = seedDiscount(fakeDb, { value: 10 });
+
+    await expect(
+      previewStorefrontDiscount(STORE_SLUG, discount.code, [
+        { productId: ids.productId, quantity: 1 },
+      ]),
+    ).rejects.toBeInstanceOf(AppError);
   });
 });
 

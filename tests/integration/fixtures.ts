@@ -315,9 +315,16 @@ export function seedStore(db: FakeFirestore, options: SeedStoreOptions = {}) {
 /** Cupón de la tienda, para probar el descuento y su liberación al rechazar. */
 export function seedDiscount(
   db: FakeFirestore,
-  options: { code?: string; kind?: 'PERCENT' | 'AMOUNT'; value: number; maxUses?: number },
+  options: {
+    code?: string;
+    kind?: 'PERCENT' | 'AMOUNT';
+    value: number;
+    maxUses?: number;
+    /** Compra mínima en unidad mayor para que el cupón aplique. */
+    minimumPurchase?: number;
+  },
 ) {
-  const { code = 'PROMO10', kind = 'PERCENT', value, maxUses = 0 } = options;
+  const { code = 'PROMO10', kind = 'PERCENT', value, maxUses = 0, minimumPurchase = 0 } = options;
   const id = `disc-${code.toLowerCase()}`;
 
   db.write(
@@ -330,7 +337,7 @@ export function seedDiscount(
       // El porcentaje viaja en puntos base; el monto fijo, en centavos.
       value: kind === 'PERCENT' ? value * 100 : toMinorUnits(value),
       kind,
-      minimumPurchase: 0,
+      minimumPurchase: toMinorUnits(minimumPurchase),
       maxUses,
       usedCount: 0,
       expiresAt: null,

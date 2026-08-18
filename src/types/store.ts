@@ -164,6 +164,12 @@ export interface StoreListing extends BaseEntity {
 export interface StorefrontProduct {
   listingId: Id;
   productId: Id;
+  /**
+   * Fecha de publicación de la ficha, no de creación del producto: lo que la
+   * vitrina anuncia como novedad es lo último que el comercio puso a la venta
+   * por internet, que puede llevar años en el inventario.
+   */
+  publishedAt: IsoDate;
   title: string;
   description: string | null;
   details: string[];

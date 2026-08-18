@@ -1,11 +1,11 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { storeSettingsRepository } from '@/lib/repositories/store';
 import { catalogCollections, loadStorefrontCatalog } from '@/lib/services/store';
-import { formatStorePrice, isSoldOut, priceLabel } from '@/lib/storefront';
+import { isSoldOut } from '@/lib/storefront';
 import type { StorefrontProduct } from '@/types/store';
-import { ShopImage } from './chrome';
+import { CatalogBrowser } from './catalog-browser';
+import { HeroSlider } from './hero';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +15,10 @@ export const dynamic = 'force-dynamic';
  * El catálogo se resuelve en el servidor contra los productos vivos del ERP,
  * así que el precio y la disponibilidad que ve el visitante son los del
  * inventario en ese instante, sin ninguna copia intermedia que sincronizar.
+ *
+ * Baja entero al navegador —una tienda de este tamaño son decenas de fichas,
+ * no miles— y desde ahí el filtrado, la búsqueda y la paginación son
+ * instantáneos y sin más lecturas de Firestore.
  */
 export default async function StoreHomePage({
   params,
@@ -31,129 +35,74 @@ export default async function StoreHomePage({
 
   const catalog = await loadStorefrontCatalog(settings.organizationId);
   const collections = catalogCollections(catalog);
+  const products = orderForStorefront(catalog);
 
-  const active = coleccion && collections.includes(coleccion) ? coleccion : null;
-  const products = active ? catalog.filter((item) => item.collection === active) : catalog;
+  // La colección de la URL solo se acepta si existe: `?coleccion=cualquiercosa`
+  // no debe dejar la vitrina vacía.
+  const initialCollection = coleccion && collections.includes(coleccion) ? coleccion : null;
 
-  const symbol = settings.branding.currencySymbol;
-  const hero = settings.features.hero ? settings.heroSlides[0] : null;
+  const showHero = settings.features.hero && settings.heroSlides.length > 0;
+
+  // Gesto de la plantilla: el orden de las secciones rota con el día, así que
+  // la portada no se ve idéntica cada vez que alguien vuelve. Se calcula acá y
+  // baja como número para que servidor y navegador pinten lo mismo.
+  const sectionOffset = collections.length > 0 ? new Date().getDay() % collections.length : 0;
 
   return (
-    <div className="space-y-10">
-      {hero && (
-        <section className="relative overflow-hidden border" style={{ borderColor: 'var(--shop-line)' }}>
-          <div className="shop-media" style={{ aspectRatio: '21 / 9' }}>
-            <ShopImage src={hero.imageUrl} alt={hero.title ?? settings.branding.name} width={1600} eager />
-          </div>
-          {(hero.title || hero.subtitle || hero.ctaLabel) && (
-            <div
-              className="absolute inset-0 flex flex-col justify-end gap-3 p-6 sm:p-10"
-              style={{ background: 'linear-gradient(to top, rgb(0 0 0 / 0.85), transparent 65%)' }}
-            >
-              {hero.title && <h1 className="shop-display text-3xl sm:text-5xl">{hero.title}</h1>}
-              {hero.subtitle && (
-                <p className="max-w-prose text-sm sm:text-base" style={{ color: 'var(--shop-ink-muted)' }}>
-                  {hero.subtitle}
-                </p>
-              )}
-              {hero.ctaLabel && hero.ctaHref && (
-                <a href={hero.ctaHref} className="shop-btn w-fit">
-                  {hero.ctaLabel}
-                </a>
-              )}
-            </div>
-          )}
-        </section>
+    <div className="pb-10">
+      {showHero && (
+        <HeroSlider slides={settings.heroSlides} brandName={settings.branding.name} />
       )}
 
-      {collections.length > 0 && (
-        <nav className="flex flex-wrap gap-2">
-          <CollectionChip slug={slug} label="Todo" href={`/t/${slug}`} active={!active} />
-          {collections.map((collection) => (
-            <CollectionChip
-              key={collection}
-              slug={slug}
-              label={collection}
-              href={`/t/${slug}?coleccion=${encodeURIComponent(collection)}`}
-              active={active === collection}
-            />
-          ))}
-        </nav>
-      )}
-
-      {products.length === 0 ? (
-        <p className="py-16 text-center text-sm" style={{ color: 'var(--shop-ink-muted)' }}>
-          Todavía no hay productos publicados en esta sección.
-        </p>
-      ) : (
-        <section className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
-          {products.map((product) => (
-            <ProductCard key={product.listingId} slug={slug} product={product} symbol={symbol} />
-          ))}
-        </section>
-      )}
+      <CatalogBrowser
+        slug={settings.slug}
+        symbol={settings.branding.currencySymbol}
+        products={products}
+        latest={latestPublished(catalog, 4)}
+        collections={collections}
+        initialCollection={initialCollection}
+        sectionOffset={sectionOffset}
+      />
     </div>
   );
 }
 
-function CollectionChip({
-  label,
-  href,
-  active,
-}: {
-  slug: string;
-  label: string;
-  href: string;
-  active: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      className="shop-badge"
-      style={
-        active
-          ? { background: 'var(--accent)', color: '#000' }
-          : { background: 'var(--shop-surface-2)', color: 'var(--shop-ink-muted)' }
-      }
-    >
-      {label}
-    </Link>
-  );
+/**
+ * Orden de la vitrina, y con él el criterio de "novedades".
+ *
+ * `StorefrontProduct` no expone ninguna fecha: el listing tiene `createdAt`,
+ * pero el catálogo público lo descarta y `services/store.ts` está fuera de mi
+ * alcance en este trabajo. Tampoco sirve el id como reloj —los identificadores
+ * de Firestore son aleatorios, no cronológicos—, así que inventar una recencia
+ * a partir de ellos daría un orden falso y estable, que es lo peor de los dos
+ * mundos.
+ *
+ * El criterio usado es la curaduría explícita del comercio, que es lo único
+ * verdadero que hay a mano: primero lo que marcó como destacado y después el
+ * orden manual (`position`) con el que el repositorio ya entrega el catálogo
+ * —`sort` es estable, así que los empates lo conservan—. Sobre eso, lo agotado
+ * se hunde al final: la portada no debe abrir con algo que no se puede comprar.
+ *
+ * Es aceptable porque el vendedor controla ambas señales desde el panel y las
+ * mueve cuando entra mercadería nueva; el día que el catálogo público arrastre
+ * `createdAt`, este comparador es lo único que hay que cambiar.
+ */
+function orderForStorefront(catalog: StorefrontProduct[]): StorefrontProduct[] {
+  const rank = (product: StorefrontProduct) =>
+    (isSoldOut(product) ? 2 : 0) + (product.featured ? 0 : 1);
+
+  return [...catalog].sort((a, b) => rank(a) - rank(b));
 }
 
-function ProductCard({
-  slug,
-  product,
-  symbol,
-}: {
-  slug: string;
-  product: StorefrontProduct;
-  symbol: string;
-}) {
-  const soldOut = isSoldOut(product);
-
-  return (
-    <Link href={`/t/${slug}/producto/${product.productId}`} className="shop-card block">
-      <div className="shop-media">
-        <ShopImage src={product.images[0] ?? null} alt={product.title} width={800} />
-        {soldOut && (
-          <span className="shop-badge shop-badge-out absolute left-2 top-2">Agotado</span>
-        )}
-        {!soldOut && product.compareAtPrice > 0 && (
-          <span className="shop-badge shop-badge-accent absolute left-2 top-2">Oferta</span>
-        )}
-      </div>
-      <div className="space-y-1 p-3">
-        <p className="truncate text-sm font-bold uppercase tracking-wide">{product.title}</p>
-        <p className="flex items-baseline gap-2 text-sm">
-          <span style={{ color: 'var(--accent)' }}>{priceLabel(product, symbol)}</span>
-          {product.compareAtPrice > 0 && (
-            <span className="text-xs line-through" style={{ color: 'var(--shop-ink-subtle)' }}>
-              {formatStorePrice(product.compareAtPrice, symbol)}
-            </span>
-          )}
-        </p>
-      </div>
-    </Link>
-  );
+/**
+ * Novedades reales: lo último que el comercio publicó, no lo que destacó.
+ *
+ * Se excluye lo agotado a propósito — una sección de novedades que abre con
+ * algo que no se puede comprar trabaja en contra de la venta.
+ */
+function latestPublished(catalog: StorefrontProduct[], count: number): StorefrontProduct[] {
+  return catalog
+    .filter((product) => !isSoldOut(product))
+    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
+    .slice(0, count);
 }

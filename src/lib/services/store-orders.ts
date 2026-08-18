@@ -100,6 +100,119 @@ export function discountAmountFor(discount: StoreDiscount, subtotal: Money): Mon
   return Math.min(Math.max(raw, 0), subtotal);
 }
 
+/** Línea de carrito tal como la manda el navegador para probar un cupón. */
+export interface StorefrontDiscountPreviewLine {
+  productId: Id;
+  quantity: number;
+}
+
+/**
+ * Resultado de probar un cupón. Un código inválido NO es un error del sistema
+ * —es una respuesta legítima— así que viaja como `applies: false` con el motivo
+ * ya redactado para el comprador, no como excepción.
+ */
+export type StorefrontDiscountPreview =
+  | {
+      applies: true;
+      code: string;
+      /** Descuento en centavos sobre el subtotal recalculado aquí. */
+      amount: Money;
+      /** Subtotal del carrito según el catálogo publicado. */
+      subtotal: Money;
+      /** Porcentaje del cupón; `null` cuando es un monto fijo. */
+      percentOff: number | null;
+    }
+  | { applies: false; reason: string };
+
+/**
+ * Prueba un cupón contra el carrito SIN consumirlo.
+ *
+ * Existe para que el comprador sepa si su código sirve mientras llena el
+ * formulario, en lugar de descubrirlo al confirmar. Es de solo lectura: no
+ * incrementa `usedCount` ni escribe nada, así que se puede llamar cada vez que
+ * cambia el carrito.
+ *
+ * Comparte con `createFromStorefront` las dos piezas que definen si un cupón
+ * vale —`discountUnusable` y `discountAmountFor`— y recalcula el subtotal
+ * contra el catálogo publicado. Por eso lo que se ve aquí coincide con lo que
+ * después cobra el pedido, sin duplicar reglas ni confiar en el navegador: del
+ * carrito solo se leen `productId` y cantidad, y la organización sale del slug.
+ *
+ * El importe definitivo lo sigue fijando `createFromStorefront` dentro de la
+ * transacción: entre la previsualización y el pedido el cupón puede vencer,
+ * agotarse o cambiar de precio el producto.
+ */
+export async function previewStorefrontDiscount(
+  slug: string,
+  code: string,
+  lines: StorefrontDiscountPreviewLine[],
+): Promise<StorefrontDiscountPreview> {
+  const settings = await storeSettingsRepository.findBySlug(slug);
+  if (!settings) throw errors.notFound('Tienda');
+  if (settings.status !== 'PUBLISHED') {
+    throw errors.validation('Esta tienda no está recibiendo pedidos en este momento.');
+  }
+  if (!settings.features.discounts) {
+    return { applies: false, reason: 'Esta tienda no acepta cupones.' };
+  }
+
+  const requestedCode = code.trim().toUpperCase();
+  if (!requestedCode) return { applies: false, reason: 'Escribe un código para probarlo.' };
+
+  if (lines.length === 0) return { applies: false, reason: 'Tu carrito está vacío.' };
+  if (lines.length > MAX_ORDER_LINES) {
+    throw errors.validation('El pedido tiene demasiadas líneas distintas.');
+  }
+
+  const catalog = await loadStorefrontCatalog(settings.organizationId);
+  const sellable = sellableIndex(catalog);
+
+  // Las líneas que ya no existen en el catálogo se ignoran en lugar de abortar:
+  // aquí solo interesa el mínimo de compra, y el faltante lo denuncia el
+  // pedido con su propio mensaje. Los `productId` repetidos se cuentan una sola
+  // vez para que nadie infle el subtotal y alcance un mínimo que no cumple.
+  const seen = new Set<Id>();
+  let subtotal = 0;
+
+  for (const line of lines) {
+    if (seen.has(line.productId)) continue;
+    seen.add(line.productId);
+
+    const entry = sellable.get(line.productId);
+    if (!entry) continue;
+
+    const quantity = Math.trunc(line.quantity);
+    if (!Number.isFinite(quantity) || quantity <= 0) continue;
+
+    const capped = Math.min(quantity, MAX_LINE_QUANTITY);
+    subtotal += multiplyByQty(entry.option.price, toScaledQty(capped));
+  }
+
+  if (subtotal <= 0) {
+    return { applies: false, reason: 'Agrega productos disponibles para usar un cupón.' };
+  }
+
+  const discount = await storeDiscountRepository.findByCode(settings.organizationId, requestedCode);
+  if (!discount) return { applies: false, reason: 'El cupón no existe.' };
+
+  const problem = discountUnusable(discount, subtotal);
+  if (problem) return { applies: false, reason: problem };
+
+  const amount = discountAmountFor(discount, subtotal);
+  if (amount <= 0) {
+    return { applies: false, reason: 'El cupón no genera descuento en este carrito.' };
+  }
+
+  return {
+    applies: true,
+    code: discount.code,
+    amount,
+    subtotal,
+    // `value` viene en puntos base (10 % === 1000).
+    percentOff: discount.kind === 'PERCENT' ? discount.value / 100 : null,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Conversión pedido → líneas de venta
 // ---------------------------------------------------------------------------
