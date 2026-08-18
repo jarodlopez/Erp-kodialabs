@@ -1,13 +1,15 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
-import { PageHeader } from '@/components/ui/primitives';
+import { Card, CardHeader, PageHeader } from '@/components/ui/primitives';
 import { imgbbConfigured } from '@/lib/imgbb';
 import { PERMISSIONS } from '@/lib/rbac';
 import { accountRepository } from '@/lib/repositories/finance';
 import { warehouseRepository } from '@/lib/repositories/organization';
 import { getActorContext } from '@/lib/server-context';
 import { storeService } from '@/lib/services/store';
+import { siteOriginIsShareable, storeUrl } from '@/lib/storefront';
+import { StoreLink } from '../store-link';
 import { StoreDesignForm } from './design-form';
 
 export const metadata: Metadata = { title: 'Diseño · Tienda' };
@@ -40,6 +42,20 @@ export default async function StoreDesignPage() {
           de la tienda.
         </p>
       )}
+
+      <Card className="mb-4">
+        <CardHeader
+          title="Enlace de tu tienda"
+          description="Cambia con la dirección pública que definas más abajo."
+        />
+        <div className="px-5 pb-5">
+          <StoreLink
+            url={storeUrl(settings.slug)}
+            path={`/t/${settings.slug}`}
+            shareable={siteOriginIsShareable()}
+          />
+        </div>
+      </Card>
 
       <StoreDesignForm
         settings={settings}

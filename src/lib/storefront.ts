@@ -78,10 +78,38 @@ export function whatsappHref(
   return `https://wa.me/${phone}?text=${encodeURIComponent(lines.join('\n'))}`;
 }
 
+/**
+ * Dominio público del despliegue.
+ *
+ * El orden importa porque este enlace se pega en redes sociales y tiene que
+ * seguir funcionando mañana:
+ *  1. `NEXT_PUBLIC_SITE_URL` — el dominio propio, si se configuró. Manda.
+ *  2. `VERCEL_PROJECT_PRODUCTION_URL` — el dominio estable de producción que
+ *     Vercel expone solo. Sirve aunque nadie configure nada.
+ *  3. `VERCEL_URL` — ÚLTIMO recurso: es la URL de ESE despliegue y cambia con
+ *     cada push, así que no se puede compartir. Solo vale para previsualizar.
+ */
+export function siteOrigin(): string {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (configured) return configured.replace(/\/$/, '');
+
+  const production = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (production) return `https://${production}`;
+
+  const deployment = process.env.VERCEL_URL;
+  if (deployment) return `https://${deployment}`;
+
+  return '';
+}
+
+/** `true` si el enlace que se va a mostrar es estable y se puede compartir. */
+export function siteOriginIsShareable(): boolean {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() || process.env.VERCEL_PROJECT_PRODUCTION_URL,
+  );
+}
+
 /** URL pública absoluta de una tienda, para compartir y para los metadatos. */
 export function storeUrl(slug: string, path = ''): string {
-  const base =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '');
-  return `${base.replace(/\/$/, '')}/t/${slug}${path}`;
+  return `${siteOrigin()}/t/${slug}${path}`;
 }

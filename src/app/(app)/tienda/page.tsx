@@ -20,9 +20,10 @@ import {
 } from '@/lib/repositories/store';
 import { getActorContext } from '@/lib/server-context';
 import { storeService } from '@/lib/services/store';
-import { storeUrl } from '@/lib/storefront';
+import { siteOriginIsShareable, storeUrl } from '@/lib/storefront';
 import { daysAgoIso, formatDate } from '@/lib/utils';
 import { STORE_ORDER_STATUS_LABELS, STORE_STATUS_LABELS } from '@/types/store';
+import { StoreLink } from './store-link';
 
 export const metadata: Metadata = { title: 'Tienda online' };
 export const dynamic = 'force-dynamic';
@@ -97,11 +98,17 @@ export default async function StoreOverviewPage() {
             </Badge>
           }
         />
-        <div className="px-5 pb-5">
-          <p className="text-sm text-[var(--color-ink-muted)]">
-            Dirección pública:{' '}
-            <span className="font-mono text-[var(--color-ink)]">{shareUrl || publicHref}</span>
+        <div className="space-y-2 px-5 pb-5">
+          <p className="text-sm font-medium text-[var(--color-ink-muted)]">
+            Enlace de tu tienda
           </p>
+          <StoreLink url={shareUrl} path={publicHref} shareable={siteOriginIsShareable()} />
+          {!published && (
+            <p className="text-xs text-[var(--color-ink-subtle)]">
+              Mientras esté en borrador, este enlace no abre para nadie. Publicala en Diseño antes
+              de compartirlo.
+            </p>
+          )}
         </div>
       </Card>
 
