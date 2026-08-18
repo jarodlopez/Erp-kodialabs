@@ -1,0 +1,59 @@
+name: Reglas e índices de Firestore
+
+# Vercel despliega la aplicación, pero las reglas y los índices son
+# configuración del propio Firestore y no viajan con el código. Este flujo los
+# publica solo, cada vez que cambian en `main`, de modo que el repositorio
+# siga siendo la única fuente de verdad y nadie tenga que abrir una terminal.
+on:
+  push:
+    branches: [main]
+    paths:
+      - firestore.rules
+      - firestore.indexes.json
+      - storage.rules
+      - firebase.json
+      - .github/workflows/firebase-rules.yml
+  # Permite lanzarlo a mano desde la pestaña Actions, sin tener que tocar el
+  # código: útil la primera vez y para reintentar si algo falló.
+  workflow_dispatch:
+
+# Dos despliegues simultáneos sobre el mismo proyecto se pisarían.
+concurrency:
+  group: firebase-rules
+  cancel-in-progress: false
+
+jobs:
+  desplegar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Preparar credenciales
+        env:
+          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$SERVICE_ACCOUNT" ]; then
+            echo "Falta el secret FIREBASE_SERVICE_ACCOUNT." >&2
+            exit 1
+          fi
+          # El archivo vive solo en el runner, que se destruye al terminar.
+          printf '%s' "$SERVICE_ACCOUNT" > "$RUNNER_TEMP/service-account.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/service-account.json" >> "$GITHUB_ENV"
+
+      - name: Publicar reglas e índices
+        env:
+          PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        run: |
+          if [ -z "$PROJECT_ID" ]; then
+            echo "Falta el secret FIREBASE_PROJECT_ID." >&2
+            exit 1
+          fi
+          npx --yes firebase-tools@14 deploy \
+            --only firestore:rules,firestore:indexes,storage \
+            --project "$PROJECT_ID" \
+            --non-interactive \
+            --force

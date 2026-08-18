@@ -20,16 +20,41 @@ No hace falta ejecutar nada localmente: Vercel construye y publica en cada push.
 
 ### Publicar reglas e índices
 
-Desde cualquier equipo con Node (o desde una acción de GitHub):
+Vercel despliega la aplicación, pero las reglas y los índices son configuración
+del propio Firestore: no viajan con el código y hay que publicarlas aparte.
+
+> Este paso es **obligatorio**. Sin los índices, las consultas con filtros y orden
+> fallan; sin las reglas, la base queda expuesta a cualquiera que conozca el
+> Project ID, que es público por diseño.
+
+**Automático (recomendado, y lo único que funciona sin terminal).** El flujo
+`.github/workflows/firebase-rules.yml` publica reglas e índices en cada push a
+`main` que los modifique, y puede lanzarse a mano desde la pestaña **Actions**
+del repositorio. Se configura una sola vez:
+
+1. Firebase Console → ⚙️ **Configuración del proyecto** → **Cuentas de
+   servicio** → **Generar nueva clave privada**. Se descarga un `.json`.
+2. GitHub → el repositorio → **Settings** → **Secrets and variables** →
+   **Actions** → **New repository secret**. Creá dos:
+
+   | Secret | Valor |
+   | --- | --- |
+   | `FIREBASE_SERVICE_ACCOUNT` | El contenido completo del `.json`, pegado tal cual |
+   | `FIREBASE_PROJECT_ID` | El ID del proyecto (ej. `control-de-59fbd`) |
+
+3. GitHub → **Actions** → *Reglas e índices de Firestore* → **Run workflow**.
+
+La cuenta de servicio que genera Firebase ya trae los permisos necesarios. El
+`.json` nunca entra al repositorio: vive solo como secret, y en cada ejecución
+se escribe en un archivo temporal del runner que se destruye al terminar.
+
+**Manual**, desde un equipo con Node:
 
 ```bash
 npx firebase-tools login
 npx firebase-tools use TU_PROJECT_ID
 npx firebase-tools deploy --only firestore:rules,firestore:indexes,storage
 ```
-
-> Este paso es **obligatorio**. Sin los índices, las consultas con filtros y orden
-> fallan; sin las reglas, la base queda expuesta.
 
 ---
 

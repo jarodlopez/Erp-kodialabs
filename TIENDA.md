@@ -53,7 +53,14 @@ código.
    menos un producto visible y un dato de pago antes de dejarte abrir.
 6. **Compartí el enlace** `https://tu-dominio/t/{slug}`.
 
-Los índices de Firestore del módulo ya están en `firestore.indexes.json`:
+Los índices y las reglas del módulo ya están en el repositorio
+(`firestore.indexes.json` y `firestore.rules`). Se publican solos: el flujo
+`.github/workflows/firebase-rules.yml` los despliega en cada push a `main` que
+los toque, y también se puede lanzar a mano desde la pestaña **Actions** de
+GitHub. Requiere dos secrets en el repositorio, `FIREBASE_SERVICE_ACCOUNT` y
+`FIREBASE_PROJECT_ID`; ver [DEPLOYMENT.md](./DEPLOYMENT.md).
+
+Con terminal a mano, el equivalente es:
 
 ```bash
 npx firebase-tools deploy --only firestore:rules,firestore:indexes
