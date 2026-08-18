@@ -147,6 +147,43 @@ Documento de devolución (venta o compra) con sus ítems, `refundMode`
 (`CASH_REFUND` | `CREDIT_NOTE`) y motivo. **Nunca** modifica ni elimina la
 operación original: solo actualiza sus cantidades devueltas.
 
+### `storeSettings/{organizationId}`
+
+Configuración de la tienda online: `slug` (único en la plataforma, resuelve la
+URL pública `/t/{slug}`), `status` (`DRAFT` | `PUBLISHED`), `branding`,
+`features`, `heroSlides[]`, `shippingZones[]`, `paymentInstructions[]`,
+`shippingProductId` (producto de servicio con el que se factura el envío),
+`warehouseId` y `defaultAccountId`.
+
+### `storeListings/{organizationId}_{productId}`
+
+Ficha de vitrina de un producto **que ya existe en `products`**. Guarda solo lo
+propio del canal web: `title`, `description`, `details[]`, `images[]` (ImgBB),
+`collection`, `salePrice` (oferta; `0` = sin oferta), `position`, `visible` y
+`variants[{ label, productId }]`.
+
+La clave compuesta impide publicar dos veces el mismo producto. Cada variante
+apunta a otro producto real del ERP, de modo que talla y medida conservan su
+SKU, su existencia y su costo: **la tienda no tiene inventario propio**.
+
+### `storeOrders`
+
+Pedido recibido por la tienda, con `customer`, `delivery`, `items[]`,
+`shippingCost`, `discountCode`/`discountAmount`, `total`, `receiptUrl` y
+`status` (`PENDING` | `APPROVED` | `REJECTED` | `CANCELLED`).
+
+Un pedido **no** toca inventario ni finanzas: nace en `PENDING`. Al aprobarlo se
+crea una venta con `saleService` y el pedido guarda `saleId` y `saleNumber`. Es
+el único documento que puede crear un visitante sin sesión, y aun así solo
+aporta identificadores y cantidades: precio, envío, cupón y total los recalcula
+el servidor.
+
+### `storeDiscounts`, `storeBanners`
+
+Cupones (`code`, `kind`, `value` en puntos base o centavos, `minimumPurchase`,
+`maxUses`, `usedCount`, `expiresAt`) y pop-ups de la tienda. El uso del cupón se
+consume al crear el pedido y se devuelve si el pedido se rechaza.
+
 ### `auditLogs`
 
 Registro inmutable: `userId`, `action`, `module`, `entityType`, `entityId`,
@@ -197,6 +234,9 @@ organization
  │                 └──< expenses
  ├── financialAccounts ──< financialTransactions (libro mayor)
  │                          └── transfers (dos patas)
+ ├── storeSettings ──< storeListings ──> products (vitrina, sin copia)
+ │                  └──< storeOrders ──> sales (al aprobar)
+ │                  └──< storeDiscounts, storeBanners
  ├── returns ── (referencian sales o purchases)
  └── auditLogs (inmutable)
 ```

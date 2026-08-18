@@ -174,7 +174,37 @@ y dinero, sin tocar la operación original.
 - Índices compuestos declarados en `firestore.indexes.json`.
 - `count()` agregado para totales, en lugar de traer documentos.
 
-### 10. Sin dependencias innecesarias
+### 10. La tienda online no duplica el catálogo
+
+El módulo de tienda (`/tienda` en el panel, `/t/{slug}` en público) añade un
+canal de venta sin abrir una segunda fuente de verdad:
+
+- **Catálogo.** `storeListings` publica productos que ya viven en `products` y
+  guarda solo lo propio de la web (fotos, texto de venta, oferta, orden). El
+  precio y la existencia que ve el comprador se leen del inventario en vivo.
+- **Variantes.** Cada talla o medida es un producto real del ERP con su SKU y
+  su existencia; la ficha solo las agrupa. Así el kardex y el costo promedio
+  siguen siendo los de siempre, sin una capa paralela de stock por variante.
+- **Dinero.** Un pedido no toca nada. Al aprobarlo, `storeOrderService.approve`
+  llama a `saleService.createSale` con `confirm: true`, de modo que el pedido
+  hereda exactamente la misma transacción atómica que una venta de mostrador:
+  inventario, libro mayor, cuenta por cobrar y auditoría.
+
+El único punto verdaderamente nuevo es que la tienda acepta **escrituras sin
+sesión**. Por eso del carrito solo se leen `productId` y cantidad: precio,
+envío, cupón y total se recalculan en el servidor contra el catálogo publicado,
+y editar el `localStorage` no cambia lo que se cobra.
+
+Hay un detalle contable que conviene conocer: la tienda muestra precios
+**finales**, mientras que el ERP puede facturar con el impuesto por fuera
+(`taxMode: EXCLUSIVE`). Al aprobar, el servicio invierte la fórmula del
+impuesto para obtener la base imponible de cada línea. En la mayoría de los
+importes la reconstrucción es exacta; en unos pocos ningún entero la alcanza
+—con 7 %, ninguna base da 69.93— y la venta queda a un centavo del pedido. Por
+eso el cobro se registra por el total de la **venta**, no por el del pedido.
+Está fijado en `tests/unit/store-pricing.test.ts`.
+
+### 11. Sin dependencias innecesarias
 
 Los gráficos son SVG propios y el generador de PDF está escrito a mano
 (`src/lib/export/pdf.ts`). Menos peso en el bundle y ningún riesgo de que una
@@ -189,8 +219,9 @@ src/
 ├── app/
 │   ├── (auth)/            Login, registro y recuperación
 │   ├── (app)/             Área protegida (sidebar + módulos)
+│   ├── (shop)/            Tienda online pública (`/t/{slug}`), sin sesión
 │   ├── actions/           Server Actions por dominio
-│   ├── api/               Route Handlers (cron, export, storage)
+│   ├── api/               Route Handlers (cron, export, storage, tienda)
 │   ├── layout.tsx         Layout raíz
 │   └── globals.css        Sistema de diseño (Tailwind 4)
 ├── components/
@@ -204,6 +235,9 @@ src/
 │   ├── services/          Lógica de negocio y transacciones
 │   ├── validation/        Esquemas Zod
 │   ├── export/            CSV y PDF
+│   ├── imgbb.ts           Subida de imágenes públicas de la tienda
+│   ├── images.ts          Optimización de imágenes (proxy WebP)
+│   ├── storefront.ts      Utilidades del sitio público (precios, carrito)
 │   ├── money.ts           Aritmética monetaria
 │   ├── pricing.ts         Cálculo de documentos (puro)
 │   ├── rbac.ts            Roles y permisos

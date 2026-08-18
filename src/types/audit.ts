@@ -44,6 +44,7 @@ export type AuditModule =
   | 'FINANCE'
   | 'CATALOG'
   | 'PARTIES'
+  | 'STORE'
   | 'ADMIN'
   | 'REPORTS'
   | 'SYSTEM';

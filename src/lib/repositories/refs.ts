@@ -103,6 +103,22 @@ export const refs = {
   returns: () => col(COLLECTIONS.RETURNS),
   return: (id: Id) => docRef(COLLECTIONS.RETURNS, id),
 
+  storeSettings: () => col(COLLECTIONS.STORE_SETTINGS),
+  storeSetting: (organizationId: Id) => docRef(COLLECTIONS.STORE_SETTINGS, organizationId),
+
+  storeListings: () => col(COLLECTIONS.STORE_LISTINGS),
+  storeListing: (organizationId: Id, productId: Id) =>
+    docRef(COLLECTIONS.STORE_LISTINGS, `${organizationId}_${productId}`),
+
+  storeOrders: () => col(COLLECTIONS.STORE_ORDERS),
+  storeOrder: (id: Id) => docRef(COLLECTIONS.STORE_ORDERS, id),
+
+  storeDiscounts: () => col(COLLECTIONS.STORE_DISCOUNTS),
+  storeDiscount: (id: Id) => docRef(COLLECTIONS.STORE_DISCOUNTS, id),
+
+  storeBanners: () => col(COLLECTIONS.STORE_BANNERS),
+  storeBanner: (id: Id) => docRef(COLLECTIONS.STORE_BANNERS, id),
+
   auditLogs: () => col(COLLECTIONS.AUDIT_LOGS),
   auditLog: (id: Id) => docRef(COLLECTIONS.AUDIT_LOGS, id),
 

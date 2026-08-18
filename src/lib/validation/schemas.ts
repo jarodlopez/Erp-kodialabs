@@ -532,6 +532,177 @@ export const organizationSchema = z.object({
   logoUrl: optionalText(500),
 });
 
+// ---------------------------------------------------------------------------
+// Tienda online
+// ---------------------------------------------------------------------------
+
+/** Dirección pública de la tienda: minúsculas, números y guiones. */
+const slugSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(3, 'La dirección debe tener al menos 3 caracteres.')
+  .max(40, 'La dirección no puede superar 40 caracteres.')
+  .regex(/^[a-z0-9-]+$/, 'Usa solo letras, números y guiones.');
+
+const hexColorSchema = z
+  .string()
+  .trim()
+  .regex(/^#[0-9a-fA-F]{6}$/, 'Elige un color válido.');
+
+export const storeSettingsSchema = z.object({
+  slug: slugSchema,
+  status: z.enum(['DRAFT', 'PUBLISHED']),
+  branding: z.object({
+    name: requiredText('El nombre de la tienda', 80),
+    logoUrl: optionalText(500),
+    accentColor: hexColorSchema,
+    marqueeText: optionalText(200),
+    whatsapp: optionalText(30),
+    currencySymbol: requiredText('El símbolo de moneda', 6),
+    variantLabel: requiredText('La etiqueta de variante', 24),
+    cartTitle: requiredText('El título del carrito', 40),
+  }),
+  features: z.object({
+    hero: z.coerce.boolean().default(true),
+    discounts: z.coerce.boolean().default(true),
+    popups: z.coerce.boolean().default(true),
+    whatsappButton: z.coerce.boolean().default(true),
+    showStock: z.coerce.boolean().default(false),
+  }),
+  heroSlides: z
+    .array(
+      z.object({
+        imageUrl: requiredText('La imagen', 500),
+        title: optionalText(80),
+        subtitle: optionalText(160),
+        ctaLabel: optionalText(40),
+        ctaHref: optionalText(300),
+      }),
+    )
+    .max(6, 'Máximo 6 portadas.')
+    .default([]),
+  shippingZones: z
+    .array(
+      z.object({
+        id: optionalText(40),
+        label: requiredText('El nombre de la zona', 60),
+        cost: money('El costo de envío'),
+      }),
+    )
+    .max(30, 'Máximo 30 zonas de envío.')
+    .default([]),
+  paymentInstructions: z
+    .array(
+      z.object({
+        id: optionalText(40),
+        label: requiredText('El método de pago', 60),
+        detail: requiredText('El dato de pago', 200),
+        notes: optionalText(300),
+      }),
+    )
+    .max(10, 'Máximo 10 datos de pago.')
+    .default([]),
+  seoDescription: optionalText(300),
+  warehouseId: z.string().optional().nullable().transform((v) => v || null),
+  defaultAccountId: z.string().optional().nullable().transform((v) => v || null),
+});
+
+export const storeListingSchema = z.object({
+  productId: idString,
+  title: optionalText(150),
+  description: optionalText(2000),
+  details: z.array(z.string().trim().max(160)).max(12).default([]),
+  images: z.array(z.string().trim().max(500)).max(8).default([]),
+  collection: optionalText(80),
+  variants: z
+    .array(z.object({ label: requiredText('La etiqueta', 30), productId: idString }))
+    .max(40, 'Máximo 40 variantes por producto.')
+    .default([]),
+  salePrice: money('El precio de oferta').optional().default(0),
+  featured: z.coerce.boolean().optional().default(false),
+  position: z.coerce.number().int().min(0).max(9999).optional().default(100),
+  visible: z.coerce.boolean().optional().default(true),
+});
+
+export const storeDiscountSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .min(3, 'El código debe tener al menos 3 caracteres.')
+    .max(24, 'El código no puede superar 24 caracteres.')
+    .regex(/^[A-Z0-9-]+$/, 'Usa solo letras, números y guiones.'),
+  kind: z.enum(['PERCENT', 'AMOUNT']),
+  value: z.coerce
+    .number({ error: 'El valor debe ser un número.' })
+    .positive('El valor debe ser mayor que cero.'),
+  minimumPurchase: money('La compra mínima').optional().default(0),
+  maxUses: z.coerce.number().int().min(0).max(100000).optional().default(0),
+  expiresAt: z.string().optional().nullable().transform((v) => v || null),
+  status: z.enum(['ACTIVE', 'INACTIVE']).default('ACTIVE'),
+});
+
+export const storeBannerSchema = z.object({
+  title: requiredText('El título', 80),
+  message: optionalText(300),
+  imageUrl: optionalText(500),
+  ctaLabel: optionalText(40),
+  ctaHref: optionalText(300),
+  delaySeconds: z.coerce.number().int().min(0).max(60).optional().default(3),
+  status: z.enum(['ACTIVE', 'INACTIVE']).default('ACTIVE'),
+});
+
+export const storeOrderResolutionSchema = z.object({
+  orderId: idString,
+  note: requiredText('El motivo', 300),
+});
+
+export const approveStoreOrderSchema = z.object({
+  orderId: idString,
+  /** Sin cuenta, la venta se genera a crédito y deja la cuenta por cobrar. */
+  accountId: z.string().optional().nullable().transform((v) => v || null),
+  method: paymentMethodSchema.optional().default('TRANSFER'),
+  reference: optionalText(80),
+  note: optionalText(300),
+});
+
+/**
+ * Pedido recibido del sitio público. Es la única entrada sin sesión del ERP,
+ * por lo que se acota con firmeza: del carrito solo se aceptan identificadores
+ * y cantidades, nunca precios.
+ */
+export const storefrontOrderSchema = z.object({
+  customer: z.object({
+    name: requiredText('Tu nombre', 120),
+    phone: requiredText('Tu teléfono', 30),
+    email: z
+      .union([z.email('Ingresa un correo válido.'), z.literal('')])
+      .optional()
+      .nullable()
+      .transform((v) => (v ? v : null)),
+    document: optionalText(40),
+  }),
+  address: requiredText('La dirección de entrega', 400),
+  addressNotes: optionalText(300),
+  shippingZoneId: z.string().max(40).optional().nullable().transform((v) => v || null),
+  items: z
+    .array(
+      z.object({
+        productId: idString,
+        quantity: z.coerce
+          .number({ error: 'La cantidad debe ser un número.' })
+          .int('La cantidad debe ser un número entero.')
+          .positive('La cantidad debe ser mayor que cero.')
+          .max(500, 'La cantidad es demasiado grande.'),
+      }),
+    )
+    .min(1, 'Tu carrito está vacío.')
+    .max(50, 'El pedido tiene demasiadas líneas.'),
+  discountCode: z.string().trim().max(24).optional().nullable().transform((v) => v || null),
+  notes: optionalText(500),
+});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type ProductFormInput = z.infer<typeof productSchema>;
@@ -544,3 +715,8 @@ export type ExpenseFormInput = z.infer<typeof expenseSchema>;
 export type AccountFormInput = z.infer<typeof accountSchema>;
 export type TransferFormInput = z.infer<typeof transferSchema>;
 export type ReturnFormInput = z.infer<typeof returnSchema>;
+export type StoreSettingsFormInput = z.infer<typeof storeSettingsSchema>;
+export type StoreListingFormInput = z.infer<typeof storeListingSchema>;
+export type StoreDiscountFormInput = z.infer<typeof storeDiscountSchema>;
+export type StoreBannerFormInput = z.infer<typeof storeBannerSchema>;
+export type StorefrontOrderInput = z.infer<typeof storefrontOrderSchema>;

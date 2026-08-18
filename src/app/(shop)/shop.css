@@ -1,0 +1,228 @@
+/* ==========================================================================
+   Tienda online — estilos del sitio público
+
+   Deliberadamente separado del sistema de diseño del ERP: el panel es claro y
+   sobrio para leer tablas durante horas, la tienda es oscura y contrastada
+   para vender. Lo único que el cliente configura es `--accent`, que se inyecta
+   en runtime desde el panel (Diseño → Marca); todo lo demás se deriva de ahí.
+   ========================================================================== */
+
+.shop-root {
+  --shop-bg: #0a0a0a;
+  --shop-surface: #141414;
+  --shop-surface-2: #1c1c1c;
+  --shop-line: #2a2a2a;
+  --shop-ink: #fafafa;
+  --shop-ink-muted: #a1a1a1;
+  --shop-ink-subtle: #6f6f6f;
+
+  /* Sobrescrito por el layout con el color de la tienda. */
+  --accent: #ffffff;
+  --accent-rgb: 255 255 255;
+
+  min-height: 100vh;
+  background: var(--shop-bg);
+  color: var(--shop-ink);
+  font-feature-settings: 'ss01';
+}
+
+/* Titulares: condensados, en versales, muy apretados. Es lo que le da a la
+   plantilla su carácter sin depender de una fuente externa. */
+.shop-display {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.shop-eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--shop-ink-subtle);
+}
+
+/* --- Botones ------------------------------------------------------------ */
+
+.shop-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  border: 2px solid var(--accent);
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+}
+
+.shop-btn:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 rgb(var(--accent-rgb) / 0.35);
+}
+
+.shop-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.shop-btn-outline {
+  background: transparent;
+  color: var(--shop-ink);
+  border-color: var(--shop-line);
+}
+
+.shop-btn-outline:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* --- Campos ------------------------------------------------------------- */
+
+.shop-input,
+.shop-textarea,
+.shop-select {
+  width: 100%;
+  padding: 0.75rem 0.875rem;
+  background: var(--shop-surface);
+  border: 1px solid var(--shop-line);
+  color: var(--shop-ink);
+  font-size: 0.9375rem;
+  outline: none;
+  transition: border-color 120ms ease;
+}
+
+.shop-input:focus,
+.shop-textarea:focus,
+.shop-select:focus {
+  border-color: var(--accent);
+}
+
+.shop-input::placeholder,
+.shop-textarea::placeholder {
+  color: var(--shop-ink-subtle);
+}
+
+.shop-label {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--shop-ink-muted);
+}
+
+/* --- Tarjetas de producto ---------------------------------------------- */
+
+.shop-card {
+  background: var(--shop-surface);
+  border: 1px solid var(--shop-line);
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.shop-card:hover {
+  border-color: rgb(var(--accent-rgb) / 0.6);
+  transform: translateY(-3px);
+}
+
+.shop-media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--shop-surface-2);
+}
+
+.shop-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 400ms ease, opacity 300ms ease;
+}
+
+.shop-card:hover .shop-media img {
+  transform: scale(1.04);
+}
+
+/* Aparición suave al terminar de cargar, para evitar el salto en blanco. */
+.shop-img-fade {
+  opacity: 0;
+}
+
+.shop-img-loaded {
+  opacity: 1;
+}
+
+/* --- Cinta superior ----------------------------------------------------- */
+
+.shop-marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  background: var(--accent);
+  color: #000;
+}
+
+.shop-marquee > span {
+  display: inline-block;
+  padding-block: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  animation: shop-marquee 28s linear infinite;
+}
+
+@keyframes shop-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-marquee > span {
+    animation: none;
+  }
+
+  .shop-card:hover,
+  .shop-btn:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* --- Insignias ---------------------------------------------------------- */
+
+.shop-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.shop-badge-accent {
+  background: var(--accent);
+  color: #000;
+}
+
+.shop-badge-muted {
+  background: var(--shop-surface-2);
+  color: var(--shop-ink-muted);
+  border: 1px solid var(--shop-line);
+}
+
+.shop-badge-out {
+  background: #000;
+  color: var(--shop-ink-muted);
+  border: 1px solid var(--shop-line);
+}

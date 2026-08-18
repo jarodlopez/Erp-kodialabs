@@ -8,4 +8,5 @@ export * from './purchases';
 export * from './expenses';
 export * from './finance';
 export * from './returns';
+export * from './store';
 export * from './audit';

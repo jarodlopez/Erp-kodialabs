@@ -65,6 +65,12 @@ export const PERMISSIONS = {
   PAYABLES_VIEW: 'payables.view',
   PAYABLES_PAY: 'payables.pay',
 
+  // Tienda online
+  STORE_VIEW: 'store.view',
+  STORE_MANAGE: 'store.manage',
+  STORE_ORDERS_VIEW: 'store.orders.view',
+  STORE_ORDERS_MANAGE: 'store.orders.manage',
+
   // Análisis
   REPORTS_VIEW: 'reports.view',
   REPORTS_EXPORT: 'reports.export',
@@ -125,6 +131,7 @@ const MANAGER_PERMISSIONS: Permission[] = [
   P.FINANCE_VIEW, P.FINANCE_CREATE, P.FINANCE_TRANSFER, P.FINANCE_ADJUST,
   P.RECEIVABLES_VIEW, P.RECEIVABLES_COLLECT,
   P.PAYABLES_VIEW, P.PAYABLES_PAY,
+  P.STORE_VIEW, P.STORE_MANAGE, P.STORE_ORDERS_VIEW, P.STORE_ORDERS_MANAGE,
   P.REPORTS_VIEW, P.REPORTS_EXPORT,
   P.SETTINGS_VIEW,
 ];
@@ -137,6 +144,7 @@ const SALES_PERMISSIONS: Permission[] = [
   P.SALES_VIEW, P.SALES_CREATE, P.SALES_UPDATE,
   P.INVENTORY_VIEW,
   P.RECEIVABLES_VIEW, P.RECEIVABLES_COLLECT,
+  P.STORE_VIEW, P.STORE_ORDERS_VIEW, P.STORE_ORDERS_MANAGE,
   P.REPORTS_VIEW,
 ];
 
@@ -148,6 +156,7 @@ const WAREHOUSE_PERMISSIONS: Permission[] = [
   P.PURCHASES_VIEW, P.PURCHASES_CREATE, P.PURCHASES_UPDATE, P.PURCHASES_RECEIVE,
   P.PURCHASES_RETURN,
   P.INVENTORY_VIEW, P.INVENTORY_ADJUST, P.INVENTORY_TRANSFER,
+  P.STORE_VIEW, P.STORE_ORDERS_VIEW,
   P.REPORTS_VIEW,
 ];
 
@@ -164,6 +173,7 @@ const ACCOUNTANT_PERMISSIONS: Permission[] = [
   P.FINANCE_VIEW, P.FINANCE_CREATE, P.FINANCE_TRANSFER, P.FINANCE_ADJUST,
   P.RECEIVABLES_VIEW, P.RECEIVABLES_COLLECT,
   P.PAYABLES_VIEW, P.PAYABLES_PAY,
+  P.STORE_VIEW, P.STORE_ORDERS_VIEW,
   P.REPORTS_VIEW, P.REPORTS_EXPORT,
   P.AUDIT_VIEW,
   P.SETTINGS_VIEW,
@@ -290,6 +300,15 @@ export const PERMISSION_GROUPS: { module: string; permissions: { key: Permission
       { key: P.RECEIVABLES_COLLECT, label: 'Registrar cobros' },
       { key: P.PAYABLES_VIEW, label: 'Ver cuentas por pagar' },
       { key: P.PAYABLES_PAY, label: 'Registrar pagos a proveedores' },
+    ],
+  },
+  {
+    module: 'Tienda online',
+    permissions: [
+      { key: P.STORE_VIEW, label: 'Ver la tienda' },
+      { key: P.STORE_MANAGE, label: 'Configurar tienda y catálogo' },
+      { key: P.STORE_ORDERS_VIEW, label: 'Ver pedidos online' },
+      { key: P.STORE_ORDERS_MANAGE, label: 'Aprobar y rechazar pedidos' },
     ],
   },
   {

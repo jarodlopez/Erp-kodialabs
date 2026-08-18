@@ -81,6 +81,23 @@ export const customerRepository = {
     return snap.empty ? null : mapDoc<Customer>(snap.docs[0]);
   },
 
+  /**
+   * Cliente por teléfono. Es la llave natural de los pedidos web: el
+   * comprador deja su número, no su cédula, y así los pedidos repetidos se
+   * acumulan en la misma ficha en lugar de crear un cliente por compra.
+   */
+  async findByPhone(organizationId: Id, phone: string): Promise<Customer | null> {
+    const clean = phone.replace(/[^0-9]/g, '');
+    if (!clean) return null;
+    const snap = await refs
+      .customers()
+      .where('organizationId', '==', organizationId)
+      .where('phone', '==', clean)
+      .limit(1)
+      .get();
+    return snap.empty ? null : mapDoc<Customer>(snap.docs[0]);
+  },
+
   async quickSearch(organizationId: Id, term: string, max = 15): Promise<Customer[]> {
     const clean = term.trim();
     let query: Query = refs

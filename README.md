@@ -66,6 +66,19 @@ operaciones críticas se ejecutan en el servidor dentro de transacciones atómic
 - Estado de resultados y flujo de caja construidos desde los documentos registrados.
 - Centro de reportes con exportación real a **CSV** y **PDF**.
 
+**Tienda online**
+
+- Módulo de e-commerce integrado: vitrina pública en `/t/{slug}` servida por el
+  mismo Next.js, con marca, portadas, zonas de envío, datos de pago, cupones y
+  pop-ups configurables desde el panel — sin tocar código.
+- Publica productos que ya existen en el inventario: no hay catálogo ni
+  existencias duplicadas. Las variantes (talla, medida, presentación) son
+  productos reales del ERP agrupados bajo una misma ficha.
+- Los pedidos llegan a revisión con su comprobante de pago. Al aprobarlos se
+  genera una **venta confirmada**: descuenta inventario, registra el asiento y
+  crea la cuenta por cobrar en la misma transacción atómica.
+- Imágenes alojadas en ImgBB y servidas en WebP al ancho de cada vista.
+
 **Administración**
 
 - Multi-organización con aislamiento estricto de datos.
@@ -115,6 +128,10 @@ Solo hay **tres variables obligatorias**, todas privadas y de servidor:
 | `FIREBASE_CLIENT_EMAIL` | Del service account. **Nunca** con prefijo `NEXT_PUBLIC`. |
 | `FIREBASE_PRIVATE_KEY` | Del service account, entre comillas dobles y conservando los `\n`. |
 | `CRON_SECRET` | Protege `/api/cron/daily`. |
+
+Para la tienda online se añaden dos opcionales: `IMGBB_API_KEY` (privada, sin
+ella no se pueden subir imágenes) y `NEXT_PUBLIC_SITE_URL` (para armar el enlace
+público de cada tienda).
 
 Opcionales: `SESSION_COOKIE_DAYS`, `SESSION_CHECK_REVOKED`, las variables de
 emuladores y las `NEXT_PUBLIC_FIREBASE_*` (solo si quieres apuntar a otro
@@ -167,6 +184,7 @@ partir de `vercel.json`.
 | Documento | Contenido |
 | --- | --- |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Capas, flujo de una operación, decisiones técnicas. |
+| [TIENDA.md](./TIENDA.md) | Módulo de tienda online: puesta en marcha y modelo. |
 | [DATABASE.md](./DATABASE.md) | Modelo de datos, colecciones, índices y convenciones. |
 | [SECURITY.md](./SECURITY.md) | Autenticación, RBAC, reglas, aislamiento y controles. |
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Despliegue en Vercel y configuración de Firebase. |

@@ -104,6 +104,22 @@ service cloud.firestore {
     match /taxes/{docId}                 { allow read: if sameOrganization(); allow write: if false; }
     match /warehouses/{docId}            { allow read: if sameOrganization(); allow write: if false; }
 
+    // ---------------------------- Tienda online -----------------------------
+    // El sitio público NO lee Firestore desde el navegador: las páginas se
+    // renderizan en el servidor con el Admin SDK, que no pasa por estas
+    // reglas. Por eso la tienda no necesita —ni debe tener— lectura anónima:
+    // aquí solo se habilita la lectura para el panel del propio comercio.
+
+    match /storeSettings/{organizationId} {
+      allow read: if hasOrganization() && organizationId == orgId();
+      allow write: if false;
+    }
+
+    match /storeListings/{docId}  { allow read: if sameOrganization(); allow write: if false; }
+    match /storeOrders/{docId}    { allow read: if sameOrganization(); allow write: if false; }
+    match /storeDiscounts/{docId} { allow read: if sameOrganization(); allow write: if false; }
+    match /storeBanners/{docId}   { allow read: if sameOrganization(); allow write: if false; }
+
     // ------------------------------ Auditoría -------------------------------
     // Inmutable: sin escritura desde ningún cliente y lectura restringida.
 

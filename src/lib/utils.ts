@@ -41,6 +41,13 @@ export function toDateInput(value?: string | Date | null): string {
 }
 
 /** Primer día del mes actual, en formato de input. */
+/** Fecha ISO de hace N días, para ventanas móviles ("últimos 30 días"). */
+export function daysAgoIso(days: number, reference = new Date()): string {
+  const date = new Date(reference);
+  date.setUTCDate(date.getUTCDate() - days);
+  return date.toISOString();
+}
+
 export function startOfMonthInput(reference = new Date()): string {
   return new Date(Date.UTC(reference.getUTCFullYear(), reference.getUTCMonth(), 1))
     .toISOString()

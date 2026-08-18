@@ -42,6 +42,12 @@ export const COLLECTIONS = {
   PAYMENTS: 'payments',
   RETURNS: 'returns',
 
+  STORE_SETTINGS: 'storeSettings',
+  STORE_LISTINGS: 'storeListings',
+  STORE_ORDERS: 'storeOrders',
+  STORE_DISCOUNTS: 'storeDiscounts',
+  STORE_BANNERS: 'storeBanners',
+
   AUDIT_LOGS: 'auditLogs',
   COUNTERS: 'counters',
   IDEMPOTENCY: 'idempotencyKeys',

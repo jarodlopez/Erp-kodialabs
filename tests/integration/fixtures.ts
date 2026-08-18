@@ -211,3 +211,137 @@ export function seedOrganization(db: FakeFirestore, options: SeedOptions = {}) {
 
   return { productId, accountId, customerId, supplierId, expenseCategoryId };
 }
+
+// ---------------------------------------------------------------------------
+// Tienda online
+// ---------------------------------------------------------------------------
+
+export const STORE_SLUG = 'tienda-test';
+
+export interface SeedStoreOptions {
+  /** Zonas de envío. Por defecto, una zona con costo. */
+  shippingCost?: number;
+  /** Productos que se publican en la vitrina. */
+  productIds?: string[];
+  /** Precio de oferta de la ficha (unidad mayor). `0` = sin oferta. */
+  listingSalePrice?: number;
+  status?: 'DRAFT' | 'PUBLISHED';
+}
+
+/** Publica una tienda con un producto en vitrina, lista para recibir pedidos. */
+export function seedStore(db: FakeFirestore, options: SeedStoreOptions = {}) {
+  const {
+    shippingCost = 50,
+    productIds = ['prod-1'],
+    listingSalePrice = 0,
+    status = 'PUBLISHED',
+  } = options;
+
+  const zoneId = 'zone-managua';
+
+  db.write(
+    COLLECTIONS.STORE_SETTINGS,
+    ORG_ID,
+    {
+      id: ORG_ID,
+      organizationId: ORG_ID,
+      slug: STORE_SLUG,
+      status,
+      branding: {
+        name: 'Tienda de prueba',
+        logoUrl: null,
+        accentColor: '#111111',
+        marqueeText: null,
+        whatsapp: null,
+        currencySymbol: 'C$',
+        variantLabel: 'TALLA',
+        cartTitle: 'TU CARRITO',
+      },
+      features: {
+        hero: true,
+        discounts: true,
+        popups: true,
+        whatsappButton: true,
+        showStock: false,
+      },
+      heroSlides: [],
+      shippingZones: [{ id: zoneId, label: 'Managua', cost: toMinorUnits(shippingCost) }],
+      paymentInstructions: [{ id: 'pay-1', label: 'BAC', detail: '000-0000', notes: null }],
+      seoDescription: null,
+      shippingProductId: null,
+      warehouseId: WAREHOUSE_ID,
+      defaultAccountId: null,
+      createdAt: now,
+      updatedAt: now,
+      updatedBy: USER_ID,
+    },
+    false,
+  );
+
+  const [mainProductId, ...variantProductIds] = productIds;
+
+  db.write(
+    COLLECTIONS.STORE_LISTINGS,
+    `${ORG_ID}_${mainProductId}`,
+    {
+      id: `${ORG_ID}_${mainProductId}`,
+      organizationId: ORG_ID,
+      productId: mainProductId,
+      title: 'Producto en vitrina',
+      searchTitle: normalizeSearch('Producto en vitrina'),
+      description: null,
+      details: [],
+      images: [],
+      collection: null,
+      variants: variantProductIds.map((id, index) => ({
+        label: `V${index + 1}`,
+        productId: id,
+      })),
+      salePrice: toMinorUnits(listingSalePrice),
+      featured: false,
+      position: 1,
+      visible: true,
+      createdAt: now,
+      updatedAt: now,
+      createdBy: USER_ID,
+      updatedBy: USER_ID,
+    },
+    false,
+  );
+
+  return { zoneId, listingId: `${ORG_ID}_${mainProductId}` };
+}
+
+/** Cupón de la tienda, para probar el descuento y su liberación al rechazar. */
+export function seedDiscount(
+  db: FakeFirestore,
+  options: { code?: string; kind?: 'PERCENT' | 'AMOUNT'; value: number; maxUses?: number },
+) {
+  const { code = 'PROMO10', kind = 'PERCENT', value, maxUses = 0 } = options;
+  const id = `disc-${code.toLowerCase()}`;
+
+  db.write(
+    COLLECTIONS.STORE_DISCOUNTS,
+    id,
+    {
+      id,
+      organizationId: ORG_ID,
+      code,
+      // El porcentaje viaja en puntos base; el monto fijo, en centavos.
+      value: kind === 'PERCENT' ? value * 100 : toMinorUnits(value),
+      kind,
+      minimumPurchase: 0,
+      maxUses,
+      usedCount: 0,
+      expiresAt: null,
+      status: 'ACTIVE',
+      createdAt: now,
+      updatedAt: now,
+      createdBy: USER_ID,
+      updatedBy: USER_ID,
+    },
+    false,
+  );
+
+  return { id, code };
+}

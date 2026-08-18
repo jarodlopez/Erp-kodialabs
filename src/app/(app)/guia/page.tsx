@@ -342,6 +342,53 @@ const SECTIONS: Section[] = [
     ),
   },
   {
+    id: 'tienda',
+    title: 'Tienda online',
+    icon: Store,
+    content: (
+      <>
+        <P>
+          Vende por internet el mismo catálogo del ERP. La tienda tiene su propia dirección
+          pública y se configura entera desde el panel, sin tocar código.
+        </P>
+        <Steps
+          items={[
+            <>
+              <Term>Diseño:</Term> nombre, logo, color, moneda, zonas de envío y datos de pago.
+              Elige también la etiqueta de variante: <Term>TALLA</Term> para ropa,{' '}
+              <Term>MEDIDA</Term> para ferretería.
+            </>,
+            <>
+              <Term>Vitrina:</Term> elige qué productos del inventario se publican y súbeles
+              fotos. Si un producto se vende en varias tallas o medidas, agrégalas como
+              variantes: cada una es otro producto tuyo, con su propio SKU y su existencia.
+            </>,
+            <>
+              <Term>Publicar:</Term> la tienda nace en borrador y nadie puede verla. Cuando esté
+              lista, cámbiala a publicada desde Diseño.
+            </>,
+            <>
+              <Term>Pedidos:</Term> los pedidos llegan con su comprobante de pago. Revísalo y
+              apruébalo: en ese momento se genera la venta, se descuenta el inventario y se
+              registra el asiento.
+            </>,
+          ]}
+        />
+        <Tip>
+          Un pedido pendiente no toca inventario ni dinero. Nada se mueve hasta que alguien lo
+          aprueba, así que un pago falso no te descuadra el stock.
+        </Tip>
+        <Bullets
+          items={[
+            <>Si apruebas <Term>sin elegir una cuenta</Term>, la venta queda a crédito y aparece en cuentas por cobrar: es lo correcto cuando el cliente paga contra entrega.</>,
+            <>El costo de envío se factura como una línea más, para que el total de la venta cuadre con lo que pagó el cliente.</>,
+            <>Los <Term>cupones</Term> se crean en su propia pantalla y el descuento se traslada a la venta.</>,
+          ]}
+        />
+      </>
+    ),
+  },
+  {
     id: 'reportes',
     title: 'Reportes',
     icon: FileBarChart,

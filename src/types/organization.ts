@@ -80,6 +80,12 @@ export interface Settings {
     return: string;
     transfer: string;
     adjustment: string;
+    /**
+     * Prefijo de los pedidos de la tienda online. Opcional: las
+     * organizaciones creadas antes del módulo no lo tienen y se resuelve
+     * con `DEFAULT_STORE_ORDER_PREFIX`.
+     */
+    storeOrder?: string;
   };
   invoiceFooter: string | null;
   updatedAt: IsoDate;
