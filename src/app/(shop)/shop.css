@@ -1,135 +1,104 @@
 /* ==========================================================================
-   Tienda online — estilos del sitio público
+   Tienda online — sistema visual
 
-   Deliberadamente separado del sistema de diseño del ERP: el panel es claro y
-   sobrio para leer tablas durante horas, la tienda es oscura y contrastada
-   para vender. Lo único que el cliente configura es `--accent`, que se inyecta
-   en runtime desde el panel (Diseño → Marca); todo lo demás se deriva de ahí.
+   Puerto directo del lenguaje de la plantilla Kodia Shop: fondo negro con
+   retícula tenue, tarjetas con borde que se enciende, botones que invierten a
+   negro con halo de neón, titulares condensados en versales y cifras
+   monoespaciadas.
+
+   Todo cuelga de `--accent`, que el layout inyecta con el color que el
+   comercio eligió en el panel. Nada de esto está cableado: cambiando ese color
+   la tienda entera cambia de personalidad.
+
+   Deliberadamente separado del sistema del ERP: el panel es claro y sobrio
+   para leer tablas durante horas; la tienda es oscura y contrastada para
+   vender.
    ========================================================================== */
 
 .shop-root {
-  --shop-bg: #0a0a0a;
-  --shop-surface: #141414;
-  --shop-surface-2: #1c1c1c;
-  --shop-line: #2a2a2a;
-  --shop-ink: #fafafa;
-  --shop-ink-muted: #a1a1a1;
-  --shop-ink-subtle: #6f6f6f;
+  /* Superficies. El negro es negro: el contraste es parte de la identidad. */
+  --shop-bg: #000000;
+  --shop-surface: #050505;
+  --shop-surface-2: #0a0a0a;
+  --shop-line: #222222;
+  --shop-line-soft: #18181b;
+  --shop-ink: #ffffff;
+  --shop-ink-muted: #a1a1aa;
+  --shop-ink-subtle: #71717a;
 
-  /* Sobrescrito por el layout con el color de la tienda. */
+  /* Sobrescrito en runtime por el layout con el color de la tienda. */
   --accent: #ffffff;
   --accent-rgb: 255 255 255;
 
   min-height: 100vh;
-  background: var(--shop-bg);
+  background-color: var(--shop-bg);
   color: var(--shop-ink);
-  font-feature-settings: 'ss01';
+  font-family: var(--shop-font-body), system-ui, sans-serif;
+
+  /* Retícula de fondo: da profundidad sin competir con las fotos. */
+  background-image:
+    linear-gradient(rgb(var(--accent-rgb) / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--accent-rgb) / 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  overscroll-behavior-y: none;
 }
 
-/* Titulares: condensados, en versales, muy apretados. Es lo que le da a la
-   plantilla su carácter sin depender de una fuente externa. */
+/* Las imágenes de catálogo no se arrastran ni se copian por gesto largo. */
+.shop-root img {
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
+
+/* --- Tipografía ---------------------------------------------------------- */
+
 .shop-display {
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-family: var(--shop-font-display), 'Arial Narrow', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.03em;
   line-height: 0.95;
   text-transform: uppercase;
 }
 
+.shop-mono {
+  font-family: var(--shop-font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
 .shop-eyebrow {
+  font-family: var(--shop-font-mono), ui-monospace, monospace;
   font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--shop-ink-subtle);
-}
-
-/* --- Botones ------------------------------------------------------------ */
-
-.shop-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1.5rem;
-  border: 2px solid var(--accent);
-  background: var(--accent);
-  color: #000;
-  font-weight: 700;
-  font-size: 0.875rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
-}
-
-.shop-btn:hover:not(:disabled) {
-  transform: translate(-2px, -2px);
-  box-shadow: 4px 4px 0 rgb(var(--accent-rgb) / 0.35);
-}
-
-.shop-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.shop-btn-outline {
-  background: transparent;
-  color: var(--shop-ink);
-  border-color: var(--shop-line);
-}
-
-.shop-btn-outline:hover:not(:disabled) {
-  border-color: var(--accent);
   color: var(--accent);
 }
 
-/* --- Campos ------------------------------------------------------------- */
-
-.shop-input,
-.shop-textarea,
-.shop-select {
-  width: 100%;
-  padding: 0.75rem 0.875rem;
-  background: var(--shop-surface);
-  border: 1px solid var(--shop-line);
-  color: var(--shop-ink);
-  font-size: 0.9375rem;
-  outline: none;
-  transition: border-color 120ms ease;
+/* Título en contorno, para portadas y secciones de remate. */
+.shop-outline {
+  -webkit-text-stroke: 1px var(--accent);
+  color: transparent;
+  filter: drop-shadow(0 0 8px rgb(var(--accent-rgb) / 0.7));
 }
 
-.shop-input:focus,
-.shop-textarea:focus,
-.shop-select:focus {
-  border-color: var(--accent);
-}
-
-.shop-input::placeholder,
-.shop-textarea::placeholder {
-  color: var(--shop-ink-subtle);
-}
-
-.shop-label {
-  display: block;
-  margin-bottom: 0.375rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--shop-ink-muted);
-}
-
-/* --- Tarjetas de producto ---------------------------------------------- */
+/* --- Tarjetas ------------------------------------------------------------ */
 
 .shop-card {
-  background: var(--shop-surface);
   border: 1px solid var(--shop-line);
-  transition: border-color 160ms ease, transform 160ms ease;
+  background: var(--shop-surface);
+  border-radius: 16px;
+  overflow: hidden;
+  transition:
+    border-color 250ms ease,
+    transform 250ms ease,
+    box-shadow 250ms ease;
 }
 
 .shop-card:hover {
-  border-color: rgb(var(--accent-rgb) / 0.6);
-  transform: translateY(-3px);
+  border-color: var(--accent);
+  transform: translate(-2px, -2px);
+  box-shadow:
+    0 0 24px rgb(var(--accent-rgb) / 0.3),
+    0 8px 32px rgb(0 0 0 / 0.5);
 }
 
 .shop-media {
@@ -143,35 +112,231 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 400ms ease, opacity 300ms ease;
 }
 
+/* El zoom vive en la tarjeta, no en la imagen: así también aplica al pasar
+   por el texto y no solo por la foto. */
 .shop-card:hover .shop-media img {
-  transform: scale(1.04);
+  transform: scale(1.08);
 }
 
-/* Aparición suave al terminar de cargar, para evitar el salto en blanco. */
-.shop-img-fade {
-  opacity: 0;
+.shop-media img {
+  transition: transform 500ms ease;
 }
 
-.shop-img-loaded {
-  opacity: 1;
+/* --- Botones ------------------------------------------------------------- */
+
+.shop-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent);
+  color: #000;
+  font-family: var(--shop-font-display), 'Arial Narrow', sans-serif;
+  font-size: 1.25rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 250ms ease;
+}
+
+/* La inversión a negro con halo es la firma de la plantilla. */
+.shop-btn:hover:not(:disabled) {
+  background: #000;
+  color: var(--accent);
+  box-shadow:
+    0 0 15px rgb(var(--accent-rgb) / 0.55),
+    0 0 40px rgb(var(--accent-rgb) / 0.2);
+}
+
+.shop-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.shop-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #000;
+  color: var(--shop-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 250ms ease;
+}
+
+.shop-btn-outline:hover:not(:disabled),
+.shop-btn-outline[data-active='true'] {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 10px rgb(var(--accent-rgb) / 0.25);
+}
+
+.shop-btn-outline[data-active='true'] {
+  background: var(--accent);
+  color: #000;
+}
+
+/* Selector de variante: cuadrado, grande, con la elegida en acento. */
+.shop-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border: 2px solid var(--shop-line);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--shop-ink-muted);
+  font-family: var(--shop-font-display), 'Arial Narrow', sans-serif;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.shop-swatch:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--shop-ink);
+}
+
+.shop-swatch[data-selected='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+  transform: scale(1.1);
+}
+
+.shop-swatch:disabled {
+  border-color: var(--shop-line-soft);
+  color: #3f3f46;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* --- Campos ------------------------------------------------------------- */
+
+.shop-input,
+.shop-textarea,
+.shop-select {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--shop-line);
+  border-radius: 12px;
+  background: var(--shop-surface);
+  color: var(--shop-ink);
+  font-size: 0.9375rem;
+  outline: none;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.shop-input:focus,
+.shop-textarea:focus,
+.shop-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / 0.12);
+}
+
+.shop-input::placeholder,
+.shop-textarea::placeholder {
+  color: var(--shop-ink-subtle);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+
+.shop-label {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--shop-ink-subtle);
+}
+
+/* --- Insignias ---------------------------------------------------------- */
+
+.shop-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  font-family: var(--shop-font-display), 'Arial Narrow', sans-serif;
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.shop-badge-accent {
+  background: var(--accent);
+  color: #000;
+}
+
+.shop-badge-light {
+  background: #fff;
+  color: #000;
+}
+
+.shop-badge-out {
+  background: rgb(0 0 0 / 0.85);
+  color: var(--shop-ink-muted);
+  border: 1px solid var(--shop-line);
+}
+
+/* --- Encabezado de sección ---------------------------------------------- */
+
+/* El guion de acento antes del título es el gesto que ordena la portada. */
+.shop-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--shop-font-display), 'Arial Narrow', sans-serif;
+  font-size: 1.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.shop-section-title::before {
+  content: '';
+  display: inline-block;
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 2px;
+  background: var(--accent);
+}
+
+@media (min-width: 768px) {
+  .shop-section-title {
+    font-size: 2rem;
+  }
 }
 
 /* --- Cinta superior ----------------------------------------------------- */
 
 .shop-marquee {
+  width: 100%;
   overflow: hidden;
   white-space: nowrap;
   background: var(--accent);
   color: #000;
+  padding-block: 4px;
 }
 
 .shop-marquee > span {
   display: inline-block;
-  padding-block: 0.375rem;
-  font-size: 0.75rem;
+  min-width: 100%;
+  font-family: var(--shop-font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -187,42 +352,109 @@
   }
 }
 
+/* --- Animaciones -------------------------------------------------------- */
+
+@keyframes shop-slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.shop-slide-up {
+  animation: shop-slide-up 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Parpadeo de tubo de neón para el logo escrito en texto. */
+@keyframes shop-neon-flicker {
+  0%,
+  19%,
+  21%,
+  23%,
+  25%,
+  54%,
+  56%,
+  100% {
+    text-shadow:
+      0 0 7px var(--accent),
+      0 0 20px rgb(var(--accent-rgb) / 0.5),
+      0 0 42px rgb(var(--accent-rgb) / 0.3);
+    opacity: 1;
+  }
+  20%,
+  24%,
+  55% {
+    text-shadow: none;
+    opacity: 0.85;
+  }
+}
+
+.shop-neon {
+  animation: shop-neon-flicker 7s ease-in-out infinite;
+}
+
+/* Aparición suave de la imagen al terminar de cargar. */
+.shop-img-fade {
+  opacity: 0;
+  transition: opacity 500ms ease-in-out;
+}
+
+.shop-img-loaded {
+  opacity: 1;
+}
+
+/* --- Barras de desplazamiento ------------------------------------------- */
+
+.shop-root ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.shop-root ::-webkit-scrollbar-track {
+  background: #000;
+}
+
+.shop-root ::-webkit-scrollbar-thumb {
+  background: #333;
+}
+
+.shop-root ::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Carruseles horizontales: se desplazan sin mostrar barra. */
+.shop-no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.shop-no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* --- Accesibilidad ------------------------------------------------------ */
+
 @media (prefers-reduced-motion: reduce) {
-  .shop-marquee > span {
+  .shop-marquee > span,
+  .shop-neon {
+    animation: none;
+  }
+
+  .shop-slide-up {
     animation: none;
   }
 
   .shop-card:hover,
-  .shop-btn:hover:not(:disabled) {
+  .shop-btn:hover:not(:disabled),
+  .shop-swatch[data-selected='true'] {
     transform: none;
   }
-}
 
-/* --- Insignias ---------------------------------------------------------- */
-
-.shop-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.shop-badge-accent {
-  background: var(--accent);
-  color: #000;
-}
-
-.shop-badge-muted {
-  background: var(--shop-surface-2);
-  color: var(--shop-ink-muted);
-  border: 1px solid var(--shop-line);
-}
-
-.shop-badge-out {
-  background: #000;
-  color: var(--shop-ink-muted);
-  border: 1px solid var(--shop-line);
+  .shop-card:hover .shop-media img {
+    transform: none;
+  }
 }

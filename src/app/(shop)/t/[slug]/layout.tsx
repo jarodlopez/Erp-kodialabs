@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { storeBannerRepository, storeSettingsRepository } from '@/lib/repositories/store';
 import { storeUrl } from '@/lib/storefront';
 import type { StoreSettings } from '@/types/store';
+import { shopFontClass } from '../../fonts';
 import '../../shop.css';
 import { CartProvider } from './cart';
 import { StoreHeader, StorePopup, WhatsAppButton } from './chrome';
@@ -79,7 +80,7 @@ export default async function StoreLayout({
   return (
     <CartProvider slug={settings.slug}>
       <div
-        className="shop-root"
+        className={`shop-root ${shopFontClass}`}
         style={
           {
             '--accent': settings.branding.accentColor,
@@ -99,24 +100,37 @@ export default async function StoreLayout({
 
         <StoreHeader settings={settings} />
 
-        <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">{children}</main>
+        <main className="shop-slide-up">{children}</main>
 
         <footer
-          className="mt-16 border-t px-4 py-10 sm:px-6"
-          style={{ borderColor: 'var(--shop-line)' }}
+          className="mt-20 border-t px-4 py-12 md:px-8"
+          style={{ borderColor: 'var(--shop-line-soft)' }}
         >
-          <div className="mx-auto max-w-6xl space-y-2">
-            <p className="shop-display text-xl">{settings.branding.name}</p>
-            {settings.seoDescription && (
-              <p className="max-w-prose text-sm" style={{ color: 'var(--shop-ink-muted)' }}>
-                {settings.seoDescription}
-              </p>
-            )}
-            {settings.branding.whatsapp && (
-              <p className="text-sm" style={{ color: 'var(--shop-ink-muted)' }}>
-                WhatsApp: {settings.branding.whatsapp}
-              </p>
-            )}
+          <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+            <div className="space-y-3">
+              <p className="shop-display text-3xl">{settings.branding.name}</p>
+              {settings.seoDescription && (
+                <p
+                  className="max-w-prose text-sm leading-relaxed"
+                  style={{ color: 'var(--shop-ink-muted)' }}
+                >
+                  {settings.seoDescription}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              {settings.branding.whatsapp && (
+                <p className="shop-mono text-xs tracking-widest" style={{ color: 'var(--shop-ink-muted)' }}>
+                  WHATSAPP · {settings.branding.whatsapp}
+                </p>
+              )}
+              {settings.shippingZones.length > 0 && (
+                <p className="shop-mono text-xs tracking-widest" style={{ color: 'var(--shop-ink-subtle)' }}>
+                  ENVÍOS A {settings.shippingZones.length} ZONA(S)
+                </p>
+              )}
+            </div>
           </div>
         </footer>
 
