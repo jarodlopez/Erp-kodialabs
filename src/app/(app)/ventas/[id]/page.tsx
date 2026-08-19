@@ -248,6 +248,19 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
             <CardHeader title="Totales" />
             <dl className="space-y-2 p-5 text-sm">
               <Row label="Subtotal" value={<Money value={sale.subtotal} currency={currency} />} />
+              {(sale.shippingCost ?? 0) > 0 && (
+                /*
+                 * En gris y debajo del subtotal: el envío ya está sumado ahí
+                 * porque viaja como una línea más de la venta. Al mismo nivel
+                 * que "Descuentos" se leería como un cargo aparte.
+                 */
+                <div className="flex items-center justify-between pl-3 text-xs text-[var(--color-ink-subtle)]">
+                  <dt>del cual, envío</dt>
+                  <dd>
+                    <Money value={sale.shippingCost ?? 0} currency={currency} />
+                  </dd>
+                </div>
+              )}
               <Row label="Descuentos" value={<Money value={-sale.discount} currency={currency} />} />
               <Row label="Impuestos" value={<Money value={sale.tax} currency={currency} />} />
               <div className="border-t border-[var(--color-border)] pt-2">

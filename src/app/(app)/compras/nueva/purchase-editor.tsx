@@ -2,7 +2,20 @@
 
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
-import { Trash2 } from 'lucide-react';
+import {
+  Banknote,
+  CalendarDays,
+  Coins,
+  CreditCard,
+  Hash,
+  Package,
+  Percent,
+  ShoppingBag,
+  StickyNote,
+  Trash2,
+  Truck,
+  Wallet,
+} from 'lucide-react';
 
 import { createPurchaseAction } from '@/app/actions/purchases';
 import { PartyPicker, type PartyOption } from '@/components/domain/party-picker';
@@ -163,7 +176,7 @@ export function PurchaseEditor({
       <div className="space-y-4 lg:col-span-2">
         <Card>
           <CardHeader
-            title="Productos"
+            title="Productos" icon={<Package />}
             description="El costo de cada línea alimentará el costo promedio ponderado."
           />
           <div className="border-b border-[var(--color-border)] p-4">
@@ -210,7 +223,7 @@ export function PurchaseEditor({
                     </div>
 
                     <div className="mt-3 grid gap-3 sm:grid-cols-4">
-                      <Field label="Cantidad">
+                      <Field label="Cantidad" icon={<Package />}>
                         <Input
                           type="number"
                           step="0.001"
@@ -221,7 +234,7 @@ export function PurchaseEditor({
                           }
                         />
                       </Field>
-                      <Field label="Costo unitario">
+                      <Field label="Costo unitario" icon={<Coins />}>
                         <Input
                           type="number"
                           step="0.01"
@@ -232,7 +245,7 @@ export function PurchaseEditor({
                           }
                         />
                       </Field>
-                      <Field label="Descuento">
+                      <Field label="Descuento" icon={<Percent />}>
                         <Input
                           type="number"
                           step="0.01"
@@ -261,11 +274,11 @@ export function PurchaseEditor({
 
         <Card>
           <CardHeader
-            title="Costos adicionales"
+            title="Costos adicionales" icon={<Coins />}
             description="Se prorratean proporcionalmente entre las líneas y se capitalizan en el costo."
           />
           <div className="grid gap-4 p-4 sm:grid-cols-3">
-            <Field label="Flete">
+            <Field label="Flete" icon={<Truck />}>
               <Input
                 type="number"
                 step="0.01"
@@ -274,7 +287,7 @@ export function PurchaseEditor({
                 onChange={(event) => setShipping(Number(event.target.value))}
               />
             </Field>
-            <Field label="Otros costos">
+            <Field label="Otros costos" icon={<Coins />}>
               <Input
                 type="number"
                 step="0.01"
@@ -283,7 +296,7 @@ export function PurchaseEditor({
                 onChange={(event) => setOtherCosts(Number(event.target.value))}
               />
             </Field>
-            <Field label="Descuento global">
+            <Field label="Descuento global" icon={<Percent />}>
               <Input
                 type="number"
                 step="0.01"
@@ -296,7 +309,7 @@ export function PurchaseEditor({
         </Card>
 
         <Card>
-          <CardHeader title="Notas" />
+          <CardHeader title="Notas" icon={<StickyNote />} />
           <div className="p-4">
             <Textarea value={notes} onChange={(event) => setNotes(event.target.value)} />
           </div>
@@ -305,13 +318,13 @@ export function PurchaseEditor({
 
       <div className="space-y-4">
         <Card>
-          <CardHeader title="Datos de la compra" />
+          <CardHeader title="Datos de la compra" icon={<ShoppingBag />} />
           <div className="space-y-4 p-4">
-            <Field label="Proveedor" required>
+            <Field label="Proveedor" icon={<Truck />} required>
               <PartyPicker kind="supplier" value={supplier} onSelect={setSupplier} />
             </Field>
 
-            <Field label="N.º de factura del proveedor">
+            <Field label="N.º de factura del proveedor" icon={<Hash />}>
               <Input
                 value={invoiceNumber}
                 onChange={(event) => setInvoiceNumber(event.target.value)}
@@ -319,11 +332,11 @@ export function PurchaseEditor({
               />
             </Field>
 
-            <Field label="Fecha" required>
+            <Field label="Fecha" icon={<CalendarDays />} required>
               <Input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
             </Field>
 
-            <Field label="Condición de pago" required>
+            <Field label="Condición de pago" icon={<CreditCard />} required>
               <Select
                 value={type}
                 onChange={(event) => setType(event.target.value as 'CASH' | 'CREDIT')}
@@ -334,7 +347,7 @@ export function PurchaseEditor({
             </Field>
 
             {type === 'CREDIT' && (
-              <Field label="Fecha de vencimiento">
+              <Field label="Fecha de vencimiento" icon={<CalendarDays />}>
                 <Input
                   type="date"
                   value={dueDate}
@@ -346,9 +359,9 @@ export function PurchaseEditor({
         </Card>
 
         <Card>
-          <CardHeader title="Pago" />
+          <CardHeader title="Pago" icon={<Banknote />} />
           <div className="space-y-4 p-4">
-            <Field label="Cuenta de origen">
+            <Field label="Cuenta de origen" icon={<Wallet />}>
               <Select value={accountId} onChange={(event) => setAccountId(event.target.value)}>
                 <option value="">Sin pago ahora</option>
                 {accounts.map((account) => (
@@ -359,7 +372,7 @@ export function PurchaseEditor({
               </Select>
             </Field>
 
-            <Field label="Método de pago">
+            <Field label="Método de pago" icon={<CreditCard />}>
               <Select value={method} onChange={(event) => setMethod(event.target.value)}>
                 {Object.entries(PAYMENT_METHOD_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
@@ -370,7 +383,7 @@ export function PurchaseEditor({
             </Field>
 
             {type === 'CREDIT' && (
-              <Field label="Abono inicial" hint="El resto queda como cuenta por pagar.">
+              <Field label="Abono inicial" icon={<Banknote />} hint="El resto queda como cuenta por pagar.">
                 <Input
                   type="number"
                   step="0.01"
@@ -385,7 +398,7 @@ export function PurchaseEditor({
         </Card>
 
         <Card>
-          <CardHeader title="Resumen" />
+          <CardHeader title="Resumen" icon={<Banknote />} />
           <dl className="space-y-2 p-4 text-sm">
             <SummaryLine label="Subtotal" value={priced?.totals.subtotal ?? 0} currency={currency} />
             <SummaryLine

@@ -2,7 +2,11 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { SlidersHorizontal } from 'lucide-react';
+import {
+  MessageSquare,
+  Package,
+  SlidersHorizontal,
+} from 'lucide-react';
 
 import { adjustInventoryAction } from '@/app/actions/inventory';
 import { Button, Field, Input, Select, Textarea } from '@/components/ui/primitives';
@@ -64,14 +68,14 @@ export function AdjustPanel({ productId, productName }: { productId: string; pro
         size="sm"
       >
         <form onSubmit={onSubmit} className="space-y-4" id="adjust-form" noValidate>
-          <Field label="Tipo de ajuste" htmlFor="direction" required>
+          <Field label="Tipo de ajuste" icon={<SlidersHorizontal />} htmlFor="direction" required>
             <Select id="direction" name="direction" defaultValue="IN">
               <option value="IN">Entrada (aumentar existencias)</option>
               <option value="OUT">Salida (disminuir existencias)</option>
             </Select>
           </Field>
 
-          <Field label="Cantidad" htmlFor="quantity" required error={errors.quantity}>
+          <Field label="Cantidad" icon={<Package />} htmlFor="quantity" required error={errors.quantity}>
             <Input
               id="quantity"
               name="quantity"
@@ -84,7 +88,7 @@ export function AdjustPanel({ productId, productName }: { productId: string; pro
           </Field>
 
           <Field
-            label="Motivo"
+            label="Motivo" icon={<MessageSquare />}
             htmlFor="reason"
             required
             error={errors.reason}

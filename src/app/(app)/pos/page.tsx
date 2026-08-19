@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/primitives';
 import { requirePermission } from '@/lib/auth/session';
 import { PERMISSIONS } from '@/lib/rbac';
 import { accountRepository } from '@/lib/repositories/finance';
+import { productRepository } from '@/lib/repositories/catalog';
 import { organizationRepository } from '@/lib/repositories/organization';
 import { PosTerminal } from './pos-terminal';
 
@@ -19,6 +20,13 @@ export default async function PosPage() {
     accountRepository.list(session.organizationId),
     organizationRepository.getSettings(session.organizationId),
   ]);
+
+  // Impuesto del producto de envío: el total del POS es el que se le canta al
+  // cliente y con el que se calcula el vuelto, así que no puede diferir del que
+  // guarda el servidor ni por un centavo.
+  const shippingProduct = settings.shippingProductId
+    ? await productRepository.get(session.organizationId, settings.shippingProductId)
+    : null;
 
   return (
     <div className="space-y-5">
@@ -53,6 +61,7 @@ export default async function PosPage() {
         <PosTerminal
           accounts={accounts}
           settings={settings}
+          shippingTaxRate={shippingProduct?.taxRate ?? 0}
           canCreateProduct={session.permissions.includes(PERMISSIONS.PRODUCTS_CREATE)}
         />
       )}

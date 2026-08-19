@@ -2,7 +2,18 @@
 
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
-import { Ban, CheckCircle2, RotateCcw, Trash2, Wallet } from 'lucide-react';
+import {
+  Ban,
+  Banknote,
+  CalendarDays,
+  CheckCircle2,
+  CreditCard,
+  Hash,
+  MessageSquare,
+  RotateCcw,
+  Trash2,
+  Wallet,
+} from 'lucide-react';
 
 import {
   cancelSaleAction,
@@ -215,7 +226,7 @@ export function SaleActions({
         size="sm"
       >
         <form action={confirmDraft} className="space-y-4">
-          <Field label="Cuenta de cobro" hint="Déjalo vacío para dejar la venta pendiente de cobro.">
+          <Field label="Cuenta de cobro" icon={<Wallet />} hint="Déjalo vacío para dejar la venta pendiente de cobro.">
             <Select name="accountId" defaultValue={sale.type === 'CASH' ? defaultAccount : ''}>
               <option value="">Sin cobro ahora</option>
               {accounts.map((account) => (
@@ -226,7 +237,7 @@ export function SaleActions({
             </Select>
           </Field>
 
-          <Field label="Importe cobrado">
+          <Field label="Importe cobrado" icon={<Banknote />}>
             <Input
               name="amount"
               type="number"
@@ -236,7 +247,7 @@ export function SaleActions({
             />
           </Field>
 
-          <Field label="Método de pago">
+          <Field label="Método de pago" icon={<CreditCard />}>
             <Select name="method" defaultValue="CASH">
               {Object.entries(PAYMENT_METHOD_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
@@ -266,7 +277,7 @@ export function SaleActions({
         size="sm"
       >
         <form action={registerPayment} className="space-y-4">
-          <Field label="Cuenta de destino" required>
+          <Field label="Cuenta de destino" icon={<Wallet />} required>
             <Select name="accountId" defaultValue={defaultAccount} required>
               {accounts.map((account) => (
                 <option key={account.id} value={account.id}>
@@ -276,7 +287,7 @@ export function SaleActions({
             </Select>
           </Field>
 
-          <Field label="Importe" required>
+          <Field label="Importe" icon={<Banknote />} required>
             <Input
               name="amount"
               type="number"
@@ -289,7 +300,7 @@ export function SaleActions({
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Método">
+            <Field label="Método" icon={<CreditCard />}>
               <Select name="method" defaultValue="CASH">
                 {Object.entries(PAYMENT_METHOD_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
@@ -298,12 +309,12 @@ export function SaleActions({
                 ))}
               </Select>
             </Field>
-            <Field label="Fecha">
+            <Field label="Fecha" icon={<CalendarDays />}>
               <Input name="date" type="date" defaultValue={toDateInput()} />
             </Field>
           </div>
 
-          <Field label="Referencia">
+          <Field label="Referencia" icon={<Hash />}>
             <Input name="reference" placeholder="N.º de transferencia, cheque..." />
           </Field>
 
@@ -354,13 +365,13 @@ export function SaleActions({
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Forma de reintegro" required>
+            <Field label="Forma de reintegro" icon={<CreditCard />} required>
               <Select name="refundMode" defaultValue={sale.dueAmount > 0 ? 'CREDIT_NOTE' : 'CASH_REFUND'}>
                 <option value="CASH_REFUND">Devolver dinero</option>
                 <option value="CREDIT_NOTE">Reducir deuda (nota de crédito)</option>
               </Select>
             </Field>
-            <Field label="Cuenta">
+            <Field label="Cuenta" icon={<Wallet />}>
               <Select name="accountId" defaultValue={defaultAccount}>
                 <option value="">No aplica</option>
                 {accounts.map((account) => (
@@ -372,11 +383,11 @@ export function SaleActions({
             </Field>
           </div>
 
-          <Field label="Fecha">
+          <Field label="Fecha" icon={<CalendarDays />}>
             <Input name="date" type="date" defaultValue={toDateInput()} />
           </Field>
 
-          <Field label="Motivo" required>
+          <Field label="Motivo" icon={<MessageSquare />} required>
             <Textarea name="reason" required placeholder="Producto defectuoso, error en el pedido..." />
           </Field>
 
@@ -403,7 +414,7 @@ export function SaleActions({
             Se revertirá el inventario, se reversarán los cobros registrados y se cancelará la cuenta
             por cobrar. La venta se conserva con estado <strong>Anulada</strong>.
           </p>
-          <Field label="Motivo de la anulación" required>
+          <Field label="Motivo de la anulación" icon={<MessageSquare />} required>
             <Textarea name="reason" required placeholder="Explica por qué se anula esta venta." />
           </Field>
           <div className="flex justify-end gap-2 pt-2">

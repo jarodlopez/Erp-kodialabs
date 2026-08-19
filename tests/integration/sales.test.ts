@@ -398,3 +398,160 @@ describe('aislamiento por organización', () => {
     ).rejects.toMatchObject({ code: 'ORGANIZATION_MISMATCH' });
   });
 });
+
+describe('cobro del envío', () => {
+  const delivery = {
+    recipient: 'Doña Marta',
+    address: 'De la rotonda 2c al sur, portón negro',
+    phone: '88881234',
+    notes: null,
+  };
+
+  /**
+   * El envío no es un campo suelto del documento: entra como una LÍNEA de la
+   * venta. Solo así el total coincide con lo que paga el cliente, el ingreso
+   * por flete llega al estado de resultados y el impuesto se calcula sobre él
+   * como sobre cualquier otra venta.
+   */
+  it('agrega el envío como una línea y lo suma al total', async () => {
+    const result = await saleService.createSale(
+      ctx,
+      {
+        customerId: ids.customerId,
+        date: '2026-02-01',
+        type: 'CASH',
+        items: [{ productId: ids.productId, quantity: 3 }],
+        delivery,
+        shippingCost: 50,
+        payment: { accountId: ids.accountId, amount: 740, method: 'CASH' },
+      },
+      { confirm: true },
+    );
+
+    // 3 x C$200 = C$600 + 15 % = C$690, más C$50 de envío sin impuesto.
+    expect(result.total).toBe(74000);
+
+    const sale = fakeDb.all<Sale>(COLLECTIONS.SALES)[0];
+    expect(sale.shippingCost).toBe(5000);
+    expect(sale.subtotal).toBe(65000);
+    // El impuesto NO cambia: el producto de envío nace exento a propósito,
+    // porque el flete se grava distinto que la mercadería según el país.
+    expect(sale.tax).toBe(9000);
+    expect(sale.items).toHaveLength(2);
+
+    const shippingLine = sale.items.find((item) => item.sku === 'ENVIO-WEB');
+    expect(shippingLine).toBeDefined();
+    expect(shippingLine?.unitPrice).toBe(5000);
+  });
+
+  it('crea el producto de envío una sola vez y lo reutiliza', async () => {
+    for (const quantity of [1, 2]) {
+      await saleService.createSale(
+        ctx,
+        {
+          customerId: ids.customerId,
+          date: '2026-02-01',
+          type: 'CREDIT',
+          items: [{ productId: ids.productId, quantity }],
+          delivery,
+          shippingCost: 30,
+        },
+        { confirm: true },
+      );
+    }
+
+    const shippingProducts = fakeDb
+      .all<Product>(COLLECTIONS.PRODUCTS)
+      .filter((product) => product.sku === 'ENVIO-WEB');
+    expect(shippingProducts).toHaveLength(1);
+
+    // Es un servicio, no mercadería: si llevara inventario, cada envío
+    // intentaría descontar existencias de algo que nunca se compra.
+    expect(shippingProducts[0].tracksInventory).toBe(false);
+    expect(shippingProducts[0].stock).toBe(0);
+  });
+
+  it('el envío no afecta el costo de venta ni inventa utilidad', async () => {
+    await saleService.createSale(
+      ctx,
+      {
+        customerId: ids.customerId,
+        date: '2026-02-01',
+        type: 'CREDIT',
+        items: [{ productId: ids.productId, quantity: 1 }],
+        delivery,
+        shippingCost: 80,
+      },
+      { confirm: true },
+    );
+
+    const sale = fakeDb.all<Sale>(COLLECTIONS.SALES)[0];
+    // Un solo producto vendido: el costo es el suyo, C$100. El envío no
+    // agrega costo de mercadería porque no es mercadería.
+    expect(sale.costOfGoodsSold).toBe(10000);
+
+    // Solo se movió el producto real, no el servicio de envío.
+    const movements = fakeDb.all<InventoryMovement>(COLLECTIONS.INVENTORY_MOVEMENTS);
+    expect(movements).toHaveLength(1);
+    expect(movements[0].productId).toBe(ids.productId);
+  });
+
+  it('rechaza cobrar un envío sin dirección a dónde llevarlo', async () => {
+    await expect(
+      saleService.createSale(
+        ctx,
+        {
+          customerId: ids.customerId,
+          date: '2026-02-01',
+          type: 'CREDIT',
+          items: [{ productId: ids.productId, quantity: 1 }],
+          delivery: null,
+          shippingCost: 50,
+        },
+        { confirm: true },
+      ),
+    ).rejects.toThrow(/dirección de entrega/);
+  });
+
+  it('una venta de mostrador no crea el producto de envío', async () => {
+    await saleService.createSale(
+      ctx,
+      {
+        customerId: ids.customerId,
+        date: '2026-02-01',
+        type: 'CREDIT',
+        items: [{ productId: ids.productId, quantity: 1 }],
+      },
+      { confirm: true },
+    );
+
+    const sale = fakeDb.all<Sale>(COLLECTIONS.SALES)[0];
+    expect(sale.shippingCost).toBe(0);
+    expect(sale.items).toHaveLength(1);
+    expect(
+      fakeDb.all<Product>(COLLECTIONS.PRODUCTS).some((p) => p.sku === 'ENVIO-WEB'),
+    ).toBe(false);
+  });
+
+  it('un envío en cero deja la entrega registrada sin cobrar nada', async () => {
+    // Envío gratis: hay dirección, pero no hay línea ni cargo.
+    const result = await saleService.createSale(
+      ctx,
+      {
+        customerId: ids.customerId,
+        date: '2026-02-01',
+        type: 'CREDIT',
+        items: [{ productId: ids.productId, quantity: 1 }],
+        delivery,
+        shippingCost: 0,
+      },
+      { confirm: true },
+    );
+
+    expect(result.total).toBe(23000); // C$200 + 15 %
+    const sale = fakeDb.all<Sale>(COLLECTIONS.SALES)[0];
+    expect(sale.shippingCost).toBe(0);
+    expect(sale.items).toHaveLength(1);
+    expect(sale.delivery?.address).toBe(delivery.address);
+  });
+});

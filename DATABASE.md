@@ -34,6 +34,11 @@ Parámetros de operación: `currency`, `locale`, `timezone`, `taxMode`
 (`EXCLUSIVE` | `INCLUSIVE`), `defaultTaxRate`, `defaultCreditDays`,
 `allowNegativeStock`, `numbering` (prefijos por documento), `invoiceFooter`.
 
+`shippingProductId` apunta al producto de servicio con el que se cobra el envío.
+Se crea solo la primera vez que alguien cobra uno y es **el mismo** para la
+tienda online y para una venta escrita a mano: con uno por canal, la pregunta
+"cuánto facturé en envíos" tendría dos respuestas y ninguna completa.
+
 ### `users/{uid}` y `memberships/{organizationId}_{uid}`
 
 Perfil del usuario y su pertenencia a una organización con su rol. El rol
@@ -84,6 +89,15 @@ Totales: `subtotal`, `discount`, `globalDiscount`, `tax`, `total`,
 `costOfGoodsSold`, `grossProfit`, `paidAmount`, `dueAmount`.
 
 Estados: `DRAFT → CONFIRMED → PARTIAL → PAID`, más `CANCELLED` y `RETURNED`.
+
+`delivery` guarda los datos de entrega (`null` en mostrador) y `shippingCost` el
+envío cobrado. Ese importe **también** viaja como un ítem más de la venta —con el
+producto de servicio de `settings.shippingProductId`— porque solo así el total
+cuadra con lo que pagó el cliente y el ingreso por flete llega al estado de
+resultados. Se guarda además aparte porque como ítem es indistinguible de
+cualquier otro producto, y hay dos preguntas que sin ese campo hay que adivinar:
+cuánto se facturó en envíos, y qué importe hereda el reparto para su margen. Las
+ventas anteriores al cobro de envío no lo tienen, así que se lee con `?? 0`.
 
 ### `purchases`
 

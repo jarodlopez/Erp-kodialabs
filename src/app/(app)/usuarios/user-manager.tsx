@@ -2,7 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Plus, ShieldCheck, UserX } from 'lucide-react';
+import {
+  Lock,
+  Mail,
+  Plus,
+  ShieldCheck,
+  UserRound,
+  UserX,
+} from 'lucide-react';
 
 import {
   changeUserRoleAction,
@@ -61,21 +68,21 @@ export function InviteUserButton() {
         size="sm"
       >
         <form action={submit} className="space-y-4">
-          <Field label="Nombre completo" required error={errors.displayName}>
+          <Field label="Nombre completo" icon={<UserRound />} required error={errors.displayName}>
             <Input name="displayName" required />
           </Field>
-          <Field label="Correo electrónico" required error={errors.email}>
+          <Field label="Correo electrónico" icon={<Mail />} required error={errors.email}>
             <Input name="email" type="email" required />
           </Field>
           <Field
-            label="Contraseña temporal"
+            label="Contraseña temporal" icon={<Lock />}
             required
             error={errors.password}
             hint="Mínimo 8 caracteres con letras y números. El usuario podrá cambiarla."
           >
             <Input name="password" type="text" required />
           </Field>
-          <Field label="Rol" required error={errors.role}>
+          <Field label="Rol" icon={<ShieldCheck />} required error={errors.role}>
             <Select
               name="role"
               value={role}
@@ -180,7 +187,7 @@ export function UserRowActions({
         size="sm"
       >
         <form action={changeRole} className="space-y-4">
-          <Field label="Nuevo rol" required>
+          <Field label="Nuevo rol" icon={<ShieldCheck />} required>
             <Select name="role" defaultValue={user.role}>
               {ROLE_LIST.map((item) => (
                 <option key={item} value={item}>

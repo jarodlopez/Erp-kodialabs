@@ -2,7 +2,15 @@
 
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
-import { Bike, MapPin } from 'lucide-react';
+import {
+  Bike,
+  Eye,
+  FileText,
+  Hash,
+  MapPin,
+  StickyNote,
+  UserRound,
+} from 'lucide-react';
 
 import { createDeliveryAction } from '@/app/actions/delivery';
 import { DeliveryMap, type MapMarker } from '@/components/domain/map';
@@ -131,7 +139,7 @@ export function DispatchForm({
       </div>
 
       <div className="space-y-4">
-        <Field label="Documento a repartir" htmlFor="sourceId" required error={fieldErrors.sourceId}>
+        <Field label="Documento a repartir" icon={<FileText />} htmlFor="sourceId" required error={fieldErrors.sourceId}>
           <Select
             id="sourceId"
             value={sourceId}
@@ -157,7 +165,7 @@ export function DispatchForm({
         )}
 
         <Field
-          label="Referencia visual"
+          label="Referencia visual" icon={<Eye />}
           htmlFor="landmark"
           error={fieldErrors['destination.landmark']}
           hint="Lo que el rider ve al llegar: “portón negro”, “frente a la pulpería”."
@@ -166,7 +174,7 @@ export function DispatchForm({
         </Field>
 
         <Field
-          label="Rider"
+          label="Rider" icon={<UserRound />}
           htmlFor="riderId"
           error={fieldErrors.riderId}
           hint={
@@ -190,7 +198,7 @@ export function DispatchForm({
           </Select>
         </Field>
 
-        <Field label="Notas para el rider" htmlFor="notes" error={fieldErrors.notes}>
+        <Field label="Notas para el rider" icon={<StickyNote />} htmlFor="notes" error={fieldErrors.notes}>
           <Textarea id="notes" name="notes" rows={2} maxLength={500} />
         </Field>
 

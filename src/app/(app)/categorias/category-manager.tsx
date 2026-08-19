@@ -2,7 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Pencil, Plus } from 'lucide-react';
+import {
+  AlignLeft,
+  CircleDot,
+  Palette,
+  Pencil,
+  Plus,
+  Type,
+} from 'lucide-react';
 
 import { createCategoryAction, updateCategoryAction } from '@/app/actions/catalog';
 import { Button, Field, Input, Select, Textarea } from '@/components/ui/primitives';
@@ -75,7 +82,7 @@ export function CategoryManager({
         size="sm"
       >
         <form onSubmit={onSubmit} className="space-y-4" noValidate>
-          <Field label="Nombre" htmlFor="name" required error={errors.name}>
+          <Field label="Nombre" icon={<Type />} htmlFor="name" required error={errors.name}>
             <Input
               id="name"
               name="name"
@@ -85,12 +92,12 @@ export function CategoryManager({
             />
           </Field>
 
-          <Field label="Descripción" htmlFor="description" error={errors.description}>
+          <Field label="Descripción" icon={<AlignLeft />} htmlFor="description" error={errors.description}>
             <Textarea id="description" name="description" defaultValue={category?.description ?? ''} />
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Color" htmlFor="color" error={errors.color}>
+            <Field label="Color" icon={<Palette />} htmlFor="color" error={errors.color}>
               <Input
                 id="color"
                 name="color"
@@ -100,7 +107,7 @@ export function CategoryManager({
               />
             </Field>
 
-            <Field label="Estado" htmlFor="status" error={errors.status}>
+            <Field label="Estado" icon={<CircleDot />} htmlFor="status" error={errors.status}>
               <Select id="status" name="status" defaultValue={category?.status ?? 'ACTIVE'}>
                 <option value="ACTIVE">Activa</option>
                 <option value="INACTIVE">Inactiva</option>

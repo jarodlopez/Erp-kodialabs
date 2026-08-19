@@ -2,7 +2,23 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FileText, Minus, PackagePlus, Plus, ScanLine, Trash2, Truck, UserRound, X } from 'lucide-react';
+import {
+  Banknote,
+  CreditCard,
+  FileText,
+  MapPin,
+  Minus,
+  PackagePlus,
+  Phone,
+  Plus,
+  ScanLine,
+  StickyNote,
+  Trash2,
+  Truck,
+  UserRound,
+  Wallet,
+  X,
+} from 'lucide-react';
 
 import { findProductByBarcodeAction } from '@/app/actions/catalog';
 import { createSaleAction } from '@/app/actions/sales';
@@ -34,10 +50,13 @@ interface Line {
 export function PosTerminal({
   accounts,
   settings,
+  shippingTaxRate,
   canCreateProduct = false,
 }: {
   accounts: FinancialAccount[];
   settings: Settings;
+  /** Impuesto del producto de envío, para que el total cantado no mienta. */
+  shippingTaxRate: number;
   canCreateProduct?: boolean;
 }) {
   const router = useRouter();
@@ -68,6 +87,7 @@ export function PosTerminal({
   const [delRecipient, setDelRecipient] = useState('');
   const [delPhone, setDelPhone] = useState('');
   const [delNotes, setDelNotes] = useState('');
+  const [delShipping, setDelShipping] = useState(0);
 
   // Última venta cobrada, para ofrecer factura / etiqueta.
   const [lastSale, setLastSale] = useState<{
@@ -76,23 +96,42 @@ export function PosTerminal({
     isDelivery: boolean;
   } | null>(null);
 
+  /**
+   * Envío efectivamente cobrado. Desmarcar el delivery no puede dejar un cobro
+   * huérfano: sin esto, marcar envío, poner un monto y volver a mostrador
+   * cobraría un flete que ya no se ve en pantalla.
+   */
+  const billedShipping = isDelivery ? delShipping : 0;
+
   const totals = useMemo(() => {
     if (lines.length === 0) return null;
     try {
-      return priceDocument(
-        lines.map((line) => ({
-          quantity: toScaledQty(line.quantity),
-          unitPrice: line.product.salePrice,
+      const priced = lines.map((line) => ({
+        quantity: toScaledQty(line.quantity),
+        unitPrice: line.product.salePrice,
+        discount: 0,
+        taxRate: line.product.taxRate ?? 0,
+        unitCost: line.product.averageCost ?? 0,
+      }));
+
+      // El envío entra como una línea más, igual que hará el servidor: en el
+      // POS esto importa el doble, porque el total en pantalla es el que se le
+      // canta al cliente y con el que se calcula el vuelto.
+      if (billedShipping > 0) {
+        priced.push({
+          quantity: toScaledQty(1),
+          unitPrice: toMinorUnits(billedShipping),
           discount: 0,
-          taxRate: line.product.taxRate ?? 0,
-          unitCost: line.product.averageCost ?? 0,
-        })),
-        { taxMode: settings.taxMode, globalDiscount: 0 },
-      );
+          taxRate: shippingTaxRate,
+          unitCost: 0,
+        });
+      }
+
+      return priceDocument(priced, { taxMode: settings.taxMode, globalDiscount: 0 });
     } catch {
       return null;
     }
-  }, [lines, settings.taxMode]);
+  }, [lines, settings.taxMode, billedShipping, shippingTaxRate]);
 
   const totalMinor = totals?.totals.total ?? 0;
   const totalMajor = totalMinor / 100;
@@ -174,6 +213,7 @@ export function PosTerminal({
               notes: delNotes.trim() || null,
             }
           : null,
+        shippingCost: billedShipping,
         payment: { accountId, amount: totalMajor, method, reference: null },
         idempotencyKey: idemKeyRef.current,
       },
@@ -346,11 +386,11 @@ export function PosTerminal({
       {/* Cobro */}
       <div className="space-y-4">
         <Card>
-          <CardHeader title="Cobro" />
+          <CardHeader title="Cobro" icon={<Wallet />} />
           <div className="space-y-4 p-4">
             {/* Cliente opcional */}
             {showCustomer ? (
-              <Field label="Cliente">
+              <Field label="Cliente" icon={<UserRound />}>
                 <div className="flex items-start gap-2">
                   <div className="flex-1">
                     <PartyPicker kind="customer" value={customer} onSelect={setCustomer} allowEmpty />
@@ -374,7 +414,7 @@ export function PosTerminal({
               </Button>
             )}
 
-            <Field label="Cuenta de destino" required>
+            <Field label="Cuenta de destino" icon={<Wallet />} required>
               <Select value={accountId} onChange={(event) => setAccountId(event.target.value)}>
                 {accounts.map((account) => (
                   <option key={account.id} value={account.id}>
@@ -384,7 +424,7 @@ export function PosTerminal({
               </Select>
             </Field>
 
-            <Field label="Método de pago">
+            <Field label="Método de pago" icon={<CreditCard />}>
               <Select value={method} onChange={(event) => setMethod(event.target.value)}>
                 {Object.entries(PAYMENT_METHOD_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
@@ -395,7 +435,7 @@ export function PosTerminal({
             </Field>
 
             {method === 'CASH' && (
-              <Field label="Efectivo recibido" hint="Opcional. Calcula el cambio.">
+              <Field label="Efectivo recibido" icon={<Banknote />} hint="Opcional. Calcula el cambio.">
                 <Input
                   type="number"
                   inputMode="decimal"
@@ -423,21 +463,21 @@ export function PosTerminal({
 
               {isDelivery && (
                 <div className="mt-3 space-y-3">
-                  <Field label="Dirección de entrega" required>
+                  <Field label="Dirección de entrega" icon={<MapPin />} required>
                     <Input
                       value={delAddress}
                       onChange={(event) => setDelAddress(event.target.value)}
                       placeholder="Barrio, calle, número, referencias..."
                     />
                   </Field>
-                  <Field label="Recibe (opcional)">
+                  <Field label="Recibe (opcional)" icon={<UserRound />}>
                     <Input
                       value={delRecipient}
                       onChange={(event) => setDelRecipient(event.target.value)}
                       placeholder="Nombre de quien recibe"
                     />
                   </Field>
-                  <Field label="Teléfono (opcional)">
+                  <Field label="Teléfono (opcional)" icon={<Phone />}>
                     <Input
                       value={delPhone}
                       inputMode="tel"
@@ -445,11 +485,25 @@ export function PosTerminal({
                       placeholder="Para coordinar la entrega"
                     />
                   </Field>
-                  <Field label="Indicaciones (opcional)">
+                  <Field label="Indicaciones (opcional)" icon={<StickyNote />}>
                     <Input
                       value={delNotes}
                       onChange={(event) => setDelNotes(event.target.value)}
                       placeholder="Ej. tocar el timbre, dejar con el portero..."
+                    />
+                  </Field>
+                  <Field
+                    label={`Cobro de envío (${currency})`}
+                    icon={<Truck />}
+                    hint="Se suma al total como una línea más. Déjalo en 0 si el envío va gratis."
+                  >
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      inputMode="decimal"
+                      value={delShipping}
+                      onChange={(event) => setDelShipping(Number(event.target.value))}
                     />
                   </Field>
                 </div>

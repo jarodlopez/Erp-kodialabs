@@ -8,6 +8,14 @@ import { Button, Card, CardHeader, Field, Input, Select, Textarea } from '@/comp
 import { useToast } from '@/components/ui/toast';
 import { toDateInput } from '@/lib/utils';
 import type { PlanConfig } from '@/types/subscription';
+import {
+  Banknote,
+  CalendarDays,
+  CreditCard,
+  Hash,
+  Sparkles,
+  StickyNote,
+} from 'lucide-react';
 
 export function ReportPaymentForm({ plans }: { plans: PlanConfig[] }) {
   const router = useRouter();
@@ -42,11 +50,11 @@ export function ReportPaymentForm({ plans }: { plans: PlanConfig[] }) {
   return (
     <Card>
       <CardHeader
-        title="Reportar un pago"
+        title="Reportar un pago" icon={<Banknote />}
         description="Tras pagar por transferencia o depósito, envía los datos para validar tu suscripción."
       />
       <form onSubmit={onSubmit} className="space-y-4 p-4">
-        <Field label="Plan que pagaste" required>
+        <Field label="Plan que pagaste" icon={<Sparkles />} required>
           <Select name="plan" value={plan} onChange={(e) => setPlan(e.target.value)}>
             {plans.map((p) => (
               <option key={p.key} value={p.key}>
@@ -56,15 +64,15 @@ export function ReportPaymentForm({ plans }: { plans: PlanConfig[] }) {
           </Select>
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Monto pagado" required>
+          <Field label="Monto pagado" icon={<Banknote />} required>
             <Input name="amount" type="number" step="0.01" min="0" required placeholder="0.00" />
           </Field>
-          <Field label="Fecha de pago" required>
+          <Field label="Fecha de pago" icon={<CalendarDays />} required>
             <Input name="paidAt" type="date" defaultValue={toDateInput()} required />
           </Field>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Método" required>
+          <Field label="Método" icon={<CreditCard />} required>
             <Select name="method" defaultValue="TRANSFER">
               <option value="TRANSFER">Transferencia</option>
               <option value="DEPOSIT">Depósito</option>
@@ -72,11 +80,11 @@ export function ReportPaymentForm({ plans }: { plans: PlanConfig[] }) {
               <option value="OTHER">Otro</option>
             </Select>
           </Field>
-          <Field label="Referencia / N.º de operación">
+          <Field label="Referencia / N.º de operación" icon={<Hash />}>
             <Input name="reference" placeholder="Ej. 00123456" />
           </Field>
         </div>
-        <Field label="Nota (opcional)">
+        <Field label="Nota (opcional)" icon={<StickyNote />}>
           <Textarea name="note" placeholder="Cualquier detalle que quieras indicar." />
         </Field>
         <Button type="submit" loading={loading}>

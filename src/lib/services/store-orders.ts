@@ -604,7 +604,7 @@ export const storeOrderService = {
     // tienda: así el ingreso por envío queda contabilizado y el total de la
     // venta coincide con lo que el cliente pagó.
     if (order.shippingCost > 0) {
-      const shippingProductId = await storeService.ensureShippingProduct(ctx.actor, settings);
+      const shippingProductId = await storeService.ensureShippingProduct(ctx.actor);
       sources.push({
         productId: shippingProductId,
         scaledQty: toScaledQty(1),
@@ -637,6 +637,11 @@ export const storeOrderService = {
       notes: `Pedido web ${order.number}${order.notes ? ` · ${order.notes}` : ''}`,
       warehouseId: settings.warehouseId ?? ctx.defaultWarehouseId,
       delivery: order.delivery,
+      // El envío ya viaja dentro de `items` (se agregó a `sources` arriba para
+      // que entrara en la reconstrucción de la base gravable). Se declara acá
+      // para que la venta lo registre aparte, sin volver a agregarlo.
+      shippingCost: toMajorUnits(order.shippingCost),
+      shippingAlreadyInItems: true,
       payment: options.payment
         ? {
             accountId: options.payment.accountId,

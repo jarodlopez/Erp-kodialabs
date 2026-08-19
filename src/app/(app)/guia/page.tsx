@@ -186,8 +186,21 @@ const SECTIONS: Section[] = [
             <><Term>Crédito:</Term> requiere un cliente; puedes registrar un abono inicial y el resto queda como cuenta por cobrar con fecha de vencimiento.</>,
             <><Term>Borrador:</Term> guarda la venta sin afectar inventario ni finanzas; la confirmas después.</>,
             <><Term>Anular / Devolver:</Term> desde la ficha de la venta puedes anularla o registrar una devolución, revirtiendo inventario y dinero.</>,
+            <>
+              <Term>Enviar a domicilio:</Term> marca la casilla de entrega y escribe la dirección,
+              quién recibe y el teléfono. Si cobras el envío, ponlo en{' '}
+              <Term>Cobro de envío</Term> y se suma al total como una línea más — así lo que
+              factures cuadra con lo que paga el cliente, y el ingreso por fletes aparece en tus
+              reportes en lugar de perderse.
+            </>,
           ]}
         />
+        <Tip>
+          El envío se cobra igual desde el <Term>Punto de venta</Term>. Y si además querés seguir al
+          repartidor en el mapa, la ficha de la venta tiene el botón{' '}
+          <Term>Crear reparto</Term>: el módulo de Reparto hereda la dirección y el envío que ya
+          cobraste, y te muestra si esa entrega te dejó ganancia o pérdida.
+        </Tip>
       </>
     ),
   },

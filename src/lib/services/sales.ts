@@ -41,6 +41,7 @@ import {
   writeReceivable,
 } from './finance';
 import { writeStockMovement } from './inventory';
+import { assertShippingIsDeliverable, ensureShippingProduct } from './shipping';
 import { guardIdempotency, reserveNumber, runTransaction } from './transaction';
 import type { ActorContext, Id } from '@/types/common';
 import type { Product } from '@/types/catalog';
@@ -176,6 +177,24 @@ export const saleService = {
     const warehouseId = input.warehouseId ?? ctx.defaultWarehouseId;
     const date = parseDate(input.date);
 
+    /*
+     * El envío se resuelve ANTES de abrir la transacción porque la primera vez
+     * tiene que crear el producto de servicio, y meter esa creación dentro de
+     * la transacción de la venta la alargaría para nada.
+     *
+     * Entra como una línea normal: de ahí en adelante el motor de precios lo
+     * trata igual que a cualquier producto, y el impuesto y el total salen
+     * bien sin ningún caso especial.
+     */
+    const shippingCost = input.shippingCost ?? 0;
+    assertShippingIsDeliverable(shippingCost, input.delivery);
+
+    const lines = [...input.items];
+    if (shippingCost > 0 && !input.shippingAlreadyInItems) {
+      const shippingProductId = await ensureShippingProduct(ctx.actor, ctx.settings);
+      lines.push({ productId: shippingProductId, quantity: 1, unitPrice: shippingCost });
+    }
+
     return runTransaction(async (tx) => {
       // ------------------------------- LECTURAS -------------------------------
       const guard = await guardIdempotency(
@@ -188,7 +207,7 @@ export const saleService = {
         return guard.existing as unknown as CreateSaleResult;
       }
 
-      const prepared = await readLines(tx, ctx, input.items);
+      const prepared = await readLines(tx, ctx, lines);
 
       let customer: Customer | null = null;
       if (input.customerId) {
@@ -287,6 +306,7 @@ export const saleService = {
         dueDate: input.type === 'CREDIT' ? dueDate : null,
         notes: input.notes ?? null,
         delivery: input.delivery ?? null,
+        shippingCost: toMinorUnits(shippingCost),
         cancelledAt: null,
         cancelledBy: null,
         cancelReason: null,

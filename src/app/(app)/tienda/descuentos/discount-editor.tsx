@@ -2,7 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Pencil, Plus } from 'lucide-react';
+import {
+  CalendarDays,
+  CircleDot,
+  Hash,
+  Pencil,
+  Plus,
+  Shapes,
+} from 'lucide-react';
 
 import { saveStoreDiscountAction, setStoreDiscountStatusAction } from '@/app/actions/store';
 import { Modal } from '@/components/ui/modal';
@@ -85,7 +92,7 @@ export function DiscountEditor({
         size="sm"
       >
         <form onSubmit={onSubmit} className="space-y-4" noValidate>
-          <Field label="Código" htmlFor="code" required error={errors.code}>
+          <Field label="Código" icon={<Hash />} htmlFor="code" required error={errors.code}>
             <Input
               id="code"
               name="code"
@@ -98,7 +105,7 @@ export function DiscountEditor({
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Tipo" htmlFor="kind" error={errors.kind}>
+            <Field label="Tipo" icon={<Shapes />} htmlFor="kind" error={errors.kind}>
               <Select
                 id="kind"
                 value={kind}
@@ -149,7 +156,7 @@ export function DiscountEditor({
               />
             </Field>
 
-            <Field label="Usos máximos" htmlFor="maxUses" error={errors.maxUses} hint="0 = ilimitado">
+            <Field label="Usos máximos" icon={<Hash />} htmlFor="maxUses" error={errors.maxUses} hint="0 = ilimitado">
               <Input
                 id="maxUses"
                 name="maxUses"
@@ -159,7 +166,7 @@ export function DiscountEditor({
               />
             </Field>
 
-            <Field label="Vence el" htmlFor="expiresAt" error={errors.expiresAt}>
+            <Field label="Vence el" icon={<CalendarDays />} htmlFor="expiresAt" error={errors.expiresAt}>
               <Input
                 id="expiresAt"
                 name="expiresAt"
@@ -168,7 +175,7 @@ export function DiscountEditor({
               />
             </Field>
 
-            <Field label="Estado" htmlFor="status" error={errors.status}>
+            <Field label="Estado" icon={<CircleDot />} htmlFor="status" error={errors.status}>
               <Select id="status" name="status" defaultValue={discount?.status ?? 'ACTIVE'}>
                 <option value="ACTIVE">Activo</option>
                 <option value="INACTIVE">Inactivo</option>

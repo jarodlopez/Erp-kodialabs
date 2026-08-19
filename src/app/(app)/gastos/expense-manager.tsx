@@ -2,7 +2,18 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import {
+  AlignLeft,
+  Banknote,
+  CalendarDays,
+  CreditCard,
+  Layers,
+  Percent,
+  Plus,
+  StickyNote,
+  Truck,
+  Wallet,
+} from 'lucide-react';
 
 import { createExpenseAction } from '@/app/actions/expenses';
 import { PartyPicker, type PartyOption } from '@/components/domain/party-picker';
@@ -81,7 +92,7 @@ export function ExpenseManager({
       <Modal open={open} onClose={() => !loading && setOpen(false)} title="Registrar gasto">
         <form onSubmit={onSubmit} className="space-y-4" noValidate>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Categoría" htmlFor="categoryId" required error={errors.categoryId}>
+            <Field label="Categoría" icon={<Layers />} htmlFor="categoryId" required error={errors.categoryId}>
               <Select id="categoryId" name="categoryId" required>
                 <option value="">Selecciona una categoría</option>
                 {categories.map((category) => (
@@ -92,12 +103,12 @@ export function ExpenseManager({
               </Select>
             </Field>
 
-            <Field label="Fecha" htmlFor="date" required error={errors.date}>
+            <Field label="Fecha" icon={<CalendarDays />} htmlFor="date" required error={errors.date}>
               <Input id="date" name="date" type="date" defaultValue={toDateInput()} required />
             </Field>
           </div>
 
-          <Field label="Descripción" htmlFor="description" required error={errors.description}>
+          <Field label="Descripción" icon={<AlignLeft />} htmlFor="description" required error={errors.description}>
             <Input
               id="description"
               name="description"
@@ -106,12 +117,12 @@ export function ExpenseManager({
             />
           </Field>
 
-          <Field label="Proveedor" hint="Opcional. Si el gasto queda a crédito genera cuenta por pagar.">
+          <Field label="Proveedor" icon={<Truck />} hint="Opcional. Si el gasto queda a crédito genera cuenta por pagar.">
             <PartyPicker kind="supplier" value={supplier} onSelect={setSupplier} />
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Importe" htmlFor="amount" required error={errors.amount}>
+            <Field label="Importe" icon={<Banknote />} htmlFor="amount" required error={errors.amount}>
               <Input
                 id="amount"
                 name="amount"
@@ -122,7 +133,7 @@ export function ExpenseManager({
                 invalid={Boolean(errors.amount)}
               />
             </Field>
-            <Field label="Impuesto (%)" htmlFor="taxRatePercent">
+            <Field label="Impuesto (%)" icon={<Percent />} htmlFor="taxRatePercent">
               <Input
                 id="taxRatePercent"
                 name="taxRatePercent"
@@ -153,7 +164,7 @@ export function ExpenseManager({
 
           {payNow ? (
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Cuenta de pago" htmlFor="accountId" required error={errors.accountId}>
+              <Field label="Cuenta de pago" icon={<Wallet />} htmlFor="accountId" required error={errors.accountId}>
                 <Select
                   id="accountId"
                   name="accountId"
@@ -167,7 +178,7 @@ export function ExpenseManager({
                   ))}
                 </Select>
               </Field>
-              <Field label="Método" htmlFor="method">
+              <Field label="Método" icon={<CreditCard />} htmlFor="method">
                 <Select id="method" name="method" defaultValue="CASH">
                   {Object.entries(PAYMENT_METHOD_LABELS).map(([value, label]) => (
                     <option key={value} value={value}>
@@ -178,12 +189,12 @@ export function ExpenseManager({
               </Field>
             </div>
           ) : (
-            <Field label="Fecha de vencimiento" htmlFor="dueDate">
+            <Field label="Fecha de vencimiento" icon={<CalendarDays />} htmlFor="dueDate">
               <Input id="dueDate" name="dueDate" type="date" defaultValue={toDateInput()} />
             </Field>
           )}
 
-          <Field label="Notas" htmlFor="notes">
+          <Field label="Notas" icon={<StickyNote />} htmlFor="notes">
             <Textarea id="notes" name="notes" />
           </Field>
 

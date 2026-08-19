@@ -2,7 +2,24 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import {
+  Activity,
+  AlignLeft,
+  Banknote,
+  CircleDot,
+  Coins,
+  CreditCard,
+  Globe,
+  Images,
+  LayoutGrid,
+  MapPin,
+  Palette,
+  Plus,
+  Trash2,
+  Type,
+  Wallet,
+  Warehouse,
+} from 'lucide-react';
 
 import { saveStoreSettingsAction } from '@/app/actions/store';
 import { Button, Card, CardHeader, Field, Input, Select, Textarea } from '@/components/ui/primitives';
@@ -143,16 +160,16 @@ export function StoreDesignForm({
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
       <Card>
         <CardHeader
-          title="Marca"
+          title="Marca" icon={<Palette />}
           description="Lo que ve el comprador: nombre, logo y color. Se aplica al instante en la tienda."
         />
         <div className="grid gap-4 p-5 sm:grid-cols-2">
-          <Field label="Nombre de la tienda" htmlFor="name" required error={errors['branding.name']}>
+          <Field label="Nombre de la tienda" icon={<Type />} htmlFor="name" required error={errors['branding.name']}>
             <Input id="name" name="name" defaultValue={settings.branding.name} maxLength={80} required />
           </Field>
 
           <Field
-            label="Dirección pública"
+            label="Dirección pública" icon={<MapPin />}
             htmlFor="slug"
             required
             error={errors.slug}
@@ -168,7 +185,7 @@ export function StoreDesignForm({
             />
           </Field>
 
-          <Field label="Color de acento" htmlFor="accentColor" error={errors['branding.accentColor']}>
+          <Field label="Color de acento" icon={<Palette />} htmlFor="accentColor" error={errors['branding.accentColor']}>
             <Input
               id="accentColor"
               name="accentColor"
@@ -207,7 +224,7 @@ export function StoreDesignForm({
           </Field>
 
           <Field
-            label="Símbolo de moneda"
+            label="Símbolo de moneda" icon={<Coins />}
             htmlFor="currencySymbol"
             required
             error={errors['branding.currencySymbol']}
@@ -238,7 +255,7 @@ export function StoreDesignForm({
           </Field>
 
           <Field
-            label="Título del carrito"
+            label="Título del carrito" icon={<Type />}
             htmlFor="cartTitle"
             required
             error={errors['branding.cartTitle']}
@@ -263,7 +280,7 @@ export function StoreDesignForm({
           </div>
 
           <Field
-            label="Descripción para buscadores"
+            label="Descripción para buscadores" icon={<AlignLeft />}
             htmlFor="seoDescription"
             className="sm:col-span-2"
             error={errors.seoDescription}
@@ -281,7 +298,7 @@ export function StoreDesignForm({
 
       <Card>
         <CardHeader
-          title="Módulos"
+          title="Módulos" icon={<LayoutGrid />}
           description="Lo que apagues desaparece de la tienda pública."
         />
         <div className="grid gap-3 p-5 sm:grid-cols-2">
@@ -307,7 +324,7 @@ export function StoreDesignForm({
 
       <Card>
         <CardHeader
-          title="Portadas"
+          title="Portadas" icon={<Images />}
           description="Imágenes grandes del inicio. Se muestra la primera."
           actions={
             <label className="cursor-pointer">
@@ -406,7 +423,7 @@ export function StoreDesignForm({
 
       <Card>
         <CardHeader
-          title="Zonas de envío"
+          title="Zonas de envío" icon={<MapPin />}
           description="El costo se agrega al pedido y se factura como una línea de servicio en la venta."
           actions={
             <Button
@@ -470,7 +487,7 @@ export function StoreDesignForm({
 
       <Card>
         <CardHeader
-          title="Datos de pago"
+          title="Datos de pago" icon={<CreditCard />}
           description="Se muestran al comprador después de confirmar el pedido, para que pague y suba su comprobante."
           actions={
             <Button
@@ -552,11 +569,11 @@ export function StoreDesignForm({
 
       <Card>
         <CardHeader
-          title="Operación"
+          title="Operación" icon={<Activity />}
           description="De dónde sale el inventario y a qué cuenta entra el dinero de los pedidos web."
         />
         <div className="grid gap-4 p-5 sm:grid-cols-2">
-          <Field label="Bodega de despacho" htmlFor="warehouseId" error={errors.warehouseId}>
+          <Field label="Bodega de despacho" icon={<Warehouse />} htmlFor="warehouseId" error={errors.warehouseId}>
             <Select id="warehouseId" name="warehouseId" defaultValue={settings.warehouseId ?? ''}>
               {warehouses.map((warehouse) => (
                 <option key={warehouse.id} value={warehouse.id}>
@@ -567,7 +584,7 @@ export function StoreDesignForm({
           </Field>
 
           <Field
-            label="Cuenta sugerida al cobrar"
+            label="Cuenta sugerida al cobrar" icon={<Wallet />}
             htmlFor="defaultAccountId"
             error={errors.defaultAccountId}
             hint="Se preselecciona al aprobar un pedido; siempre se puede cambiar."
@@ -590,11 +607,11 @@ export function StoreDesignForm({
 
       <Card>
         <CardHeader
-          title="Publicación"
+          title="Publicación" icon={<Globe />}
           description="En borrador, la tienda no es accesible para nadie."
         />
         <div className="flex flex-wrap items-end justify-between gap-4 p-5">
-          <Field label="Estado" htmlFor="status" className="min-w-[220px]" error={errors.status}>
+          <Field label="Estado" icon={<CircleDot />} htmlFor="status" className="min-w-[220px]" error={errors.status}>
             <Select
               id="status"
               value={status}

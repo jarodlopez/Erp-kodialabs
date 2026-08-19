@@ -2,7 +2,15 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import {
+  CircleDot,
+  Link2,
+  Pencil,
+  Plus,
+  StickyNote,
+  Trash2,
+  Type,
+} from 'lucide-react';
 
 import { deleteStoreBannerAction, saveStoreBannerAction } from '@/app/actions/store';
 import { Modal } from '@/components/ui/modal';
@@ -95,11 +103,11 @@ export function BannerEditor({
         title={mode === 'edit' ? `Pop-up: ${banner?.title}` : 'Nuevo pop-up'}
       >
         <form onSubmit={onSubmit} className="space-y-4" noValidate>
-          <Field label="Título" htmlFor="title" required error={errors.title}>
+          <Field label="Título" icon={<Type />} htmlFor="title" required error={errors.title}>
             <Input id="title" name="title" defaultValue={banner?.title ?? ''} maxLength={80} required />
           </Field>
 
-          <Field label="Mensaje" htmlFor="message" error={errors.message}>
+          <Field label="Mensaje" icon={<StickyNote />} htmlFor="message" error={errors.message}>
             <Textarea
               id="message"
               name="message"
@@ -117,11 +125,11 @@ export function BannerEditor({
           />
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Texto del botón" htmlFor="ctaLabel" error={errors.ctaLabel}>
+            <Field label="Texto del botón" icon={<Type />} htmlFor="ctaLabel" error={errors.ctaLabel}>
               <Input id="ctaLabel" name="ctaLabel" defaultValue={banner?.ctaLabel ?? ''} maxLength={40} />
             </Field>
 
-            <Field label="Enlace del botón" htmlFor="ctaHref" error={errors.ctaHref}>
+            <Field label="Enlace del botón" icon={<Link2 />} htmlFor="ctaHref" error={errors.ctaHref}>
               <Input id="ctaHref" name="ctaHref" defaultValue={banner?.ctaHref ?? ''} maxLength={300} />
             </Field>
 
@@ -141,7 +149,7 @@ export function BannerEditor({
               />
             </Field>
 
-            <Field label="Estado" htmlFor="status" error={errors.status}>
+            <Field label="Estado" icon={<CircleDot />} htmlFor="status" error={errors.status}>
               <Select id="status" name="status" defaultValue={banner?.status ?? 'ACTIVE'}>
                 <option value="ACTIVE">Activo</option>
                 <option value="INACTIVE">Inactivo</option>

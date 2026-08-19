@@ -93,15 +93,25 @@ export function Card({ className, children, ...props }: HTMLAttributes<HTMLDivEl
   );
 }
 
+/**
+ * Cabecera de tarjeta.
+ *
+ * El `icon` es opcional y decorativo: identifica el bloque de un vistazo en una
+ * pantalla con varias tarjetas, pero el título siempre dice lo mismo por
+ * escrito. Un icono nunca es la única forma de saber qué hay adentro — quien no
+ * lo reconozca, o use lector de pantalla, no pierde nada.
+ */
 export function CardHeader({
   title,
   description,
   actions,
+  icon,
   className,
 }: {
   title: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
+  icon?: ReactNode;
   className?: string;
 }) {
   return (
@@ -111,11 +121,21 @@ export function CardHeader({
         className,
       )}
     >
+      <div className="flex min-w-0 items-start gap-3">
+        {icon && (
+          <span
+            aria-hidden
+            className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--color-brand-50)] text-[var(--color-brand-600)] [&>svg]:h-4 [&>svg]:w-4"
+          >
+            {icon}
+          </span>
+        )}
       <div className="min-w-0">
         <h2 className="text-base font-semibold text-[var(--color-ink)]">{title}</h2>
         {description && (
           <p className="mt-0.5 text-sm text-[var(--color-ink-subtle)]">{description}</p>
         )}
+      </div>
       </div>
       {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
     </div>
@@ -239,12 +259,21 @@ export function Textarea({
   );
 }
 
+/**
+ * Campo de formulario: etiqueta, control y, debajo, el error o la ayuda.
+ *
+ * El `icon` acompaña a la etiqueta y es puramente visual (`aria-hidden`): sirve
+ * para recorrer un formulario largo con la vista y encontrar el campo que se
+ * busca sin leer cada etiqueta. Nunca reemplaza al texto — un icono solo es
+ * adivinanza, y de las que cada persona resuelve distinto.
+ */
 export function Field({
   label,
   htmlFor,
   required,
   error,
   hint,
+  icon,
   children,
   className,
 }: {
@@ -253,13 +282,22 @@ export function Field({
   required?: boolean;
   error?: string | null;
   hint?: ReactNode;
+  icon?: ReactNode;
   children: ReactNode;
   className?: string;
 }) {
   return (
     <div className={cn('space-y-2', className)}>
       {label && (
-        <Label htmlFor={htmlFor} required={required}>
+        <Label htmlFor={htmlFor} required={required} className="flex items-center gap-1.5">
+          {icon && (
+            <span
+              aria-hidden
+              className="shrink-0 text-[var(--color-ink-subtle)] [&>svg]:h-3.5 [&>svg]:w-3.5"
+            >
+              {icon}
+            </span>
+          )}
           {label}
         </Label>
       )}

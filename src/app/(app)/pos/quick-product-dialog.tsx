@@ -1,7 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { PackagePlus } from 'lucide-react';
+import {
+  Boxes,
+  Coins,
+  Package,
+  PackagePlus,
+  Type,
+} from 'lucide-react';
 
 import { createPosProductAction } from '@/app/actions/catalog';
 import { Button, Field, Input } from '@/components/ui/primitives';
@@ -103,7 +109,7 @@ export function QuickProductDialog({
       }
     >
       <div className="space-y-4">
-        <Field label="Nombre del artículo" required>
+        <Field label="Nombre del artículo" icon={<Type />} required>
           <Input
             value={name}
             onChange={(event) => setName(event.target.value)}
@@ -124,7 +130,7 @@ export function QuickProductDialog({
               placeholder="0.00"
             />
           </Field>
-          <Field label="Costo (opcional)" hint="Para calcular tu ganancia.">
+          <Field label="Costo (opcional)" icon={<Coins />} hint="Para calcular tu ganancia.">
             <Input
               type="number"
               inputMode="decimal"
@@ -152,7 +158,7 @@ export function QuickProductDialog({
           </p>
           {tracks && (
             <div className="mt-3">
-              <Field label="Existencia inicial">
+              <Field label="Existencia inicial" icon={<Boxes />}>
                 <Input
                   type="number"
                   inputMode="numeric"

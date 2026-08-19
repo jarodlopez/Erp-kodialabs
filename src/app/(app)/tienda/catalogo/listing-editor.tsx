@@ -2,7 +2,17 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import {
+  AlignLeft,
+  ArrowUpDown,
+  Layers,
+  Package,
+  Pencil,
+  Plus,
+  Tag,
+  Trash2,
+  Type,
+} from 'lucide-react';
 
 import {
   removeStoreListingAction,
@@ -128,7 +138,7 @@ export function ListingEditor({
         size="lg"
       >
         <form onSubmit={onSubmit} className="space-y-4" noValidate>
-          <Field label="Producto del ERP" htmlFor="productId" required error={errors.productId}>
+          <Field label="Producto del ERP" icon={<Package />} htmlFor="productId" required error={errors.productId}>
             <Select
               id="productId"
               value={productId}
@@ -145,7 +155,7 @@ export function ListingEditor({
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Título en la tienda" htmlFor="title" error={errors.title}>
+            <Field label="Título en la tienda" icon={<Type />} htmlFor="title" error={errors.title}>
               <Input
                 id="title"
                 name="title"
@@ -155,7 +165,7 @@ export function ListingEditor({
               />
             </Field>
 
-            <Field label="Colección" htmlFor="collection" error={errors.collection}>
+            <Field label="Colección" icon={<Layers />} htmlFor="collection" error={errors.collection}>
               <Input
                 id="collection"
                 name="collection"
@@ -172,7 +182,7 @@ export function ListingEditor({
             </Field>
           </div>
 
-          <Field label="Descripción" htmlFor="description" error={errors.description}>
+          <Field label="Descripción" icon={<AlignLeft />} htmlFor="description" error={errors.description}>
             <Textarea
               id="description"
               name="description"
@@ -204,7 +214,7 @@ export function ListingEditor({
 
           <div className="grid gap-4 sm:grid-cols-3">
             <Field
-              label="Precio de oferta"
+              label="Precio de oferta" icon={<Tag />}
               htmlFor="salePrice"
               error={errors.salePrice}
               hint={
@@ -223,7 +233,7 @@ export function ListingEditor({
               />
             </Field>
 
-            <Field label="Orden" htmlFor="position" error={errors.position} hint="Menor aparece primero">
+            <Field label="Orden" icon={<ArrowUpDown />} htmlFor="position" error={errors.position} hint="Menor aparece primero">
               <Input
                 id="position"
                 name="position"

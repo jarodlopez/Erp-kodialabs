@@ -2,7 +2,19 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Pencil, Plus } from 'lucide-react';
+import {
+  AlignLeft,
+  Banknote,
+  CalendarDays,
+  CircleDot,
+  CreditCard,
+  Layers,
+  Pencil,
+  Percent,
+  Plus,
+  Repeat,
+  Wallet,
+} from 'lucide-react';
 
 import { saveRecurringExpenseAction } from '@/app/actions/expenses';
 import { Button, Field, Input, Select } from '@/components/ui/primitives';
@@ -89,7 +101,7 @@ export function RecurringManager({
         description="El sistema generará el gasto automáticamente en cada vencimiento."
       >
         <form onSubmit={onSubmit} className="space-y-4" noValidate>
-          <Field label="Descripción" htmlFor="description" required error={errors.description}>
+          <Field label="Descripción" icon={<AlignLeft />} htmlFor="description" required error={errors.description}>
             <Input
               id="description"
               name="description"
@@ -100,7 +112,7 @@ export function RecurringManager({
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Categoría" htmlFor="categoryId" required error={errors.categoryId}>
+            <Field label="Categoría" icon={<Layers />} htmlFor="categoryId" required error={errors.categoryId}>
               <Select id="categoryId" name="categoryId" defaultValue={item?.categoryId ?? ''} required>
                 <option value="">Selecciona</option>
                 {categories.map((category) => (
@@ -110,7 +122,7 @@ export function RecurringManager({
                 ))}
               </Select>
             </Field>
-            <Field label="Frecuencia" htmlFor="frequency" required>
+            <Field label="Frecuencia" icon={<Repeat />} htmlFor="frequency" required>
               <Select id="frequency" name="frequency" defaultValue={item?.frequency ?? 'MONTHLY'}>
                 {Object.entries(RECURRING_FREQUENCY_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
@@ -122,7 +134,7 @@ export function RecurringManager({
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Importe" htmlFor="amount" required error={errors.amount}>
+            <Field label="Importe" icon={<Banknote />} htmlFor="amount" required error={errors.amount}>
               <Input
                 id="amount"
                 name="amount"
@@ -133,7 +145,7 @@ export function RecurringManager({
                 required
               />
             </Field>
-            <Field label="Impuesto (%)" htmlFor="taxRatePercent">
+            <Field label="Impuesto (%)" icon={<Percent />} htmlFor="taxRatePercent">
               <Input
                 id="taxRatePercent"
                 name="taxRatePercent"
@@ -147,7 +159,7 @@ export function RecurringManager({
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Próxima generación" htmlFor="nextDate" required error={errors.nextDate}>
+            <Field label="Próxima generación" icon={<CalendarDays />} htmlFor="nextDate" required error={errors.nextDate}>
               <Input
                 id="nextDate"
                 name="nextDate"
@@ -156,7 +168,7 @@ export function RecurringManager({
                 required
               />
             </Field>
-            <Field label="Finaliza el" htmlFor="endDate" hint="Opcional.">
+            <Field label="Finaliza el" icon={<CalendarDays />} htmlFor="endDate" hint="Opcional.">
               <Input
                 id="endDate"
                 name="endDate"
@@ -167,7 +179,7 @@ export function RecurringManager({
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Cuenta de pago" htmlFor="accountId">
+            <Field label="Cuenta de pago" icon={<Wallet />} htmlFor="accountId">
               <Select id="accountId" name="accountId" defaultValue={item?.accountId ?? ''}>
                 <option value="">Sin cuenta (queda pendiente)</option>
                 {accounts.map((account) => (
@@ -177,7 +189,7 @@ export function RecurringManager({
                 ))}
               </Select>
             </Field>
-            <Field label="Método" htmlFor="method">
+            <Field label="Método" icon={<CreditCard />} htmlFor="method">
               <Select id="method" name="method" defaultValue={item?.method ?? 'CASH'}>
                 {Object.entries(PAYMENT_METHOD_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
@@ -203,7 +215,7 @@ export function RecurringManager({
             </span>
           </label>
 
-          <Field label="Estado" htmlFor="status">
+          <Field label="Estado" icon={<CircleDot />} htmlFor="status">
             <Select id="status" name="status" defaultValue={item?.status ?? 'ACTIVE'}>
               <option value="ACTIVE">Activo</option>
               <option value="INACTIVE">Pausado</option>

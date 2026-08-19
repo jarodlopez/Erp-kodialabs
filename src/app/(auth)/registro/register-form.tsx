@@ -12,6 +12,12 @@ import { translateAuthError } from '@/lib/auth/client-errors';
 import { getClientAuth } from '@/lib/firebase/client';
 import { parseSafe } from '@/lib/validation/parse';
 import { registerSchema } from '@/lib/validation/schemas';
+import {
+  Lock,
+  Mail,
+  Type,
+  UserRound,
+} from 'lucide-react';
 
 export function RegisterForm() {
   const router = useRouter();
@@ -90,7 +96,7 @@ export function RegisterForm() {
       </p>
 
       <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
-        <Field label="Tu nombre" htmlFor="displayName" required error={errors.displayName}>
+        <Field label="Tu nombre" icon={<UserRound />} htmlFor="displayName" required error={errors.displayName}>
           <Input
             id="displayName"
             name="displayName"
@@ -102,7 +108,7 @@ export function RegisterForm() {
         </Field>
 
         <Field
-          label="Nombre del negocio"
+          label="Nombre del negocio" icon={<Type />}
           htmlFor="organizationName"
           required
           error={errors.organizationName}
@@ -116,7 +122,7 @@ export function RegisterForm() {
           />
         </Field>
 
-        <Field label="Correo electrónico" htmlFor="email" required error={errors.email}>
+        <Field label="Correo electrónico" icon={<Mail />} htmlFor="email" required error={errors.email}>
           <Input
             id="email"
             name="email"
@@ -130,7 +136,7 @@ export function RegisterForm() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
-            label="Contraseña"
+            label="Contraseña" icon={<Lock />}
             htmlFor="password"
             required
             error={errors.password}
@@ -146,7 +152,7 @@ export function RegisterForm() {
             />
           </Field>
 
-          <Field label="Confirmar" htmlFor="confirmPassword" required error={errors.confirmPassword}>
+          <Field label="Confirmar" icon={<Lock />} htmlFor="confirmPassword" required error={errors.confirmPassword}>
             <Input
               id="confirmPassword"
               name="confirmPassword"

@@ -2,7 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Save } from 'lucide-react';
+import {
+  Layers,
+  Route,
+  Save,
+  Tag,
+  Timer,
+  Zap,
+} from 'lucide-react';
 
 import { saveDeliverySettingsAction } from '@/app/actions/delivery';
 import { DeliveryMap, type MapMarker } from '@/components/domain/map';
@@ -154,7 +161,7 @@ export function RatesForm({
             onChange={onPreviewChange('customerBaseFee')}
           />
         </Field>
-        <Field label="Kilómetros incluidos" htmlFor="customerFreeKm" error={fieldErrors.customerFreeKm}>
+        <Field label="Kilómetros incluidos" icon={<Route />} htmlFor="customerFreeKm" error={fieldErrors.customerFreeKm}>
           <Input
             id="customerFreeKm"
             name="customerFreeKm"
@@ -273,7 +280,7 @@ export function RatesForm({
           <h3 className="text-sm font-semibold">Seguimiento y contabilidad</h3>
         </div>
         <Field
-          label="Segundos entre marcas"
+          label="Segundos entre marcas" icon={<Timer />}
           htmlFor="pingSeconds"
           error={fieldErrors.pingSeconds}
           hint="30 s es el equilibrio entre precisión y batería."
@@ -322,7 +329,7 @@ export function RatesForm({
         </Field>
 
         <Field
-          label="Categoría de gasto"
+          label="Categoría de gasto" icon={<Layers />}
           htmlFor="expenseCategoryId"
           error={fieldErrors.expenseCategoryId}
           className="sm:col-span-2"
@@ -347,7 +354,7 @@ export function RatesForm({
           </Select>
         </Field>
 
-        <Field label="Registro automático" hint="Solo al entregar; un reparto fallido se revisa a mano.">
+        <Field label="Registro automático" icon={<Zap />} hint="Solo al entregar; un reparto fallido se revisa a mano.">
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"

@@ -5,6 +5,7 @@ import { Card, PageHeader } from '@/components/ui/primitives';
 import { requirePermission } from '@/lib/auth/session';
 import { PERMISSIONS } from '@/lib/rbac';
 import { accountRepository } from '@/lib/repositories/finance';
+import { productRepository } from '@/lib/repositories/catalog';
 import { organizationRepository } from '@/lib/repositories/organization';
 import { SaleEditor } from './sale-editor';
 
@@ -18,6 +19,17 @@ export default async function NewSalePage() {
     accountRepository.list(session.organizationId),
     organizationRepository.getSettings(session.organizationId),
   ]);
+
+  /*
+   * Tasa de impuesto del producto de envío, para que la vista previa del total
+   * coincida con lo que el servidor va a calcular. Se lee acá y no se asume
+   * cero porque el producto es editable desde Inventario: hay países donde el
+   * flete se grava y quien lo cambió espera verlo reflejado antes de confirmar.
+   * Si todavía no existe, el primer envío lo crea sin impuesto.
+   */
+  const shippingProduct = settings.shippingProductId
+    ? await productRepository.get(session.organizationId, settings.shippingProductId)
+    : null;
 
   return (
     <>
@@ -42,7 +54,11 @@ export default async function NewSalePage() {
           </p>
         </Card>
       ) : (
-        <SaleEditor accounts={accounts} settings={settings} />
+        <SaleEditor
+          accounts={accounts}
+          settings={settings}
+          shippingTaxRate={shippingProduct?.taxRate ?? 0}
+        />
       )}
     </>
   );

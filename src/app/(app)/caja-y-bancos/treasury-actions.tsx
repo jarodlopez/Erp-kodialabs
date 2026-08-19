@@ -2,7 +2,21 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { ArrowLeftRight, Plus, SlidersHorizontal } from 'lucide-react';
+import {
+  ArrowLeftRight,
+  Banknote,
+  CalendarDays,
+  Hash,
+  Landmark,
+  MapPin,
+  MessageSquare,
+  Plus,
+  Shapes,
+  SlidersHorizontal,
+  StickyNote,
+  Type,
+  Wallet,
+} from 'lucide-react';
 
 import {
   adjustAccountAction,
@@ -133,10 +147,10 @@ export function TreasuryActions({
         size="sm"
       >
         <form action={createAccount} className="space-y-4">
-          <Field label="Nombre" required error={errors.name}>
+          <Field label="Nombre" icon={<Type />} required error={errors.name}>
             <Input name="name" placeholder="Caja general, BAC córdobas..." required />
           </Field>
-          <Field label="Tipo" required>
+          <Field label="Tipo" icon={<Shapes />} required>
             <Select name="type" defaultValue="CASH">
               {Object.entries(ACCOUNT_TYPE_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
@@ -146,10 +160,10 @@ export function TreasuryActions({
             </Select>
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Banco">
+            <Field label="Banco" icon={<Landmark />}>
               <Input name="bankName" />
             </Field>
-            <Field label="N.º de cuenta">
+            <Field label="N.º de cuenta" icon={<Hash />}>
               <Input name="accountNumber" />
             </Field>
           </div>
@@ -164,7 +178,7 @@ export function TreasuryActions({
             <input type="checkbox" name="isDefault" className="h-4 w-4" />
             Usar como cuenta predeterminada
           </label>
-          <Field label="Notas">
+          <Field label="Notas" icon={<StickyNote />}>
             <Textarea name="notes" />
           </Field>
           <div className="flex justify-end gap-2 pt-2">
@@ -205,14 +219,14 @@ export function TreasuryActions({
             </Select>
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Importe" required error={errors.amount}>
+            <Field label="Importe" icon={<Banknote />} required error={errors.amount}>
               <Input name="amount" type="number" step="0.01" min="0.01" required />
             </Field>
-            <Field label="Fecha" required>
+            <Field label="Fecha" icon={<CalendarDays />} required>
               <Input name="date" type="date" defaultValue={toDateInput()} required />
             </Field>
           </div>
-          <Field label="Referencia">
+          <Field label="Referencia" icon={<Hash />}>
             <Input name="reference" />
           </Field>
           <div className="flex justify-end gap-2 pt-2">
@@ -234,7 +248,7 @@ export function TreasuryActions({
         size="sm"
       >
         <form action={adjust} className="space-y-4">
-          <Field label="Cuenta" required>
+          <Field label="Cuenta" icon={<Wallet />} required>
             <Select name="accountId" required defaultValue={accounts[0]?.id}>
               {accounts.map((account) => (
                 <option key={account.id} value={account.id}>
@@ -244,20 +258,20 @@ export function TreasuryActions({
             </Select>
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Dirección" required>
+            <Field label="Dirección" icon={<MapPin />} required>
               <Select name="direction" defaultValue="IN">
                 <option value="IN">Aumentar saldo</option>
                 <option value="OUT">Disminuir saldo</option>
               </Select>
             </Field>
-            <Field label="Importe" required error={errors.amount}>
+            <Field label="Importe" icon={<Banknote />} required error={errors.amount}>
               <Input name="amount" type="number" step="0.01" min="0.01" required />
             </Field>
           </div>
-          <Field label="Fecha" required>
+          <Field label="Fecha" icon={<CalendarDays />} required>
             <Input name="date" type="date" defaultValue={toDateInput()} required />
           </Field>
-          <Field label="Motivo" required error={errors.reason}>
+          <Field label="Motivo" icon={<MessageSquare />} required error={errors.reason}>
             <Textarea name="reason" required placeholder="Diferencia de arqueo, corrección..." />
           </Field>
           <div className="flex justify-end gap-2 pt-2">

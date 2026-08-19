@@ -41,6 +41,11 @@ export async function createSaleAction(
         data.type,
         JSON.stringify(data.items),
         data.globalDiscount,
+        // El envío y la dirección entran en la clave: corregir cualquiera de
+        // los dos y reenviar tiene que crear la venta corregida, no devolver
+        // la anterior como si fuera un doble clic.
+        data.shippingCost,
+        data.delivery?.address,
       ]);
 
     const result = await saleService.createSale(

@@ -2,7 +2,12 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Ban, UserCheck } from 'lucide-react';
+import {
+  Ban,
+  MessageSquare,
+  UserCheck,
+  UserRound,
+} from 'lucide-react';
 
 import { assignDeliveryAction, cancelDeliveryAction } from '@/app/actions/delivery';
 import { Modal } from '@/components/ui/modal';
@@ -98,7 +103,7 @@ export function DeliveryActions({
             No hay usuarios con permiso para repartir. Creá uno con el rol Repartidor en Usuarios.
           </p>
         ) : (
-          <Field label="Rider" htmlFor="riderId" hint="Primero quien tiene menos repartos encima.">
+          <Field label="Rider" icon={<UserRound />} htmlFor="riderId" hint="Primero quien tiene menos repartos encima.">
             <Select
               id="riderId"
               value={riderId}
@@ -132,7 +137,7 @@ export function DeliveryActions({
           </>
         }
       >
-        <Field label="Motivo" htmlFor="note" required>
+        <Field label="Motivo" icon={<MessageSquare />} htmlFor="note" required>
           <Textarea
             id="note"
             rows={3}

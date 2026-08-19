@@ -249,6 +249,11 @@ export const saleSchema = z.object({
     .optional()
     .nullable()
     .transform((v) => v ?? null),
+  /**
+   * Envío a cobrar. El servidor lo convierte en una línea más de la venta, así
+   * que el total que ve el cliente ya lo incluye.
+   */
+  shippingCost: money('El costo de envío').optional().default(0),
   payment: z
     .object({
       accountId: idString,
@@ -259,7 +264,14 @@ export const saleSchema = z.object({
     .optional()
     .nullable(),
   idempotencyKey: z.string().max(120).optional().nullable(),
-});
+})
+  // Cobrar un envío sin dirección a dónde llevarlo es un error de captura, no
+  // una venta. Se marca en el campo de la dirección para que el formulario lo
+  // señale donde hay que corregirlo.
+  .refine((v) => v.shippingCost === 0 || Boolean(v.delivery?.address?.trim()), {
+    error: 'Para cobrar el envío hace falta la dirección de entrega.',
+    path: ['delivery', 'address'],
+  });
 
 export const salePaymentSchema = z.object({
   saleId: idString,

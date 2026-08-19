@@ -11,6 +11,20 @@ import { parseSafe } from '@/lib/validation/parse';
 import { productSchema } from '@/lib/validation/schemas';
 import type { Category, Product } from '@/types/catalog';
 import { PRODUCT_UNIT_LABELS } from '@/types/catalog';
+import {
+  AlignLeft,
+  Barcode,
+  Boxes,
+  CircleDot,
+  Hash,
+  Info,
+  Layers,
+  Link2,
+  Percent,
+  Ruler,
+  Tag,
+  Type,
+} from 'lucide-react';
 
 export function ProductForm({
   categories,
@@ -82,9 +96,9 @@ export function ProductForm({
     <form onSubmit={onSubmit} className="grid gap-4 lg:grid-cols-3" noValidate>
       <div className="space-y-4 lg:col-span-2">
         <Card>
-          <CardHeader title="Información general" />
+          <CardHeader title="Información general" icon={<Info />} />
           <div className="grid gap-4 p-5 sm:grid-cols-2">
-            <Field label="SKU" htmlFor="sku" required error={errors.sku} className="sm:col-span-1">
+            <Field label="SKU" icon={<Hash />} htmlFor="sku" required error={errors.sku} className="sm:col-span-1">
               <Input
                 id="sku"
                 name="sku"
@@ -95,7 +109,7 @@ export function ProductForm({
               />
             </Field>
 
-            <Field label="Código de barras" htmlFor="barcode" error={errors.barcode}>
+            <Field label="Código de barras" icon={<Barcode />} htmlFor="barcode" error={errors.barcode}>
               <Input
                 id="barcode"
                 name="barcode"
@@ -105,7 +119,7 @@ export function ProductForm({
             </Field>
 
             <Field
-              label="Nombre"
+              label="Nombre" icon={<Type />}
               htmlFor="name"
               required
               error={errors.name}
@@ -120,7 +134,7 @@ export function ProductForm({
               />
             </Field>
 
-            <Field label="Categoría" htmlFor="categoryId" error={errors.categoryId}>
+            <Field label="Categoría" icon={<Layers />} htmlFor="categoryId" error={errors.categoryId}>
               <Select id="categoryId" name="categoryId" defaultValue={product?.categoryId ?? ''}>
                 <option value="">Sin categoría</option>
                 {categories.map((category) => (
@@ -131,11 +145,11 @@ export function ProductForm({
               </Select>
             </Field>
 
-            <Field label="Marca" htmlFor="brand" error={errors.brand}>
+            <Field label="Marca" icon={<Tag />} htmlFor="brand" error={errors.brand}>
               <Input id="brand" name="brand" defaultValue={product?.brand ?? ''} />
             </Field>
 
-            <Field label="Unidad de medida" htmlFor="unit" required error={errors.unit}>
+            <Field label="Unidad de medida" icon={<Ruler />} htmlFor="unit" required error={errors.unit}>
               <Select id="unit" name="unit" defaultValue={product?.unit ?? 'UNIT'}>
                 {Object.entries(PRODUCT_UNIT_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
@@ -145,7 +159,7 @@ export function ProductForm({
               </Select>
             </Field>
 
-            <Field label="Estado" htmlFor="status" error={errors.status}>
+            <Field label="Estado" icon={<CircleDot />} htmlFor="status" error={errors.status}>
               <Select id="status" name="status" defaultValue={product?.status ?? 'ACTIVE'}>
                 <option value="ACTIVE">Activo</option>
                 <option value="INACTIVE">Inactivo</option>
@@ -153,7 +167,7 @@ export function ProductForm({
             </Field>
 
             <Field
-              label="Descripción"
+              label="Descripción" icon={<AlignLeft />}
               htmlFor="description"
               error={errors.description}
               className="sm:col-span-2"
@@ -162,7 +176,7 @@ export function ProductForm({
             </Field>
 
             <Field
-              label="URL de imagen"
+              label="URL de imagen" icon={<Link2 />}
               htmlFor="imageUrl"
               error={errors.imageUrl}
               className="sm:col-span-2"
@@ -175,7 +189,7 @@ export function ProductForm({
 
         <Card>
           <CardHeader
-            title="Precios e impuestos"
+            title="Precios e impuestos" icon={<Tag />}
             description="El costo promedio se calcula automáticamente con cada compra recibida."
           />
           <div className="grid gap-4 p-5 sm:grid-cols-3">
@@ -197,7 +211,7 @@ export function ProductForm({
               />
             </Field>
 
-            <Field label="Precio de venta" htmlFor="salePrice" required error={errors.salePrice}>
+            <Field label="Precio de venta" icon={<Tag />} htmlFor="salePrice" required error={errors.salePrice}>
               <Input
                 id="salePrice"
                 name="salePrice"
@@ -210,7 +224,7 @@ export function ProductForm({
               />
             </Field>
 
-            <Field label="Precio mayorista" htmlFor="wholesalePrice" error={errors.wholesalePrice}>
+            <Field label="Precio mayorista" icon={<Tag />} htmlFor="wholesalePrice" error={errors.wholesalePrice}>
               <Input
                 id="wholesalePrice"
                 name="wholesalePrice"
@@ -221,7 +235,7 @@ export function ProductForm({
               />
             </Field>
 
-            <Field label="Impuesto (%)" htmlFor="taxRatePercent" error={errors.taxRate}>
+            <Field label="Impuesto (%)" icon={<Percent />} htmlFor="taxRatePercent" error={errors.taxRate}>
               <Input
                 id="taxRatePercent"
                 name="taxRatePercent"
@@ -238,7 +252,7 @@ export function ProductForm({
 
       <div className="space-y-4">
         <Card>
-          <CardHeader title="Inventario" />
+          <CardHeader title="Inventario" icon={<Boxes />} />
           <div className="space-y-4 p-5">
             <label className="flex items-start gap-2.5">
               <input
@@ -255,7 +269,7 @@ export function ProductForm({
               </span>
             </label>
 
-            <Field label="Stock mínimo" htmlFor="minimumStock" error={errors.minimumStock}>
+            <Field label="Stock mínimo" icon={<Boxes />} htmlFor="minimumStock" error={errors.minimumStock}>
               <Input
                 id="minimumStock"
                 name="minimumStock"
@@ -268,7 +282,7 @@ export function ProductForm({
 
             {!isEdit && (
               <Field
-                label="Existencias iniciales"
+                label="Existencias iniciales" icon={<Boxes />}
                 htmlFor="initialStock"
                 error={errors.initialStock}
                 hint="Genera un movimiento de inventario inicial trazable."

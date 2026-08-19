@@ -12,6 +12,10 @@ import { translateAuthError } from '@/lib/auth/client-errors';
 import { getClientAuth } from '@/lib/firebase/client';
 import { parseSafe } from '@/lib/validation/parse';
 import { loginSchema } from '@/lib/validation/schemas';
+import {
+  Lock,
+  Mail,
+} from 'lucide-react';
 
 export function LoginForm() {
   const router = useRouter();
@@ -77,7 +81,7 @@ export function LoginForm() {
       </p>
 
       <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
-        <Field label="Correo electrónico" htmlFor="email" required error={errors.email}>
+        <Field label="Correo electrónico" icon={<Mail />} htmlFor="email" required error={errors.email}>
           <Input
             id="email"
             name="email"
@@ -89,7 +93,7 @@ export function LoginForm() {
           />
         </Field>
 
-        <Field label="Contraseña" htmlFor="password" required error={errors.password}>
+        <Field label="Contraseña" icon={<Lock />} htmlFor="password" required error={errors.password}>
           <Input
             id="password"
             name="password"

@@ -2,7 +2,19 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Pencil, Plus } from 'lucide-react';
+import {
+  CalendarClock,
+  CircleDot,
+  CreditCard,
+  IdCard,
+  Mail,
+  MapPin,
+  Pencil,
+  Phone,
+  Plus,
+  StickyNote,
+  Type,
+} from 'lucide-react';
 
 import { createCustomerAction, updateCustomerAction } from '@/app/actions/parties';
 import { Button, Field, Input, Select, Textarea } from '@/components/ui/primitives';
@@ -81,12 +93,12 @@ export function CustomerManager({
         title={mode === 'edit' ? 'Editar cliente' : 'Nuevo cliente'}
       >
         <form onSubmit={onSubmit} className="space-y-4" noValidate>
-          <Field label="Nombre o razón social" htmlFor="name" required error={errors.name}>
+          <Field label="Nombre o razón social" icon={<Type />} htmlFor="name" required error={errors.name}>
             <Input id="name" name="name" defaultValue={customer?.name} required />
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Tipo de documento" htmlFor="documentType">
+            <Field label="Tipo de documento" icon={<IdCard />} htmlFor="documentType">
               <Select id="documentType" name="documentType" defaultValue={customer?.documentType ?? ''}>
                 <option value="">Sin especificar</option>
                 {Object.entries(DOCUMENT_TYPE_LABELS).map(([value, label]) => (
@@ -96,26 +108,26 @@ export function CustomerManager({
                 ))}
               </Select>
             </Field>
-            <Field label="Número de documento" htmlFor="document" error={errors.document}>
+            <Field label="Número de documento" icon={<IdCard />} htmlFor="document" error={errors.document}>
               <Input id="document" name="document" defaultValue={customer?.document ?? ''} />
             </Field>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Teléfono" htmlFor="phone" error={errors.phone}>
+            <Field label="Teléfono" icon={<Phone />} htmlFor="phone" error={errors.phone}>
               <Input id="phone" name="phone" defaultValue={customer?.phone ?? ''} />
             </Field>
-            <Field label="Correo" htmlFor="email" error={errors.email}>
+            <Field label="Correo" icon={<Mail />} htmlFor="email" error={errors.email}>
               <Input id="email" name="email" type="email" defaultValue={customer?.email ?? ''} />
             </Field>
           </div>
 
-          <Field label="Dirección" htmlFor="address" error={errors.address}>
+          <Field label="Dirección" icon={<MapPin />} htmlFor="address" error={errors.address}>
             <Input id="address" name="address" defaultValue={customer?.address ?? ''} />
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-3">
-            <Field label="Límite de crédito" htmlFor="creditLimit" error={errors.creditLimit}>
+            <Field label="Límite de crédito" icon={<CreditCard />} htmlFor="creditLimit" error={errors.creditLimit}>
               <Input
                 id="creditLimit"
                 name="creditLimit"
@@ -125,7 +137,7 @@ export function CustomerManager({
                 defaultValue={customer ? toMajorUnits(customer.creditLimit) : 0}
               />
             </Field>
-            <Field label="Días de crédito" htmlFor="creditDays" error={errors.creditDays}>
+            <Field label="Días de crédito" icon={<CalendarClock />} htmlFor="creditDays" error={errors.creditDays}>
               <Input
                 id="creditDays"
                 name="creditDays"
@@ -134,7 +146,7 @@ export function CustomerManager({
                 defaultValue={customer?.creditDays ?? 30}
               />
             </Field>
-            <Field label="Estado" htmlFor="status">
+            <Field label="Estado" icon={<CircleDot />} htmlFor="status">
               <Select id="status" name="status" defaultValue={customer?.status ?? 'ACTIVE'}>
                 <option value="ACTIVE">Activo</option>
                 <option value="INACTIVE">Inactivo</option>
@@ -142,7 +154,7 @@ export function CustomerManager({
             </Field>
           </div>
 
-          <Field label="Notas" htmlFor="notes">
+          <Field label="Notas" icon={<StickyNote />} htmlFor="notes">
             <Textarea id="notes" name="notes" defaultValue={customer?.notes ?? ''} />
           </Field>
 

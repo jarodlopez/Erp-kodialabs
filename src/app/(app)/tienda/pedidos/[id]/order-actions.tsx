@@ -2,7 +2,15 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import {
+  CheckCircle2,
+  CreditCard,
+  Hash,
+  MessageSquare,
+  StickyNote,
+  Wallet,
+  XCircle,
+} from 'lucide-react';
 
 import { approveStoreOrderAction, rejectStoreOrderAction } from '@/app/actions/store';
 import { Modal } from '@/components/ui/modal';
@@ -129,7 +137,7 @@ export function StoreOrderActions({
           )}
 
           <Field
-            label="Cuenta donde entró el dinero"
+            label="Cuenta donde entró el dinero" icon={<Wallet />}
             htmlFor="accountId"
             error={errors.accountId}
             hint="Dejala vacía si el cliente paga contra entrega: la venta quedará a crédito."
@@ -145,7 +153,7 @@ export function StoreOrderActions({
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Método de pago" htmlFor="method" error={errors.method}>
+            <Field label="Método de pago" icon={<CreditCard />} htmlFor="method" error={errors.method}>
               <Select id="method" name="method" defaultValue="TRANSFER">
                 {Object.entries(PAYMENT_METHOD_LABELS).map(([value, label]) => (
                   <option key={value} value={value as PaymentMethod}>
@@ -155,12 +163,12 @@ export function StoreOrderActions({
               </Select>
             </Field>
 
-            <Field label="Referencia" htmlFor="reference" error={errors.reference}>
+            <Field label="Referencia" icon={<Hash />} htmlFor="reference" error={errors.reference}>
               <Input id="reference" name="reference" maxLength={80} placeholder="N.º de transacción" />
             </Field>
           </div>
 
-          <Field label="Nota interna" htmlFor="note" error={errors.note}>
+          <Field label="Nota interna" icon={<StickyNote />} htmlFor="note" error={errors.note}>
             <Textarea id="note" name="note" rows={2} maxLength={300} />
           </Field>
 
@@ -188,7 +196,7 @@ export function StoreOrderActions({
         size="sm"
       >
         <form onSubmit={onReject} className="space-y-4" noValidate>
-          <Field label="Motivo" htmlFor="note" required error={errors.note}>
+          <Field label="Motivo" icon={<MessageSquare />} htmlFor="note" required error={errors.note}>
             <Textarea
               id="note"
               name="note"

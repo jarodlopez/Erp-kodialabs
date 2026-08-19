@@ -105,11 +105,14 @@ invitaría a "cerrar" repartos que nadie hizo.
 
 Se guardan separados porque responden preguntas distintas.
 
-**Lo cobrado al cliente** (`amounts.charged`) se calcula sobre la distancia
-**estimada**, antes de salir. Si el pedido online ya traía un envío cobrado, ese
-manda: es el precio que el comprador aceptó, y no se le cambia porque el rider
-tomó un desvío. Que el negocio absorba esa diferencia es exactamente lo que el
-margen deja ver.
+**Lo cobrado al cliente** (`amounts.charged`) sale del documento de origen
+cuando ese ya facturó el envío —sea un pedido online o una venta a domicilio con
+cobro de flete—, porque ese es el precio que el cliente aceptó y no se le cambia
+porque el rider tomó un desvío. Solo cuando el documento no cobró nada se aplica
+la tarifa configurada, calculada sobre la distancia **estimada** antes de salir.
+
+Que el negocio absorba la diferencia entre lo cobrado y lo que costó es
+exactamente lo que el margen deja ver.
 
 ```
 cobrado = tarifa base + (km estimados − km incluidos) × tarifa por km

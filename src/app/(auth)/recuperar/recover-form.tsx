@@ -10,6 +10,9 @@ import { translateAuthError } from '@/lib/auth/client-errors';
 import { getClientAuth } from '@/lib/firebase/client';
 import { parseSafe } from '@/lib/validation/parse';
 import { forgotPasswordSchema } from '@/lib/validation/schemas';
+import {
+  Mail,
+} from 'lucide-react';
 
 export function RecoverForm() {
   const toast = useToast();
@@ -63,7 +66,7 @@ export function RecoverForm() {
         </div>
       ) : (
         <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
-          <Field label="Correo electrónico" htmlFor="email" required error={error}>
+          <Field label="Correo electrónico" icon={<Mail />} htmlFor="email" required error={error}>
             <Input
               id="email"
               name="email"

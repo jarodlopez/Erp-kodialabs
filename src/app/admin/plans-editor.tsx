@@ -7,6 +7,16 @@ import { savePlansAction } from '@/app/actions/platform';
 import { Badge, Button, Card, CardHeader, Field, Input } from '@/components/ui/primitives';
 import { useToast } from '@/components/ui/toast';
 import type { PlanConfig } from '@/types/subscription';
+import {
+  CalendarDays,
+  Coins,
+  Hash,
+  Package,
+  Sparkles,
+  Tag,
+  Type,
+  Users,
+} from 'lucide-react';
 
 /**
  * Edición de planes (precio, moneda, duración y límites). Se guarda en la base
@@ -49,7 +59,7 @@ export function PlansEditor({ initialPlans }: { initialPlans: PlanConfig[] }) {
   return (
     <Card>
       <CardHeader
-        title="Planes y precios"
+        title="Planes y precios" icon={<Sparkles />}
         description="Edita precios, duración y límites. Un límite en 0 significa ilimitado."
         actions={
           <Button onClick={save} loading={loading}>
@@ -65,10 +75,10 @@ export function PlansEditor({ initialPlans }: { initialPlans: PlanConfig[] }) {
               {p.isTrial && <span className="text-xs text-[var(--color-ink-subtle)]">Prueba gratis</span>}
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-              <Field label="Nombre">
+              <Field label="Nombre" icon={<Type />}>
                 <Input value={p.name} onChange={(e) => patch(index, 'name', e.target.value)} />
               </Field>
-              <Field label="Precio">
+              <Field label="Precio" icon={<Tag />}>
                 <Input
                   type="number"
                   min="0"
@@ -78,10 +88,10 @@ export function PlansEditor({ initialPlans }: { initialPlans: PlanConfig[] }) {
                   disabled={p.isTrial}
                 />
               </Field>
-              <Field label="Moneda">
+              <Field label="Moneda" icon={<Coins />}>
                 <Input value={p.currency} onChange={(e) => patch(index, 'currency', e.target.value)} />
               </Field>
-              <Field label="Meses">
+              <Field label="Meses" icon={<CalendarDays />}>
                 <Input
                   type="number"
                   min="0"
@@ -90,7 +100,7 @@ export function PlansEditor({ initialPlans }: { initialPlans: PlanConfig[] }) {
                   disabled={p.isTrial}
                 />
               </Field>
-              <Field label="Máx. usuarios">
+              <Field label="Máx. usuarios" icon={<Users />}>
                 <Input
                   type="number"
                   min="0"
@@ -98,7 +108,7 @@ export function PlansEditor({ initialPlans }: { initialPlans: PlanConfig[] }) {
                   onChange={(e) => patch(index, 'users', e.target.value)}
                 />
               </Field>
-              <Field label="Máx. productos">
+              <Field label="Máx. productos" icon={<Package />}>
                 <Input
                   type="number"
                   min="0"

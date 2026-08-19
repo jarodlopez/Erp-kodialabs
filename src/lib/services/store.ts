@@ -24,6 +24,7 @@ import {
 } from '@/lib/repositories/store';
 import { audit } from './audit';
 import { catalogService } from './catalog';
+import { ensureShippingProduct } from './shipping';
 import type { ActorContext, Id, Money } from '@/types/common';
 import type { Product } from '@/types/catalog';
 import type {
@@ -225,42 +226,16 @@ export const storeService = {
    * Se crea una sola vez, no controla inventario y su costo es cero, de modo
    * que el envío entra como ingreso sin ensuciar el costo de la mercadería.
    */
-  async ensureShippingProduct(actor: ActorContext, settings: StoreSettings): Promise<Id> {
-    if (settings.shippingProductId) {
-      const existing = await productRepository.get(
-        actor.organizationId,
-        settings.shippingProductId,
-      );
-      if (existing) return existing.id;
-    }
-
-    const bySku = await productRepository.findBySku(actor.organizationId, SHIPPING_SKU);
-    const productId =
-      bySku?.id ??
-      (await catalogService.createProduct(
-        actor,
-        {
-          sku: SHIPPING_SKU,
-          name: 'Envío a domicilio',
-          description: 'Costo de envío de los pedidos de la tienda online.',
-          unit: 'SERVICE',
-          cost: 0,
-          salePrice: 0,
-          wholesalePrice: 0,
-          taxRate: 0,
-          minimumStock: 0,
-          tracksInventory: false,
-          status: 'ACTIVE',
-        },
-        settings.warehouseId ?? (await warehouseRepository.getDefault(actor.organizationId)).id,
-      ));
-
-    await storeSettingsRepository.patch(
-      actor.organizationId,
-      { shippingProductId: productId },
-      actor.userId,
-    );
-    return productId;
+  /**
+   * Producto con el que se cobra el envío de los pedidos web.
+   *
+   * Delega en el servicio compartido: el envío de la tienda y el de una venta
+   * escrita a mano tienen que ser el MISMO producto, o la pregunta "cuánto
+   * facturé en envíos" tendría dos respuestas y ninguna completa.
+   */
+  async ensureShippingProduct(actor: ActorContext): Promise<Id> {
+    const settings = await organizationRepository.getSettings(actor.organizationId);
+    return ensureShippingProduct(actor, settings);
   },
 
   // -------------------------------------------------------------------------

@@ -114,8 +114,10 @@ Detalles que importan:
   organización permita stock negativo: el comprador ya vio la disponibilidad y
   no hay un vendedor que pueda resolver un faltante.
 - **El envío se factura.** Se agrega a la venta como línea del producto de
-  servicio `ENVIO-WEB`, que el módulo crea la primera vez que hace falta. Así el
-  ingreso por envío queda contabilizado y el total cuadra.
+  servicio `ENVIO-WEB`, que se crea la primera vez que hace falta. Así el ingreso
+  por envío queda contabilizado y el total cuadra. Es el **mismo** producto que
+  usan las ventas con envío escritas a mano y el POS: con uno por canal, la
+  pregunta "cuánto facturé en envíos" tendría dos respuestas y ninguna completa.
 - **El cupón sigue siendo un descuento.** Se traslada a la venta como descuento
   de línea prorrateado, no escondido en el precio, para que los reportes de
   margen y de descuentos concedidos digan la verdad.

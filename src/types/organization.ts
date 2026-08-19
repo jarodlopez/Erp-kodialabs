@@ -89,6 +89,11 @@ export interface Settings {
     /** Prefijo de los repartos. Opcional por la misma razón que el anterior. */
     delivery?: string;
   };
+  /**
+   * Producto de servicio con el que se cobra el envío. Se crea solo la primera
+   * vez que alguien cobra un envío, venga de la tienda o de una venta a mano.
+   */
+  shippingProductId?: Id | null;
   invoiceFooter: string | null;
   updatedAt: IsoDate;
   updatedBy: Id;

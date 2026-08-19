@@ -2,7 +2,15 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Ban, Wallet } from 'lucide-react';
+import {
+  Ban,
+  Banknote,
+  CalendarDays,
+  CreditCard,
+  Hash,
+  MessageSquare,
+  Wallet,
+} from 'lucide-react';
 
 import { cancelExpenseAction, payExpenseAction } from '@/app/actions/expenses';
 import { Button, Field, Input, Select, Textarea } from '@/components/ui/primitives';
@@ -95,7 +103,7 @@ export function ExpenseRowActions({
         size="sm"
       >
         <form action={pay} className="space-y-4">
-          <Field label="Cuenta de pago" required>
+          <Field label="Cuenta de pago" icon={<Wallet />} required>
             <Select
               name="accountId"
               defaultValue={accounts.find((a) => a.isDefault)?.id ?? accounts[0]?.id ?? ''}
@@ -108,7 +116,7 @@ export function ExpenseRowActions({
               ))}
             </Select>
           </Field>
-          <Field label="Importe" required>
+          <Field label="Importe" icon={<Banknote />} required>
             <Input
               name="amount"
               type="number"
@@ -120,7 +128,7 @@ export function ExpenseRowActions({
             />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Método">
+            <Field label="Método" icon={<CreditCard />}>
               <Select name="method" defaultValue="CASH">
                 {Object.entries(PAYMENT_METHOD_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
@@ -129,11 +137,11 @@ export function ExpenseRowActions({
                 ))}
               </Select>
             </Field>
-            <Field label="Fecha">
+            <Field label="Fecha" icon={<CalendarDays />}>
               <Input name="date" type="date" defaultValue={toDateInput()} />
             </Field>
           </div>
-          <Field label="Referencia">
+          <Field label="Referencia" icon={<Hash />}>
             <Input name="reference" />
           </Field>
           <div className="flex justify-end gap-2 pt-2">
@@ -158,7 +166,7 @@ export function ExpenseRowActions({
             Se revertirán los pagos registrados y se cancelará la cuenta por pagar asociada. El gasto
             se conserva con estado anulado.
           </p>
-          <Field label="Motivo" required>
+          <Field label="Motivo" icon={<MessageSquare />} required>
             <Textarea name="reason" required />
           </Field>
           <div className="flex justify-end gap-2 pt-2">

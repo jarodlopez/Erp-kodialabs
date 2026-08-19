@@ -16,6 +16,7 @@ import {
 import { COLLECTIONS } from '@/lib/firebase/collections';
 import { AppError } from '@/lib/errors';
 import { deliveryService } from '@/lib/services/delivery';
+import { saleService } from '@/lib/services/sales';
 import { storeOrderService } from '@/lib/services/store-orders';
 import type { Delivery, DeliveryTrack } from '@/types/delivery';
 import type { Expense } from '@/types/expenses';
@@ -268,6 +269,61 @@ describe('reparto desde un pedido de la tienda', () => {
     // C$120 de envío del pedido, no la tarifa por distancia (que daría ~C$54).
     expect(delivery.amounts.charged).toBe(12000);
     expect(delivery.destination.address).toBe('Reparto Schick, casa 12');
+  });
+});
+
+describe('reparto desde una venta con envío cobrado', () => {
+  it('hereda el envío que ya se le facturó al cliente', async () => {
+    // Venta a domicilio registrada con el flujo real, cobrando C$80 de envío.
+    const sale = await saleService.createSale(
+      ctx,
+      {
+        customerId: 'cust-1',
+        date: '2026-02-01',
+        type: 'CREDIT',
+        items: [{ productId: 'prod-1', quantity: 1 }],
+        delivery: {
+          recipient: 'Doña Marta',
+          address: 'De la rotonda Jean Paul 2c al sur',
+          phone: '88881234',
+          notes: null,
+        },
+        shippingCost: 80,
+      },
+      { confirm: true },
+    );
+
+    const { deliveryId } = await deliveryService.create(ctx.actor, {
+      source: 'SALE',
+      sourceId: sale.saleId,
+      point: DESTINATION_POINT,
+    });
+
+    const delivery = fakeDb.read(COLLECTIONS.DELIVERIES, deliveryId) as unknown as Delivery;
+    // Manda lo facturado, no la tarifa por distancia (que daría unos C$54):
+    // sin esto el margen del reparto compararía un costo real contra cero y
+    // saldría siempre a favor.
+    expect(delivery.amounts.charged).toBe(8000);
+  });
+
+  it('cae a la tarifa por distancia cuando la venta no facturó envío', async () => {
+    // Venta a domicilio registrada sin cobrar flete: es el caso de las ventas
+    // anteriores al cobro de envío, y el de quien lo factura después.
+    seedDeliverableSale(fakeDb);
+
+    const { deliveryId } = await deliveryService.create(ctx.actor, {
+      source: 'SALE',
+      sourceId: 'sale-delivery',
+      point: DESTINATION_POINT,
+    });
+
+    const delivery = fakeDb.read(COLLECTIONS.DELIVERIES, deliveryId) as unknown as Delivery;
+    // Sin importe heredado se aplica la tarifa configurada: base C$50 más los
+    // ~0,4 km que exceden los 2 incluidos. Dejarlo en cero haría que el margen
+    // de estos repartos saliera siempre negativo por un ingreso que sí existe,
+    // solo que fuera del documento.
+    expect(delivery.amounts.charged).toBeGreaterThanOrEqual(5000);
+    expect(delivery.amounts.charged).toBeLessThan(6000);
   });
 });
 

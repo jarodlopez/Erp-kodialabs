@@ -8,6 +8,22 @@ import { Button, Card, CardHeader, Field, Input, Select, Textarea } from '@/comp
 import { useToast } from '@/components/ui/toast';
 import { basisPointsToPercent, percentToBasisPoints } from '@/lib/money';
 import type { Organization, Settings } from '@/types/organization';
+import {
+  Building2,
+  CalendarClock,
+  Clock,
+  Coins,
+  IdCard,
+  Languages,
+  Link2,
+  Mail,
+  MapPin,
+  Percent,
+  Phone,
+  Settings2,
+  StickyNote,
+  Type,
+} from 'lucide-react';
 
 export function SettingsForm({
   organization,
@@ -74,21 +90,21 @@ export function SettingsForm({
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card>
-        <CardHeader title="Datos de la organización" description="Aparecen en los documentos exportados." />
+        <CardHeader title="Datos de la organización" icon={<Building2 />} description="Aparecen en los documentos exportados." />
         <form action={saveOrganization} className="space-y-4 p-5">
-          <Field label="Nombre comercial" required error={errors.name}>
+          <Field label="Nombre comercial" icon={<Type />} required error={errors.name}>
             <Input name="name" defaultValue={organization.name} disabled={!canEdit} required />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Razón social" error={errors.legalName}>
+            <Field label="Razón social" icon={<Type />} error={errors.legalName}>
               <Input name="legalName" defaultValue={organization.legalName ?? ''} disabled={!canEdit} />
             </Field>
-            <Field label="RUC / Identificación fiscal" error={errors.taxId}>
+            <Field label="RUC / Identificación fiscal" icon={<IdCard />} error={errors.taxId}>
               <Input name="taxId" defaultValue={organization.taxId ?? ''} disabled={!canEdit} />
             </Field>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Correo" error={errors.email}>
+            <Field label="Correo" icon={<Mail />} error={errors.email}>
               <Input
                 name="email"
                 type="email"
@@ -96,14 +112,14 @@ export function SettingsForm({
                 disabled={!canEdit}
               />
             </Field>
-            <Field label="Teléfono" error={errors.phone}>
+            <Field label="Teléfono" icon={<Phone />} error={errors.phone}>
               <Input name="phone" defaultValue={organization.phone ?? ''} disabled={!canEdit} />
             </Field>
           </div>
-          <Field label="Dirección" error={errors.address}>
+          <Field label="Dirección" icon={<MapPin />} error={errors.address}>
             <Input name="address" defaultValue={organization.address ?? ''} disabled={!canEdit} />
           </Field>
-          <Field label="URL del logo" error={errors.logoUrl}>
+          <Field label="URL del logo" icon={<Link2 />} error={errors.logoUrl}>
             <Input name="logoUrl" defaultValue={organization.logoUrl ?? ''} disabled={!canEdit} />
           </Field>
 
@@ -117,12 +133,12 @@ export function SettingsForm({
 
       <Card>
         <CardHeader
-          title="Parámetros de operación"
+          title="Parámetros de operación" icon={<Settings2 />}
           description="Afectan a los documentos nuevos; los ya emitidos conservan sus valores históricos."
         />
         <form action={saveSettings} className="space-y-4 p-5">
           <div className="grid gap-4 sm:grid-cols-3">
-            <Field label="Moneda" required error={errors.currency} hint="Código ISO, p. ej. NIO.">
+            <Field label="Moneda" icon={<Coins />} required error={errors.currency} hint="Código ISO, p. ej. NIO.">
               <Input
                 name="currency"
                 defaultValue={settings.currency}
@@ -131,16 +147,16 @@ export function SettingsForm({
                 required
               />
             </Field>
-            <Field label="Idioma" required error={errors.locale}>
+            <Field label="Idioma" icon={<Languages />} required error={errors.locale}>
               <Input name="locale" defaultValue={settings.locale} disabled={!canEdit} required />
             </Field>
-            <Field label="Zona horaria" required error={errors.timezone}>
+            <Field label="Zona horaria" icon={<Clock />} required error={errors.timezone}>
               <Input name="timezone" defaultValue={settings.timezone} disabled={!canEdit} required />
             </Field>
           </div>
 
           <Field
-            label="Tratamiento del impuesto"
+            label="Tratamiento del impuesto" icon={<Percent />}
             required
             hint="Exclusivo: el impuesto se suma al precio. Inclusivo: ya está contenido en el precio."
           >
@@ -151,7 +167,7 @@ export function SettingsForm({
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Impuesto por defecto (%)" error={errors.defaultTaxRate}>
+            <Field label="Impuesto por defecto (%)" icon={<Percent />} error={errors.defaultTaxRate}>
               <Input
                 name="defaultTaxRatePercent"
                 type="number"
@@ -162,7 +178,7 @@ export function SettingsForm({
                 disabled={!canEdit}
               />
             </Field>
-            <Field label="Días de crédito por defecto" error={errors.defaultCreditDays}>
+            <Field label="Días de crédito por defecto" icon={<CalendarClock />} error={errors.defaultCreditDays}>
               <Input
                 name="defaultCreditDays"
                 type="number"
@@ -191,7 +207,7 @@ export function SettingsForm({
             </span>
           </label>
 
-          <Field label="Pie de página de documentos" error={errors.invoiceFooter}>
+          <Field label="Pie de página de documentos" icon={<StickyNote />} error={errors.invoiceFooter}>
             <Textarea
               name="invoiceFooter"
               defaultValue={settings.invoiceFooter ?? ''}

@@ -1,7 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Camera, Keyboard } from 'lucide-react';
+import {
+  Barcode,
+  Camera,
+  Hash,
+  Keyboard,
+} from 'lucide-react';
 
 import { Modal } from '@/components/ui/modal';
 import { Button, Field, Input } from '@/components/ui/primitives';
@@ -191,7 +196,7 @@ export function BarcodeScanner({
             finish(manual);
           }}
         >
-          <Field label="O escribe el código" htmlFor="manual-barcode">
+          <Field label="O escribe el código" icon={<Barcode />} htmlFor="manual-barcode">
             <div className="flex gap-2">
               <Input
                 id="manual-barcode"

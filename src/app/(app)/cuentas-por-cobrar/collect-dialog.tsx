@@ -2,7 +2,13 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Wallet } from 'lucide-react';
+import {
+  Banknote,
+  CalendarDays,
+  CreditCard,
+  Hash,
+  Wallet,
+} from 'lucide-react';
 
 import { collectReceivableAction, payPayableAction } from '@/app/actions/finance';
 import { Button, Field, Input, Select } from '@/components/ui/primitives';
@@ -102,7 +108,7 @@ export function CollectDialog({
             </Select>
           </Field>
 
-          <Field label="Importe" required>
+          <Field label="Importe" icon={<Banknote />} required>
             <Input
               name="amount"
               type="number"
@@ -115,7 +121,7 @@ export function CollectDialog({
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Método">
+            <Field label="Método" icon={<CreditCard />}>
               <Select name="method" defaultValue="CASH">
                 {Object.entries(PAYMENT_METHOD_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
@@ -124,12 +130,12 @@ export function CollectDialog({
                 ))}
               </Select>
             </Field>
-            <Field label="Fecha">
+            <Field label="Fecha" icon={<CalendarDays />}>
               <Input name="date" type="date" defaultValue={toDateInput()} />
             </Field>
           </div>
 
-          <Field label="Referencia">
+          <Field label="Referencia" icon={<Hash />}>
             <Input name="reference" placeholder="N.º de recibo, transferencia..." />
           </Field>
 

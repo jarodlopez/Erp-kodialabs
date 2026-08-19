@@ -45,6 +45,10 @@ operaciones críticas se ejecutan en el servidor dentro de transacciones atómic
 - Ventas: borrador, confirmación, cobro total o parcial, venta a crédito, anulación y
   devolución. Al confirmar se descuenta inventario, se registra el asiento financiero y
   se crea la cuenta por cobrar, todo en una sola transacción.
+- Envío a domicilio en la venta y en el POS: dirección, quién recibe, teléfono e
+  indicaciones, más el **cobro del flete**. El envío entra como una línea de la
+  venta —no como un campo suelto— para que el total cuadre con lo que paga el
+  cliente y el ingreso llegue al estado de resultados.
 - Compras: borrador, recepción de mercadería, pago total o parcial, anulación y
   devolución al proveedor. La recepción recalcula el **costo promedio ponderado**
   incluyendo flete y otros costos prorrateados.

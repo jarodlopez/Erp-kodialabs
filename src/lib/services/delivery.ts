@@ -132,9 +132,12 @@ async function readSource(
       recipient: sale.delivery.recipient,
       phone: sale.delivery.phone,
       notes: sale.delivery.notes,
-      // El envío de una venta viaja como una línea más, así que aquí no se
-      // puede aislar sin adivinar. Se deja en cero y el panel lo puede fijar.
-      charged: 0,
+      // La venta guarda el envío cobrado aparte, además de llevarlo como una
+      // línea más: sin ese dato el margen del reparto saldría siempre a favor,
+      // porque compararía un costo real contra un ingreso de cero. Las ventas
+      // anteriores al cobro de envío no lo tienen y quedan en cero, que para
+      // ellas es la verdad.
+      charged: sale.shippingCost ?? 0,
     };
   }
 

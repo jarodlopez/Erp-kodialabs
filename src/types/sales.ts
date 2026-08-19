@@ -93,6 +93,19 @@ export interface Sale extends BaseEntity {
   notes: string | null;
   /** Datos de entrega si la venta es delivery; `null` en mostrador. */
   delivery: DeliveryInfo | null;
+  /**
+   * Envío cobrado al cliente (centavos).
+   *
+   * El importe viaja además como una LÍNEA de la venta —por eso ya está dentro
+   * de `total`— pero se guarda también aparte porque como línea es
+   * indistinguible de cualquier otro producto. Tenerlo aislado permite dos
+   * cosas que de otro modo hay que adivinar: cuánto se facturó en envíos, y
+   * qué importe hereda el reparto para calcular su margen.
+   *
+   * Opcional porque las ventas registradas antes de que existiera el cobro de
+   * envío no lo tienen; se lee siempre con `?? 0`.
+   */
+  shippingCost?: Money;
   cancelledAt: IsoDate | null;
   cancelledBy: Id | null;
   cancelReason: string | null;
@@ -121,6 +134,18 @@ export interface CreateSaleInput {
   dueDate?: string | null;
   warehouseId?: Id;
   delivery?: DeliveryInfo | null;
+  /** Envío a cobrar, en unidad mayor. El servicio lo agrega como una línea más. */
+  shippingCost?: number;
+  /**
+   * `true` cuando `items` YA trae la línea de envío, de modo que el servicio la
+   * registre pero no la duplique.
+   *
+   * Lo usa la aprobación de pedidos web: esa ruta arma sus líneas con
+   * `buildSaleLines`, que reconstruye la base gravable de TODO el documento
+   * —envío incluido— para que el total de la venta cuadre al centavo con lo que
+   * el comprador pagó. Delegar esa línea la dejaría fuera de ese cálculo.
+   */
+  shippingAlreadyInItems?: boolean;
   /** Pago inmediato registrado junto con la venta. */
   payment?: {
     accountId: Id;
